@@ -317,7 +317,7 @@ function health(){
   const box=!S.boats.find(b=>b.id==='b1').steps[3];
   const acts=[];
   const crit=alerts().filter(a=>a.sev==='crit');
-  crit.forEach(a=>acts.push({t:`Alerte capteur : ${a.d.n.toLowerCase()}`,d:`${a.b.name} · ${a.val}`,go:'#bateaux',boat:a.b.id,ft:'capteurs'}));
+  crit.forEach(a=>acts.push({t:`Alerte capteur : ${a.d.n.toLowerCase()}`,d:`${a.b.name} · ${a.val}`,go:'#capteurs',cap:a.b.id}));
   if(late) acts.push({t:'1 inspection en retard',d:'Contrôle à 1 an · Test Boat',go:'#bateaux',boat:'b3'});
   if(stock) acts.push({t:'2 bateaux non déclarés',d:'Déclaration de novembre',go:'#stock'});
   if(box) acts.push({t:'1 boîtier à activer',d:'Princess 3 · mise en service',go:'#bateaux',boat:'b1'});
@@ -391,7 +391,7 @@ function parc(){
   return `<section class="card" aria-label="État du parc"><div class="card-h"><h3>État du parc</h3><span class="muted" style="margin-left:auto;font-size:13px">90 derniers jours</span></div>
     <div class="card-b" style="display:flex;flex-direction:column;gap:12px">
       <div class="health ${h.ok?'ok':'warn'}"><div class="ico">${ic(h.ok?'check':'pulse',20,2.2)}</div><div><b>${h.ok?'Parc en bonne santé':'À surveiller'}</b><span style="font-size:13px">${h.ok?'Aucune alerte en retard, stock à jour.':`${h.acts.length} point${h.acts.length>1?'s':''} pour revenir au vert`}</span></div></div>
-      ${h.ok?'':`<div>${h.acts.map(a=>`<div class="act"><span class="b"></span><div style="flex:1;min-width:0"><b style="font-weight:500">${a.t}</b><div class="muted" style="font-size:12.5px">${a.d}</div></div><a class="linkbtn" href="${a.go}" data-go-boat="${a.boat||''}" data-ftab="${a.ft||''}">Régler</a></div>`).join('')}</div>`}
+      ${h.ok?'':`<div>${h.acts.map(a=>`<div class="act"><span class="b"></span><div style="flex:1;min-width:0"><b style="font-weight:500">${a.t}</b><div class="muted" style="font-size:12.5px">${a.d}</div></div><a class="linkbtn" href="${a.go}" data-go-boat="${a.boat||''}" data-capboat="${a.cap||''}">Régler</a></div>`).join('')}</div>`}
       <div>${[['Inspections à temps',h.m.insp,95],['Stock déclaré',h.m.stock,90],['Boîtiers activés à la livraison',h.m.box,85]].map(([k,v,s])=>`
         <div class="metric"><span>${k}</span><span class="v">${v} %</span><div class="mbar"><i style="width:${v}%;background:${v>=s?'var(--green)':'var(--orange)'}"></i><u style="left:${s}%" title="Objectif ${s} %"></u></div></div>`).join('')}
         <div class="muted" style="font-size:12px;margin-top:4px">Le trait marque l’objectif du réseau.</div></div>
@@ -405,7 +405,7 @@ function alertsCard(){
     <div class="card-b" style="padding-top:4px">${al.map(a=>`<div class="alrow"><span class="sv is-${a.sev}"></span>
       <div style="min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-weight:600">${esc(a.b.name)}</b>${stChip(a.sev)}<span class="muted" style="font-size:12.5px">${esc(a.b.owner)}</span></div>
         <div style="margin-top:3px"><b style="font-weight:500">${a.d.n} : ${a.val}</b> · <span class="muted">${a.txt}${a.since?` · ${a.since}`:''}</span></div></div>
-      <div class="acts">${a.sev==='crit'?`<a class="btn btn-pri btn-sm" href="#messages">${ic('phone',15)} Prévenir le client</a>`:''}<a class="btn btn-out btn-sm" href="#bateaux" data-go-boat="${a.b.id}" data-ftab="capteurs">Ouvrir le bateau</a></div></div>`).join('')}
+      <div class="acts">${a.sev==='crit'?`<a class="btn btn-pri btn-sm" href="#messages">${ic('phone',15)} Prévenir le client</a>`:''}<a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${a.b.id}">Ouvrir le bateau</a></div></div>`).join('')}
     ${all.length>6?`<button class="btn btn-ghost more" data-alall>${S.alAll?'Afficher moins':`Afficher les ${all.length-6} autres alertes`}</button>`:''}</div></section>`;
 }
 const OPP=[
@@ -550,7 +550,7 @@ const TABS={
       <div class="banner"><div class="ico">${ic('mail',20)}</div><div style="flex:1;min-width:200px"><b>Votre bilan du lundi est arrivé</b><div class="muted" style="font-size:13px">Semaine du 2 au 8 novembre : 11 tâches traitées, 3 à venir.</div></div><a class="btn btn-out btn-sm" href="#bilan">Voir le bilan</a></div>
       <div class="grid g2">${parc()}${card('Bateaux connectés','Boîtiers qui envoient leurs données',`<div class="muted">${offline().length} boîtier${offline().length>1?'s':''} hors ligne, ${S.boats.filter(b=>b.status!=='Vendu').length} bateaux en mise en service ou en stock. Le technicien suit le détail.</div>`,['Total',`${connected()} / ${equipped().length}`])}</div>`},
     {id:'alertes',l:'Alertes capteurs',v:`${al.length}`,s:`dont ${crit.length} critique${crit.length>1?'s':''}`,st:crit.length?'crit':'warn',body:()=>`
-      ${crit.map(a=>`<div class="health warn"><div class="ico">${ic('alert',20,2.2)}</div><div style="flex:1;min-width:0"><b>${a.b.name} : ${a.d.n.toLowerCase()} ${a.val}</b><span style="font-size:13px">${a.txt}. Le technicien est prévenu.</span></div><a class="btn btn-out btn-sm" href="#bateaux" data-go-boat="${a.b.id}" data-ftab="capteurs">Voir</a></div>`).join('')}
+      ${crit.map(a=>`<div class="health warn"><div class="ico">${ic('alert',20,2.2)}</div><div style="flex:1;min-width:0"><b>${a.b.name} : ${a.d.n.toLowerCase()} ${a.val}</b><span style="font-size:13px">${a.txt}. Le technicien est prévenu.</span></div><a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${a.b.id}">Voir</a></div>`).join('')}
       <div class="grid g2">
       ${card('Alertes par semaine','12 dernières semaines, tout le parc',barChart({items:WEEKS.map((w,i)=>({l:w,v:ALW[i],c:i===11?'cur':'',tip:`alertes · semaine ${w.slice(1)}${i===11?' (en cours)':''}`,show:i===11})),max:8,ticks:[0,2,4,6,8],fmt:v=>`${v}`,label:'Nombre d’alertes capteurs par semaine'})+'<div class="chart-note">Barre claire : semaine en cours.</div>',['Cette semaine',last(ALW)])}
       ${card('D’où viennent les alertes','90 derniers jours, par famille',hbars([{l:'Batteries',v:14},{l:'Boîtier et réseau',v:9},{l:'Moteur',v:6},{l:'Météo et humidité',v:5},{l:'Sécurité',v:3},{l:'Réservoirs',v:3}],14,v=>`${v}`)+'<div class="chart-note">Les batteries arrivent en tête : souvent le courant de quai coupé.</div>',['Total',40])}
@@ -603,7 +603,7 @@ function acc(key,title,meta,body,defOpen){
 /* = fin */
 
 /* ======================= Bateaux : liste qui tient la charge + fiche à onglets ======================= */
-Object.assign(S,{bq:'',bf:'all',bsort:'grav',blim:20,ftab:null,dev:null,cf:'all',clim:15,alAll:false,oppAll:false});
+Object.assign(S,{bq:'',bf:'all',bsort:'grav',blim:20,bpage:0,bfOpen:false,capBoat:null,ficheOpen:true,ftab:null,dev:null,cf:'all',clim:15,alAll:false,oppAll:false});
 const BF=[
   {id:'all',l:'Tous',t:()=>true},
   {id:'crit',l:'Alerte',t:b=>boatState(b.id)==='crit'},
@@ -620,72 +620,12 @@ function boatList(){
   else if(S.bsort==='rev')L.sort((a,b)=>(V[a.id]?V[a.id].next-V[a.id].eh:1e6)-(V[b.id]?V[b.id].next-V[b.id].eh:1e6));
   return L;
 }
-function boatRowsHTML(){
-  const L=boatList(),shown=L.slice(0,S.blim);
-  if(!L.length)return `<div class="muted" style="padding:16px 6px">Aucun bateau ne correspond. Effacez la recherche ou choisissez « Tous ».</div>`;
-  return shown.map(x=>{const s=boatState(x.id),n=boatIssues(x.id),v=V[x.id];
-    return `<button class="brow ${x.id===S.sel?'on':''}" data-boat="${x.id}">
-      <span class="sdot is-${s}"></span>
-      <span class="nm"><b>${esc(x.name)}</b><span>${esc(x.owner)}${x.model?` · ${esc(x.model)}`:''}</span></span>
-      ${n?`<span class="bn ${s==='crit'?'is-crit':''}">${n}</span>`:''}
-      ${x.status!=='Vendu'?`<span class="chip c-yellow">${x.status}</span>`:v&&!online(x.id)?`<span class="chip c-orange">Hors ligne</span>`:''}
-    </button>`}).join('')+(L.length>S.blim?`<button class="btn btn-ghost more" data-bmore>Afficher ${Math.min(20,L.length-S.blim)} bateaux de plus · ${L.length-S.blim} restants</button>`:'')+`<div class="muted lcnt">${Math.min(S.blim,L.length)} sur ${L.length} bateau${L.length>1?'x':''}</div>`;
-}
+
 function updateBoats(){const el=document.getElementById('blist');if(el)el.innerHTML=boatRowsHTML();const c=document.getElementById('bfil');if(c)c.innerHTML=bfChips();}
 const bfChips=()=>BF.map(f=>`<button class="fchip" data-bf="${f.id}" aria-pressed="${S.bf===f.id}">${f.l} <span>${S.boats.filter(f.t).length}</span></button>`).join('');
-function vBateaux(){
-  const b=sel();
-  return `<div class="split">
-    <div class="listcol"><div class="lh">
-        <div style="display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500">Mes bateaux <span class="muted" style="font-size:14px">${S.boats.length}</span></div>
-        <div class="search"><label class="in">${ic('search',20)}<input id="q" value="${esc(S.bq)}" placeholder="Nom, client, modèle, HIN…" aria-label="Rechercher un bateau" autocomplete="off"></label>
-          <select id="bsort" aria-label="Trier" class="bsel"><option value="grav" ${S.bsort==='grav'?'selected':''}>Les plus urgents</option><option value="nom" ${S.bsort==='nom'?'selected':''}>Nom A → Z</option><option value="rev" ${S.bsort==='rev'?'selected':''}>Révision la plus proche</option></select></div>
-        <div class="fchips" id="bfil" role="group" aria-label="Filtrer">${bfChips()}</div>
-      </div><div class="boats" id="blist">${boatRowsHTML()}</div></div>
-    <div class="fiche">${fiche(b)}</div></div>`;
-}
-function fiche(b){
-  const has=!!V[b.id];
-  const tabs=[{id:'capteurs',l:'Capteurs',n:boatIssues(b.id)},{id:'suivi',l:b.steps?'Mise en service':'Suivi'},{id:'client',l:'Client'}];
-  let t=S.ftab||(has?'capteurs':'suivi');
-  return `
-    <div class="fh">${ic('boat',24)}<h2>${esc(b.name)}</h2>${stChip(boatState(b.id))}
-      <span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}" style="margin-left:auto">${b.status}</span>
-      <div class="meta"><span>${b.model?esc(b.model)+' · ':''}HIN : ${b.hin||'—'}</span><span>${esc(b.owner)}</span>${has?`<span>Dernier envoi ${V[b.id].lastSeen}</span>`:''}</div></div>
-    <div class="ftabs" role="tablist">${tabs.map(x=>`<button role="tab" data-ftab="${x.id}" aria-selected="${t===x.id}">${x.l}${x.n?`<span class="cnt">${x.n}</span>`:''}</button>`).join('')}</div>
-    ${t==='capteurs'?tabCapteurs(b):t==='suivi'?tabSuivi(b):tabClient(b)}`;
-}
 
-function tabSuivi(b){
-  const steps=b.steps,n=steps?steps.filter(Boolean).length:0,cur=steps?steps.findIndex(s=>!s):-1;
-  return `${steps?`<div class="blk">
-      <div class="ck-h"><h4>Mise en service</h4><span class="muted" style="margin-left:auto;font-variant-numeric:tabular-nums">${n===5?'Terminée':`${n} étapes sur 5`}</span></div>
-      <div class="prog" style="margin:12px 0 4px"><i style="width:${n*20}%;${n===5?'background:var(--green)':''}"></i></div>
-      ${STEPS.map((s,i)=>`<div class="step ${steps[i]?'ok':i===cur?'cur':''}"><span class="n">${steps[i]?ic('check',14,3):i+1}</span>
-          <div class="sb"><b>${s.t}</b>${!steps[i]?`<div class="sd">${s.d}</div>`:''}${!steps[i]&&i===cur&&s.warn?`<div class="warn-note">${ic('alert',16)}<span>La mise en service envoie un e-mail au client avec son accès à l’app.</span></div>`:''}</div>
-          ${!steps[i]&&i===cur&&s.btn&&i!==4?`<button class="btn btn-out btn-sm" data-step="${i}">${s.btn}</button>`:''}</div>`).join('')}
-      ${b.status==='Mise en service'?`<button class="big-btn" id="mes" style="margin-top:12px" ${cur!==4?'disabled title="Terminez les étapes précédentes"':''}>Préparer la mise en service</button>`:''}
-    </div>`:''}
-    ${b.insp?`<div class="blk" style="border-left:4px solid var(--orange)"><div class="row"><div><h4>Inspection en retard</h4><div class="muted" style="font-size:13.5px">${b.insp} · prévu avant le 27/08/2026</div></div><button class="btn btn-pri btn-sm" data-insp="t1">${S.tasks.find(t=>t.id==='t1').done?'Inspection faite ✓':'Commencer l’inspection'}</button></div></div>`:''}
-    <div class="fgrid"><div class="fcol">
-        <div class="blk"><div class="row"><h4>Équipement</h4><button class="btn btn-out btn-sm" data-step="3">Diagnostics</button></div>
-          <div class="field"><span>Unité principale</span><span>${V[b.id]||b.id==='b1'?'3426100474':'Aucune'}</span></div></div>
-        <div class="blk"><div class="row"><h4>Gestion locative</h4><span class="toggle" role="switch" aria-checked="false" aria-label="Gestion locative"></span></div><div class="muted" style="margin-top:6px">Activez la gestion locative pour gérer ce bateau depuis Fleet.</div></div>
-      </div><div class="fcol">
-        <div class="blk"><div class="row"><h4>Abonnement propriétaire</h4><span class="chip c-grey">${ic('x',12,2)} Aucun</span></div></div>
-        <div class="blk"><div class="row"><h4>Abonnement Insight</h4><span class="chip c-red">${ic('x',12,2)} indisponible</span></div><div class="muted" style="margin-top:6px">Pas de consentement du propriétaire</div></div>
-      </div></div>`;
-}
-function tabClient(b){
-  return `<div class="owner">${ic('user',20)}<span style="flex:1;min-width:0">${esc(b.owner)}</span><span class="ib">${ic('mail',20)}</span><span class="ib">${ic('phone',20)}</span></div>
-    <div class="fgrid"><div class="fcol">
-      <div class="blk"><h4>Notifications</h4><div class="field" style="justify-content:center">${b.notif?`${b.notif} alertes`:'(Aucune)'}</div></div>
-    </div><div class="fcol">
-      <div class="blk"><div class="row"><h4>Historique</h4>${ic('chev',18)}</div></div>
-      <div class="blk"><div class="row"><h4>Documents</h4>${ic('chev',18)}</div></div>
-    </div></div>
-    <a class="big-btn" href="#messages" style="text-align:center;text-decoration:none;background:var(--panel);color:var(--blue);border:1px solid var(--blue)">Écrire au client</a>`;
-}
+
+
 
 /* ======================= Capteurs : un capteur, tous les bateaux ======================= */
 function capRows(d){
@@ -777,7 +717,7 @@ function cellVal(k,v){
   switch(k){case'battS':return nf(v.battS,1);case'battM':return nf(v.battM,1);case'quai':return v.quai?'Branché':'Coupé';case'eh':return (v.next-v.eh)+' h';case'cale':return v.cale?'Eau':'Sec';
   case'porte':return v.porte?'Ouverte':'Fermée';case'mvt':return v.mvt?'Oui':'Non';case'hum':return nf(v.hum)+' %';case'carb':return v.carb+' %';case'noires':return v.noires+' %';case'gsm':return v.gsm+'/5';default:return DEV.find(d=>d.k===k).main(v)}
 }
-function vCapteurs(){
+function vCapteursGrid(){
   const ro=roleOf(S.role),cols=COLS[S.role],k=S.dev||null;
   const B=withData();
   const worst=b=>{const s=cols.map(c=>V[b.id][c]===undefined?'ok':DEV.find(d=>d.k===c).st(V[b.id])[0]);return s.includes('crit')?'crit':s.includes('warn')?'warn':'ok'};
@@ -788,7 +728,7 @@ function vCapteurs(){
   const cnt=s=>B.filter(b=>worst(b)===s).length;
   const isCom=S.role==='commercial';
   const mx=`<div class="mxw"><table class="mx"><thead><tr><th class="bc">Bateau</th>${cols.map(c=>{const d=DEV.find(x=>x.k===c),bad=colBad(c),miss=colMiss(c);return `<th><button class="mxh ${c===k?'on':''}" data-dev="${c}" aria-pressed="${c===k}" data-tip="${bad} hors seuil · ${miss} sans capteur|${esc(d.n)} · tapez pour le détail">${esc(SHORT[c][0])}${SHORT[c][1]?` <span>${SHORT[c][1]}</span>`:''}${bad?`<i class="${bad&&B.some(b=>V[b.id][c]!==undefined&&d.st(V[b.id])[0]==='crit')?'is-crit':''}">${bad}</i>`:''}</button></th>`}).join('')}</tr></thead>
-    <tbody>${shown.map(({b})=>{const v=V[b.id];return `<tr><th class="bc"><a href="#bateaux" data-go-boat="${b.id}" data-ftab="capteurs">${esc(b.name)}</a><span>${esc(b.owner)}</span></th>${cols.map(c=>{
+    <tbody>${shown.map(({b})=>{const v=V[b.id];return `<tr><th class="bc"><a href="#capteurs" data-capboat="${b.id}">${esc(b.name)}</a><span>${esc(b.owner)}</span></th>${cols.map(c=>{
       if(v[c]===undefined)return `<td class="${c===k?'sel':''}"><span class="cell is-none ${isCom?'sell':''}" data-tip="${isCom?'À proposer':'Pas de capteur'}|${esc(b.name)} · ${esc(DEV.find(d=>d.k===c).n)}">${isCom?'+ proposer':'—'}</span></td>`;
       const d=DEV.find(x=>x.k===c),s=d.st(v);return `<td class="${c===k?'sel':''}"><span class="cell is-${s[0]}" data-tip="${esc(d.main(v))} · ${esc(s[1])}|${esc(b.name)} · ${esc(d.n)}">${esc(cellVal(c,v))}</span></td>`}).join('')}</tr>`}).join('')}</tbody></table></div>
     ${tot>shown.length?`<button class="btn btn-ghost more" data-cmore>Afficher 15 bateaux de plus · ${tot-shown.length} restants</button>`:''}`;
@@ -825,6 +765,97 @@ function vCapteurs(){
     ${acc('liste',`Les ${SENSORS.length} capteurs du fichier`,'<span>Recherche par nom, famille et métier</span>',()=>listSection(),false)}
     </div>
     <div class="proto-note">Prototype · ${S.boats.length} bateaux d’exemple. La liste des 169 capteurs vient du fichier Capteurs.xlsx.</div>
+  </div>`;
+}
+
+/* ======================= Bateaux : même mise en page que Seanapps Pro, optimisée pour une grande flotte ======================= */
+S.fx={hist:false,docs:false};
+const PER=10;
+function boatRowsHTML(){
+  const L=boatList(),pages=Math.max(1,Math.ceil(L.length/PER));
+  if(S.bpage>=pages)S.bpage=pages-1;
+  const shown=L.slice(S.bpage*PER,S.bpage*PER+PER);
+  if(!L.length)return `<div class="muted" style="padding:16px 6px">Aucun bateau ne correspond. Effacez la recherche ou choisissez « Tous ».</div>`;
+  const rows=shown.map(x=>{const n=boatIssues(x.id);
+    return `<button class="boat ${x.id===S.sel?'on':''}" data-boat="${x.id}">
+      <span class="av">${esc(x.brand)}</span>
+      <span class="nm"><b>${esc(x.name)}</b><span class="muted">${esc(x.owner)}</span></span>
+      ${n?`<span class="dot">${n}</span>`:''}
+      <span class="chip ${x.status==='Vendu'?'c-green':'c-yellow'}">${x.status}</span>
+    </button>`}).join('');
+  const win=[];for(let i=Math.max(0,S.bpage-2);i<Math.min(pages,S.bpage+3);i++)win.push(i);
+  const pager=`<nav class="pager" aria-label="Pages"><button data-bpage="${S.bpage-1}" ${S.bpage===0?'disabled':''} aria-label="Page précédente">${ic('back',18)}</button>${win.map(i=>`<button data-bpage="${i}" class="${i===S.bpage?'on':''}" aria-current="${i===S.bpage?'page':'false'}">${i+1}</button>`).join('')}<button data-bpage="${S.bpage+1}" ${S.bpage>=pages-1?'disabled':''} aria-label="Page suivante">${ic('chev',18)}</button></nav>
+    <div class="muted lcnt">${S.bpage*PER+1}–${Math.min(L.length,S.bpage*PER+PER)} sur ${L.length} bateaux</div>`;
+  return `<div class="boats-in">${rows}</div>${pager}`;
+}
+function vBateaux(){
+  const b=sel(),nf_=BF.find(f=>f.id===S.bf);
+  return `<div class="split">
+    <div class="listcol"><div class="lh">
+        <div style="display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500">${ic('back',20)} Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
+        <div class="search"><label class="in">${ic('search',20)}<input id="q" value="${esc(S.bq)}" placeholder="Rechercher" aria-label="Rechercher un bateau, un client, un HIN" autocomplete="off"><button class="fbtn ${S.bfOpen||S.bf!=='all'?'on':''}" data-bfopen aria-expanded="${S.bfOpen}" aria-label="Filtrer et trier">${ic('filter',20)}</button></label><button class="sq sq-blue" aria-label="Ajouter un bateau">${ic('boat',22)}</button></div>
+        ${S.bfOpen?`<div class="fpanel"><div class="fchips" id="bfil" role="group" aria-label="Filtrer">${bfChips()}</div>
+          <label class="muted" style="display:flex;gap:8px;align-items:center;font-size:13px">Trier par <select id="bsort" class="bsel"><option value="grav" ${S.bsort==='grav'?'selected':''}>Les plus urgents</option><option value="nom" ${S.bsort==='nom'?'selected':''}>Nom A → Z</option><option value="rev" ${S.bsort==='rev'?'selected':''}>Révision la plus proche</option></select></label></div>`
+          :(S.bf!=='all'?`<div class="muted" style="font-size:12.5px">Filtre : <b>${nf_.l}</b> · <button class="linkbtn" data-bf="all">Effacer</button></div>`:'')}
+      </div><div class="boats" id="blist">${boatRowsHTML()}</div></div>
+    <div class="fiche">${fiche(b)}</div></div>`;
+}
+function fiche(b){
+  const steps=b.steps,n=steps?steps.filter(Boolean).length:0,cur=steps?steps.findIndex(s=>!s):-1;
+  const al=boatIssues(b.id),has=!!V[b.id];
+  const notifTxt=has?(al?`${al} alerte${al>1?'s':''} capteur${al>1?'s':''}`:'(Aucune)'):'(Aucune)';
+  return `
+    <div class="fh">${ic('boat',24)}<h2>${esc(b.name)}</h2>
+      <span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}" style="margin-left:auto">${b.status}</span>
+      <button class="fold" data-fold aria-expanded="${S.ficheOpen}" aria-label="${S.ficheOpen?'Replier':'Déplier'} les informations">${ic('chev',18,2)}</button>
+      ${S.ficheOpen?`<div class="meta"><span>HIN : ${b.hin||'—'}</span><span>N° commande : ${b.order||'—'}</span>${b.model?`<span>Modèle : ${esc(b.model)}</span>`:''}<a href="#bateaux" style="margin-left:auto">Transférer</a></div>`:''}</div>
+    ${steps?`<div class="blk">
+      <div class="ck-h"><h4>Mise en service</h4>${NEW}<span class="muted" style="margin-left:auto;font-variant-numeric:tabular-nums">${n===5?'Terminée':`${n} étapes sur 5`}</span></div>
+      <div class="prog" style="margin:12px 0 4px"><i style="width:${n*20}%;${n===5?'background:var(--green)':''}"></i></div>
+      ${STEPS.map((s,i)=>`<div class="step ${steps[i]?'ok':i===cur?'cur':''}"><span class="n">${steps[i]?ic('check',14,3):i+1}</span>
+          <div class="sb"><b>${s.t}</b>${!steps[i]&&i===cur?`<div class="sd">${s.d}</div>`:''}${!steps[i]&&i===cur&&s.warn?`<div class="warn-note">${ic('alert',16)}<span>La mise en service envoie un e-mail au client avec son accès à l’app.</span></div>`:''}</div>
+          ${!steps[i]&&i===cur&&s.btn&&i!==4?`<button class="btn btn-out btn-sm" data-step="${i}">${s.btn}</button>`:''}</div>`).join('')}
+    </div>`:''}
+    ${b.insp?`<div class="blk" style="border-left:4px solid var(--orange)"><div class="row"><div><h4>Inspection en retard</h4><div class="muted" style="font-size:13.5px">${b.insp} · prévu avant le 27/08/2026</div></div><button class="btn btn-pri btn-sm" data-insp="t1">${S.tasks.find(t=>t.id==='t1').done?'Inspection faite ✓':'Commencer l’inspection'}</button></div></div>`:''}
+    <div class="fgrid">
+      <div class="fcol">
+        <div class="blk"><div class="row"><h4>Équipement</h4><button class="btn btn-out btn-sm" data-step="3">Diagnostics</button></div>
+          <div class="field"><span>Unité principale</span><span style="display:flex;gap:8px;align-items:center">${has||b.id==='b1'?'3426100474':'—'} ${ic('edit',16)}</span></div></div>
+        <div class="blk"><div class="row"><h4>Gestion locative</h4><span class="toggle" role="switch" aria-checked="false" aria-label="Gestion locative"></span></div><div class="muted" style="margin-top:6px">Activez la gestion locative pour gérer ce bateau depuis Fleet.</div></div>
+        <div class="blk"><div class="row"><h4>Abonnement propriétaire</h4><span class="chip c-grey">${ic('x',12,2)} Aucun</span></div></div>
+        <div class="blk"><div class="row"><h4>Abonnement Insight</h4><span class="chip c-red">${ic('x',12,2)} indisponible</span></div><div class="muted" style="margin-top:6px">Pas de consentement du propriétaire</div></div>
+      </div>
+      <div class="fcol">
+        <div class="blk"><h4>Notifications</h4><div class="field" style="justify-content:center;${al?'color:var(--orange-ink);border-color:var(--orange);font-weight:500':''}">${notifTxt}</div>
+          ${has?`<a class="btn btn-out" href="#capteurs" data-capboat="${b.id}" style="width:100%;justify-content:center;margin-top:10px">Voir plus${al?' dans Capteurs':''}</a>`:`<button class="btn btn-out" style="width:100%;justify-content:center;margin-top:10px" disabled>Voir plus</button>`}</div>
+        <div class="blk"><button class="row xrow" data-fx="hist" aria-expanded="${S.fx.hist}"><h4>Historique</h4><span class="xch ${S.fx.hist?'open':''}">${ic('chev',18)}</span></button>
+          ${S.fx.hist?`<div class="xbody">${(b.status==='Vendu'?[['12/09/2026','Contrôle après 1ère saison'],['03/05/2026','Livraison au client'],['28/04/2026','Mise en service']]:[['02/11/2026','Réception du bateau']]).map(h=>`<div class="act"><span class="b" style="background:var(--blue)"></span><span style="flex:1">${h[1]}</span><span class="muted" style="font-variant-numeric:tabular-nums">${h[0]}</span></div>`).join('')}</div>`:''}</div>
+        <div class="blk"><button class="row xrow" data-fx="docs" aria-expanded="${S.fx.docs}"><h4>Documents</h4><span class="xch ${S.fx.docs?'open':''}">${ic('chev',18)}</span></button>
+          ${S.fx.docs?`<div class="xbody">${['Bon de livraison.pdf','Facture.pdf','Manuel du propriétaire.pdf'].map(d=>`<div class="act"><span class="b" style="background:var(--ink-3)"></span><span style="flex:1">${d}</span></div>`).join('')}</div>`:''}</div>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="owner">${ic('user',20)}<span style="flex:1;min-width:0">${esc(b.owner)}</span><span class="ib">${ic('mail',20)}</span><span class="ib">${ic('phone',20)}</span><span class="ib x">${ic('x',20)}</span></div>
+      ${steps&&b.status==='Mise en service'?`<button class="big-btn" id="mes" ${cur!==4?'disabled title="Terminez les étapes précédentes"':''}>Préparer la mise en service</button>`:`<button class="big-btn" style="background:var(--panel);color:var(--blue);border:1px solid var(--blue)">Voir la fiche client</button>`}
+    </div>`;
+}
+
+/* ======================= Capteurs : la grille du parc, ou un bateau en plan ======================= */
+function vCapteurs(){
+  if(S.capBoat&&V[S.capBoat])return capBoatPage(boat(S.capBoat));
+  S.capBoat=null;return vCapteursGrid();
+}
+function capBoatPage(b){
+  const v=V[b.id];
+  return `<div class="top"><div class="h1">Capteurs</div>${roleTabs()}</div>
+  <div class="wrap">
+    <div><button class="btn btn-ghost btn-sm" data-capback>${ic('back',16)} Retour à la grille du parc</button></div>
+    <section class="card"><div class="card-b" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin:0;font-size:20px">${esc(b.name)}</h2>${stChip(boatState(b.id))}</div>
+        <div class="muted">${esc(b.owner)}${b.model?` · ${esc(b.model)}`:''} · dernier envoi ${v.lastSeen}</div></div>
+      <a class="btn btn-out btn-sm" href="#bateaux" data-go-boat="${b.id}">${ic('boat',16)} Ouvrir la fiche bateau</a>
+    </div></section>
+    ${tabCapteurs(b)}
   </div>`;
 }
 
@@ -866,7 +897,7 @@ function searchAll(qRaw){
   const bt=S.boats.map(b=>({b,s:score(q,b.name,b.owner)})).filter(x=>x.s).slice(0,4);
   if(bt.length)G.push({t:'Bateaux et clients',items:bt.map(({b})=>({i:'boat',h:hl(b.name,q),sub:`${hl(b.owner,q)} · ${b.status}`,st:boatState(b.id),go:()=>{S.sel=b.id;S.ftab=null;location.hash==='#bateaux'?render():location.hash='#bateaux'}}))});
   const al=alerts().map(a=>({a,s:score(q,a.d.n,a.b.name+' '+a.txt,a.d.raw.join(' '))})).filter(x=>x.s).slice(0,4);
-  if(al.length)G.push({t:'Alertes en cours',items:al.map(({a})=>({i:'alert',h:`${esc(a.b.name)} · ${hl(a.d.n,q)} ${esc(a.val)}`,sub:esc(a.txt),st:a.sev,go:()=>{S.sel=a.b.id;S.ftab='capteurs';location.hash==='#bateaux'?render():location.hash='#bateaux'}}))});
+  if(al.length)G.push({t:'Alertes en cours',items:al.map(({a})=>({i:'alert',h:`${esc(a.b.name)} · ${hl(a.d.n,q)} ${esc(a.val)}`,sub:esc(a.txt),st:a.sev,go:()=>{S.capBoat=a.b.id;location.hash==='#capteurs'?render():location.hash='#capteurs'}}))});
   const dv=DEV.map(d=>({d,s:score(q,d.n,d.raw.join(' '),d.what)})).filter(x=>x.s).sort((a,b)=>b.s-a.s).slice(0,3);
   if(dv.length)G.push({t:'Comparer sur tout le parc',items:dv.map(({d})=>{const R=capRows(d),bad=R.filter(r=>r.s[0]!=='ok').length;return {i:'pulse',h:hl(d.n,q),sub:`${R.length} bateaux équipés${bad?` · ${bad} hors seuil`:''}`,go:()=>{S.dev=d.k;S.cf='all';S.clim=15;location.hash==='#capteurs'?render():location.hash='#capteurs'}}})});
   const sn=SENSORS.map(s=>({s,sc:score(q,s[3],s[0],s[4]+' '+FAM[s[2]].t+' '+mt(s[1])+' '+s[1])})).filter(x=>x.sc).sort((a,b)=>b.sc-a.sc);
@@ -1067,18 +1098,26 @@ function checkAllDone(){if(S.tasks.every(t=>t.done))toast('Tout est traité pour
 function updateList(){const r=listRows();const b=document.getElementById('lbody');if(b)b.innerHTML=r.html;const c=document.getElementById('lcount');if(c)c.textContent=r.n;}
 
 document.addEventListener('click',e=>{
+  if(e.target.closest('.nav a[href="#capteurs"]')){S.capBoat=null;if(route()==='capteurs'){render();return;}}
+  const cbt=e.target.closest('[data-capboat]');
+  if(cbt&&cbt.dataset.capboat){S.capBoat=cbt.dataset.capboat;if(route()==='capteurs'){e.preventDefault();render();document.getElementById('main').scrollTop=0;}return;}
+  if(e.target.closest('[data-capback]')){S.capBoat=null;render();return;}
+  if(e.target.closest('[data-bfopen]')){S.bfOpen=!S.bfOpen;render();return;}
+  const bp=e.target.closest('[data-bpage]');if(bp){if(bp.disabled)return;S.bpage=+bp.dataset.bpage;updateBoats();const l=document.getElementById('blist');if(l)l.scrollTop=0;return;}
+  if(e.target.closest('[data-fold]')){S.ficheOpen=!S.ficheOpen;render();return;}
+  const fx=e.target.closest('[data-fx]');if(fx){S.fx[fx.dataset.fx]=!S.fx[fx.dataset.fx];render();return;}
   const a=e.target.closest('[data-go-boat]');
   if(a&&a.dataset.goBoat){S.sel=a.dataset.goBoat;S.ftab=a.dataset.ftab||null;if(route()==='bateaux'){render();return;}}
   const ft=e.target.closest('[data-ftab]');
   if(ft&&!ft.dataset.goBoat&&ft.dataset.ftab){S.ftab=ft.dataset.ftab;render();return;}
-  const bf=e.target.closest('[data-bf]');if(bf){S.bf=bf.dataset.bf;S.blim=20;updateBoats();return;}
+  const bf=e.target.closest('[data-bf]');if(bf){S.bf=bf.dataset.bf;S.bpage=0;render();return;}
   if(e.target.closest('[data-bmore]')){S.blim+=20;updateBoats();return;}
   if(e.target.closest('[data-cmore]')){S.clim+=15;render();return;}
   if(e.target.closest('[data-alall]')){S.alAll=!S.alAll;render();return;}
   if(e.target.closest('[data-oppall]')){S.oppAll=!S.oppAll;render();return;}
   const cf=e.target.closest('[data-cf]');if(cf){S.cf=cf.dataset.cf;S.clim=15;render();return;}
   const dv=e.target.closest('[data-dev]');if(dv){const k=dv.dataset.dev;S.dev=(route()==='capteurs'&&S.dev===k)?null:(k||null);if(route()==='capteurs'){render();if(S.dev){const z=document.querySelector('.zoom');if(z)z.scrollIntoView({block:'nearest'});}}return;}
-  const zn=e.target.closest('[data-zone]');if(zn){S.zone[S.sel]=zn.dataset.zone;render();const f=document.querySelector(`[data-zone="${zn.dataset.zone}"]`);if(f&&f.tagName!=='BUTTON')f.focus({preventScroll:true});return;}
+  const zn=e.target.closest('[data-zone]');if(zn){S.zone[S.capBoat||S.sel]=zn.dataset.zone;render();const f=document.querySelector(`[data-zone="${zn.dataset.zone}"]`);if(f&&f.tagName!=='BUTTON')f.focus({preventScroll:true});return;}
   const cb=e.target.closest('[data-cb]');
   if(cb&&cb.dataset.cb){S.cb=cb.dataset.cb;if(cb.tagName==='BUTTON'||route()==='capteurs'){render();document.getElementById('main').scrollTop=0;if(cb.tagName==='BUTTON')return;}}
   const ro=e.target.closest('[data-role]');
@@ -1119,9 +1158,9 @@ document.addEventListener('submit',e=>{
 document.addEventListener('input',e=>{
   if(e.target.id==='sq'){S.q=e.target.value;updateList();return;}
   if(e.target.id!=='q')return;
-  S.bq=e.target.value;S.blim=20;updateBoats();
+  S.bq=e.target.value;S.bpage=0;updateBoats();
 });
-document.addEventListener('change',e=>{if(e.target.id==='sf'){S.fam=e.target.value;updateList();}if(e.target.id==='bsort'){S.bsort=e.target.value;updateBoats();}if(e.target.id==='devsel'){S.dev=e.target.value;S.cf='all';S.clim=15;render();}});
+document.addEventListener('change',e=>{if(e.target.id==='sf'){S.fam=e.target.value;updateList();}if(e.target.id==='bsort'){S.bsort=e.target.value;S.bpage=0;updateBoats();}if(e.target.id==='devsel'){S.dev=e.target.value;S.cf='all';S.clim=15;render();}});
 window.addEventListener('hashchange',()=>{closeSearch();render();document.getElementById('main').scrollTop=0;});
 render();
 
