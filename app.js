@@ -412,14 +412,14 @@ const OPP=[
   {b:'b3',sig:'Santé batterie 62 %',sv:'warn',p:'Batterie de service neuve, pose comprise',pr:'≈ 420 €'},
   {b:'b6',sig:'Humidité cabine 81 %',sv:'warn',p:'Déshumidificateur + hivernage surveillé',pr:'Sur devis'},
   {b:'b7',sig:'Révision 250 h dans 3 h',sv:'warn',p:'Contrat d’entretien annuel',pr:'Sur devis'},
-  {b:'b4',sig:'Pas de capteur d’eau dans la cale',sv:'off',p:'Capteur de présence d’eau',pr:'178,80 €'},
+  {b:'b4',k:'cale',sig:'Pas de capteur d’eau dans la cale',sv:'off',p:'Capteur de présence d’eau',pr:'178,80 €'},
   {b:'b2',sig:'Batterie vidée après une coupure du quai',sv:'crit',p:'Panneau solaire d’appoint',pr:'Sur devis'}
 ];
 const SHOP0=[
   ['Capteur d’ouverture de porte magnétique','94,80 €','porte','Sécurité'],['Capteur d’ouverture de trappe mécanique','202,80 €','trappe','Sécurité'],['Détecteur de mouvement','178,80 €','mvt','Sécurité'],['Capteur de présence d’eau','178,80 €','cale','Sécurité'],
   ['Capteur antivol pour moteur hors-bord','94,80 €','antiM','Sécurité'],['Capteur antivol pour annexe','94,80 €','antiA','Sécurité'],['Capteur de tension de batterie','310,80 €','battS','Maintenance'],['Capteur de prise de quai','178,80 €','quai','Maintenance']
 ];
-const shop=()=>SHOP0.map(s=>[s[0],s[1],eqCount(s[2]),s[3]]);
+const shop=()=>SHOP0.map(s=>[s[0],s[1],eqCount(s[2]),s[3],s[2]]);
 
 
 const PLAN=[
@@ -564,10 +564,10 @@ const TABS={
     {id:'opp',l:'Ventes à proposer',v:`${OP.length}`,s:'repérées par les capteurs',st:'ok',body:()=>card('Ventes repérées par les capteurs','Le boîtier voit ce dont le bateau a besoin. Vous le proposez au bon moment.',OP.slice(0,S.oppAll?99:6).map(o=>{const b=boat(o.b);return `<div class="opp">
       <div style="min-width:0"><b style="font-weight:600">${b.name}</b> <span class="muted">· ${b.owner}</span><div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="sdot is-${o.sv}"></span><span style="font-size:13.5px">${o.sig}</span></div></div>
       <div style="min-width:0"><span class="muted" style="font-size:12.5px">À proposer</span><div style="font-weight:500">${o.p} · <span class="pr">${o.pr}</span></div></div>
-      <a class="btn btn-out btn-sm" href="#messages">${ic('msg',15)} Écrire au client</a></div>`}).join('')+(OP.length>6?`<button class="btn btn-ghost more" data-oppall>${S.oppAll?'Afficher moins':`Afficher les ${OP.length-6} autres`}</button>`:''))},
+      ${S.sent[sentKey(o.b,o.k||('opp:'+o.p))]?`<span class="chip c-green">${ic('check',13,2.4)} Proposé</span>`:`<button class="btn btn-out btn-sm" data-propose="${o.b}|opp|${encodeURIComponent(o.p)}">${ic('msg',15)} Proposer au client</button>`}</div>`}).join('')+(OP.length>6?`<button class="btn btn-ghost more" data-oppall>${S.oppAll?'Afficher moins':`Afficher les ${OP.length-6} autres`}</button>`:''))},
     {id:'ventes',l:'Capteurs et services vendus',v:'9 210 €',s:'en 2026, à fin octobre',st:'',body:()=>card('Capteurs et services vendus','Par mois, 2026',barChart({items:SAL.map((v,i)=>({l:M[i],v,c:i===10?'cur':'',tip:`${M[i]} 2026${i===10?' (en cours)':''}`})),max:2500,ticks:[0,500,1000,1500,2000,2500],tf:v=>v?nf(v/1000,1)+' k':'0',fmt:v=>nf(v)+' €',label:'Ventes de capteurs et services par mois'})+'<div class="chart-note">Le pic du printemps correspond aux remises à l’eau. Novembre est en cours.</div>',['Total','9 210 €'])},
     {id:'equip',l:'Capteurs à poser',v:`${toEquip}`,s:'sur les bateaux du parc',st:'warn',body:()=>card('Équipement du parc',`Bateaux équipés sur ${E}, par capteur vendu`,hbars(SH.map(s=>({l:s[0].replace('Capteur d’ouverture de ','').replace('Capteur de ','').replace('Capteur antivol pour ','Antivol ').replace(/^./,c=>c.toUpperCase()),v:s[2],tip:`bateaux équipés sur ${E} · ${s[0]}`})),E,v=>`${v} / ${E}`)+'<div class="chart-note">Plus la barre est courte, plus il reste de bateaux à équiper.</div>')},
-    {id:'cat',l:'Catalogue',v:`${SH.length}`,s:'capteurs sans fil à vendre',st:'',body:()=>card('Catalogue des capteurs Seanapps','Sans fil (Bluetooth), pour un bateau déjà équipé du boîtier',`<div class="cat">${SH.map(s=>`<div class="it"><div class="row"><b style="font-weight:500">${s[0]}</b><span style="font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap">${s[1]}</span></div><span class="muted" style="font-size:12.5px">${s[3]} · à proposer à ${E-s[2]} bateau${E-s[2]>1?'x':''}</span></div>`).join('')}</div>`)}
+    {id:'cat',l:'Catalogue',v:`${SH.length}`,s:'capteurs sans fil à vendre',st:'',body:()=>card('Catalogue des capteurs Seanapps','Sans fil (Bluetooth), pour un bateau déjà équipé du boîtier',`<div class="cat">${SH.map(s=>`<div class="it"><div class="row"><b style="font-weight:500">${s[0]}</b><span style="font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap">${s[1]}</span></div><div class="row"><span class="muted" style="font-size:12.5px">${s[3]} · à proposer à ${E-s[2]} bateau${E-s[2]>1?'x':''}</span>${E-s[2]>0?`<button class="btn btn-out btn-sm" data-propose="|${s[4]}">Proposer</button>`:''}</div></div>`).join('')}</div>`)}
   ]},
   technicien:()=>{const al=alerts(),crit=al.filter(a=>a.sev==='crit').length,off=Object.keys(V).filter(id=>!online(id)),todo=S.boats.filter(b=>b.status==='Mise en service');return [
     {id:'alertes',l:'Alertes ouvertes',v:`${al.length}`,s:`dont ${crit} critique${crit>1?'s':''}`,st:crit?'crit':'warn',body:()=>alertsCard()},
@@ -729,6 +729,7 @@ function vCapteursGrid(){
   const isCom=S.role==='commercial';
   const mx=`<div class="mxw"><table class="mx"><thead><tr><th class="bc">Bateau</th>${cols.map(c=>{const d=DEV.find(x=>x.k===c),bad=colBad(c),miss=colMiss(c);return `<th><button class="mxh ${c===k?'on':''}" data-dev="${c}" aria-pressed="${c===k}" data-tip="${bad} hors seuil · ${miss} sans capteur|${esc(d.n)} · tapez pour le détail">${esc(SHORT[c][0])}${SHORT[c][1]?` <span>${SHORT[c][1]}</span>`:''}${bad?`<i class="${bad&&B.some(b=>V[b.id][c]!==undefined&&d.st(V[b.id])[0]==='crit')?'is-crit':''}">${bad}</i>`:''}</button></th>`}).join('')}</tr></thead>
     <tbody>${shown.map(({b})=>{const v=V[b.id];return `<tr><th class="bc"><a href="#capteurs" data-capboat="${b.id}">${esc(b.name)}</a><span>${esc(b.owner)}</span></th>${cols.map(c=>{
+      if(v[c]===undefined&&isCom&&PROD[c])return `<td class="${c===k?'sel':''}">${S.sent[sentKey(b.id,c)]?`<span class="cell is-ok" data-tip="Proposition envoyée|${esc(b.name)} · ${esc(cap1(PROD[c].n))}">Proposé ✓</span>`:`<button class="cell is-none sell" data-propose="${b.id}|${c}" data-tip="${esc(PROD[c].pr)} · tapez pour préparer le message|${esc(b.name)} · ${esc(cap1(PROD[c].n))}">+ proposer</button>`}</td>`;
       if(v[c]===undefined)return `<td class="${c===k?'sel':''}"><span class="cell is-none ${isCom?'sell':''}" data-tip="${isCom?'À proposer':'Pas de capteur'}|${esc(b.name)} · ${esc(DEV.find(d=>d.k===c).n)}">${isCom?'+ proposer':'—'}</span></td>`;
       const d=DEV.find(x=>x.k===c),s=d.st(v);return `<td class="${c===k?'sel':''}"><span class="cell is-${s[0]}" data-tip="${esc(d.main(v))} · ${esc(s[1])}|${esc(b.name)} · ${esc(d.n)}">${esc(cellVal(c,v))}</span></td>`}).join('')}</tr>`}).join('')}</tbody></table></div>
     ${tot>shown.length?`<button class="btn btn-ghost more" data-cmore>Afficher 15 bateaux de plus · ${tot-shown.length} restants</button>`:''}`;
@@ -953,6 +954,89 @@ document.addEventListener('pointerdown',e=>{
   if(!e.target.closest('.gwrap'))closeSearch();
 });
 
+/* ======================= Proposer un produit : message prêt à envoyer, avec le lien du produit ======================= */
+/* Adresse de la boutique : à remplacer par les vraies pages produit Seanapps. */
+const SHOP_BASE='https://www.seanapps.app/boutique/';
+const PROD={
+  cale:{n:'capteur de présence d’eau',pr:'178,80 €',slug:'capteur-presence-eau',why:'n’a pas encore de capteur de présence d’eau dans la cale',gain:'Vous seriez prévenu sur votre téléphone dès que de l’eau entre dans la cale, même quand vous n’êtes pas à bord.'},
+  porte:{n:'capteur d’ouverture de porte magnétique',pr:'94,80 €',slug:'capteur-ouverture-porte',why:'n’a pas encore de capteur d’ouverture sur la porte de la cabine',gain:'Vous sauriez tout de suite si quelqu’un ouvre la porte de la cabine en votre absence.'},
+  trappe:{n:'capteur d’ouverture de trappe mécanique',pr:'202,80 €',slug:'capteur-ouverture-trappe',why:'n’a pas de capteur sur ses trappes et coffres',gain:'Vous seriez alerté dès qu’une trappe ou un coffre est ouvert.'},
+  mvt:{n:'détecteur de mouvement',pr:'178,80 €',slug:'detecteur-mouvement',why:'n’a pas encore de détecteur de mouvement dans la cabine',gain:'Vous seriez alerté de toute présence à bord quand le bateau est vide.'},
+  antiM:{n:'capteur antivol pour moteur hors-bord',pr:'94,80 €',slug:'capteur-antivol-moteur',why:'n’a pas d’antivol sur son moteur hors-bord',gain:'Vous seriez prévenu si quelqu’un déplace ou démonte votre moteur.'},
+  antiA:{n:'capteur antivol pour annexe',pr:'94,80 €',slug:'capteur-antivol-annexe',why:'n’a pas d’antivol sur son annexe',gain:'Vous seriez prévenu si quelqu’un emporte votre annexe.'},
+  battS:{n:'capteur de tension de batterie',pr:'310,80 €',slug:'capteur-tension-batterie',why:'ne suit pas encore la tension de toutes ses batteries',gain:'Vous suivriez la charge de vos batteries à distance et seriez prévenu avant qu’elles ne soient vides.'},
+  quai:{n:'capteur de prise de quai',pr:'178,80 €',slug:'capteur-prise-de-quai',why:'n’est pas équipé de capteur de prise de quai',gain:'Vous seriez prévenu dès que le courant du ponton est coupé, avant que les batteries ne se vident.'}
+};
+const prodLink=k=>SHOP_BASE+PROD[k].slug;
+const cap1=s=>s.replace(/^./,c=>c.toUpperCase());
+S.sent={};S.prop=null;
+const sentKey=(b,k)=>b+'|'+k;
+function clientName(b){return b.owner==='—'?'':b.owner.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ')}
+function buildMsg(p){
+  const b=boat(p.b),nm=clientName(b),hello=nm?`Bonjour ${nm},`:'Bonjour,';
+  const sig='\n\nBien cordialement,\nLaurine G.\nVotre concession Seanapps';
+  if(p.k&&PROD[p.k]){const P=PROD[p.k];
+    return `${hello}\n\nEn suivant les données de ${b.name} dans l’app Seanapps, j’ai remarqué que votre bateau ${P.why}.\n\n${P.gain}\n\nJe vous propose le ${P.n}, à ${P.pr}. Il se connecte sans fil au boîtier Seanapps déjà installé à bord.\nVoir le produit : ${prodLink(p.k)}\n\nNous pouvons l’installer lors de votre prochain passage. Souhaitez-vous que je vous réserve un créneau ?${sig}`;}
+  const o=p.opp;
+  return `${hello}\n\nEn suivant les données de ${b.name} dans l’app Seanapps, j’ai remarqué un point à surveiller : ${o.sig.charAt(0).toLowerCase()+o.sig.slice(1)}.\n\nPour éviter une panne ou une mauvaise surprise, je vous propose : ${o.p.charAt(0).toLowerCase()+o.p.slice(1)} (${o.pr.toLowerCase()}).\n\nJe peux vous envoyer un devis détaillé et vous proposer un rendez-vous à l’atelier. Qu’en dites-vous ?${sig}`;
+}
+function missingFor(k){return withData().filter(b=>V[b.id][k]===undefined)}
+function openProp(spec){
+  // spec: "boatId|key"  |  "|key" (catalogue)  |  "boatId|opp|texte"
+  const [bid,k,txt]=spec.split('|');
+  let p;
+  if(k==='opp'){const o=oppList().find(x=>x.b===bid&&x.p===decodeURIComponent(txt));p={b:bid,k:o&&o.k||null,opp:o};}
+  else{const cands=missingFor(k);p={b:bid||(cands[0]&&cands[0].id)||withData()[0].id,k,opp:null};}
+  p.msg=buildMsg(p);S.prop=p;renderProp();
+  setTimeout(()=>{const t=document.getElementById('pmsg');if(t)t.focus({preventScroll:true})},30);
+}
+function renderProp(){
+  const el=document.getElementById('pmodal');const p=S.prop;
+  if(!p){el.hidden=true;el.innerHTML='';document.body.style.overflow='';return;}
+  const b=boat(p.b),isProd=p.k&&PROD[p.k];
+  const boats=isProd?[...new Set([b,...missingFor(p.k)])]:[b];
+  el.hidden=false;document.body.style.overflow='hidden';
+  el.innerHTML=`<div class="pm-scrim" data-pclose></div>
+  <div class="pm" role="dialog" aria-modal="true" aria-labelledby="pmt">
+    <div class="pm-h"><div><h3 id="pmt">Proposer à ${esc(clientName(b)||'ce client')}</h3><div class="muted" style="font-size:13px">${esc(b.name)}${b.model?` · ${esc(b.model)}`:''}</div></div><button class="btn btn-ghost btn-sm" data-pclose aria-label="Fermer">${ic('x',16)}</button></div>
+    <div class="pm-b">
+      <div class="pm-row">
+        <label class="pm-f"><span>Bateau</span><select id="pboat">${boats.map(x=>`<option value="${x.id}" ${x.id===p.b?'selected':''}>${esc(x.name)} · ${esc(clientName(x)||'sans client')}</option>`).join('')}</select></label>
+        <label class="pm-f"><span>Produit</span><select id="pprod">${p.opp&&!isProd?`<option value="">${esc(p.opp.p)} · ${esc(p.opp.pr)}</option>`:''}${Object.entries(PROD).map(([k,P])=>`<option value="${k}" ${k===p.k?'selected':''}>${esc(cap1(P.n))} · ${P.pr}</option>`).join('')}</select></label>
+      </div>
+      ${isProd?`<div class="pm-link">${ic('share',16)}<span class="muted">Lien du produit</span><a href="${prodLink(p.k)}" target="_blank" rel="noopener">${prodLink(p.k)}</a></div>`:`<div class="pm-link muted">${ic('clip',16)}<span>Service sur devis : pas de page produit, le message propose un devis.</span></div>`}
+      <label class="pm-f"><span>Message (vous pouvez le modifier)</span><textarea id="pmsg" rows="14">${esc(p.msg)}</textarea></label>
+    </div>
+    <div class="pm-foot"><button class="btn btn-ghost" data-pcopy>${ic('clip',16)} Copier le message</button><button class="btn btn-pri" data-psend>${ic('send',16)} Envoyer dans Messages</button></div>
+  </div>`;
+}
+function sendProp(){
+  const p=S.prop,b=boat(p.b),t=document.getElementById('pmsg').value.trim();if(!t)return;
+  const nm=clientName(b)||b.name;
+  let c=S.convs.find(x=>x.boat===b.name)||S.convs.find(x=>x.name===nm);
+  if(!c){c={id:'c'+(S.convs.length+1)+'_'+b.id,name:nm,boat:b.name,msgs:[]};S.convs.unshift(c);}
+  c.msgs.push({me:true,t,h:'À l’instant'});c.last='Vous : '+t.split('\n').find(l=>l.trim()&&!/^Bonjour/.test(l))?.slice(0,80);c.ago='à l’instant';
+  S.sent[sentKey(p.b,p.k||('opp:'+(p.opp&&p.opp.p)))]=true;
+  S.prop=null;renderProp();render();toast(`Proposition envoyée à ${nm}`);
+}
+function linkify(s){return esc(s).replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`)}
+document.addEventListener('click',e=>{
+  const pr=e.target.closest('[data-propose]');
+  if(pr){e.preventDefault();e.stopPropagation();openProp(pr.dataset.propose);return;}
+  if(!S.prop)return;
+  if(e.target.closest('[data-pclose]')){S.prop=null;renderProp();return;}
+  if(e.target.closest('[data-psend]')){sendProp();return;}
+  if(e.target.closest('[data-pcopy]')){const t=document.getElementById('pmsg');const done=()=>toast('Message copié');
+    try{navigator.clipboard.writeText(t.value).then(done,()=>{t.select();toast('Sélectionné : faites Ctrl+C')})}catch(_){t.select();toast('Sélectionné : faites Ctrl+C')}return;}
+},true);
+document.addEventListener('change',e=>{
+  if(!S.prop)return;
+  if(e.target.id==='pboat'){S.prop.b=e.target.value;S.prop.msg=buildMsg(S.prop);renderProp();}
+  if(e.target.id==='pprod'){const k=e.target.value;if(k){S.prop.k=k;S.prop.opp=S.prop.opp&&S.prop.opp.k===k?S.prop.opp:null;}else{S.prop.k=null;}S.prop.msg=buildMsg(S.prop);renderProp();}
+});
+document.addEventListener('input',e=>{if(e.target.id==='pmsg'&&S.prop)S.prop.msg=e.target.value;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.prop){S.prop=null;renderProp();}});
+
 /* ======================= Messages ======================= */
 function vMessages(){
   const c=S.convs.find(x=>x.id===S.conv);
@@ -981,7 +1065,7 @@ function vMessages(){
     </div>
     <div class="thread">
       <div class="th"><b style="font-size:16px">${c.name}</b><span class="muted">${c.boat}</span>${c.unread?`<span class="chip c-orange" style="margin-left:auto">${ic('clock',13,2)} Reçu ${c.ago}. Répondre ?</span>`:''}</div>
-      <div class="bubbles" id="bubbles">${c.msgs.map(m=>`<div class="bub ${m.me?'me':''}">${m.t}<small>${m.h}</small></div>`).join('')}</div>
+      <div class="bubbles" id="bubbles">${c.msgs.map(m=>`<div class="bub ${m.me?'me':''}">${linkify(m.t)}<small>${m.h}</small></div>`).join('')}</div>
       <form class="composer" id="compose">
         <label for="reply" class="muted" style="position:absolute;left:-9999px">Votre réponse</label>
         <textarea id="reply" rows="3" placeholder="Écrire à ${c.name}…">${c.unread&&c.id==='c1'?'Bonjour Jean, c’est souvent la batterie de service quand le bateau reste au port. Je regarde les données du boîtier et je vous rappelle avant midi.':''}</textarea>

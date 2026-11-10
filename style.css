@@ -555,5 +555,26 @@ table.mx{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
 .xbody{margin-top:8px}
 .boat .dot{margin-left:auto}
 .boat .dot+.chip{margin-left:0}
+/* ---------- Proposer un produit ---------- */
+#pmodal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.pm-scrim{position:absolute;inset:0;background:rgba(10,14,30,.45)}
+.pm{position:relative;background:var(--panel);border-radius:14px;width:min(680px,100%);max-height:100%;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);min-width:0}
+.pm-h{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.pm-h h3{margin:0;font-size:18px}
+.pm-b{padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.pm-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pm-f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);font-weight:500;min-width:0}
+.pm-f select,.pm-f textarea{font:inherit;font-size:14px;font-weight:400;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.pm-f textarea{resize:vertical;line-height:1.5;min-height:220px}
+.pm-link{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;background:var(--blue-softer);border-radius:8px;padding:8px 10px;min-width:0}
+.pm-link a{overflow-wrap:anywhere;font-weight:500}
+.pm-foot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line)}
+button.cell{font:inherit;font-size:13px;cursor:pointer}
+button.cell:hover{background:var(--blue-soft)}
+.bub{white-space:pre-line;overflow-wrap:anywhere}
+.bub a{color:inherit;text-decoration:underline}
+@media (max-width:560px){.pm-row{grid-template-columns:minmax(0,1fr)}}
+[hidden]{display:none!important}
+.pm{max-height:calc(100dvh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
 
 html,body{margin:0}
