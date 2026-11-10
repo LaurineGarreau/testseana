@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Seanapps Mobile · Prototype</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Seanapps">
+<meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sen:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -49,10 +54,17 @@ svg,img{flex:none}
 .sw{display:flex;align-items:center;gap:10px;font-size:13.5px}
 .pnote{font-size:12.5px;color:var(--page-ink-2)}
 /* ---------- téléphone ---------- */
-.phone{width:393px;height:852px;max-height:calc(100vh - 48px);min-height:640px;border-radius:52px;background:#0c1416;padding:11px;box-shadow:0 30px 60px rgba(10,30,35,.25);flex:none}
-.screen{position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;color-scheme:light}
-.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:30px;border-radius:20px;background:#0c1416;z-index:50}
-.status{height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 4px;font-weight:700;font-size:14px;color:#000}
+.phone-box{flex:none;position:sticky;top:20px;align-self:flex-start}
+.stage{align-items:flex-start}
+body.solo .stage{align-items:center;min-height:100vh}
+body.solo .phone-box{position:relative;top:0;align-self:center}
+.phone{position:absolute;left:0;top:0;width:417px;height:876px;transform-origin:0 0;border-radius:64px;background:#0c1416;padding:12px;box-shadow:0 0 0 2px #3a4347,0 0 0 4px #1b2225,0 34px 70px rgba(10,30,35,.28)}
+.phone::before,.phone::after{content:"";position:absolute;width:4px;border-radius:2px;background:#2a3236}
+.phone::before{left:-6px;top:170px;height:64px;box-shadow:0 84px 0 #2a3236,0 -60px 0 0 #2a3236}
+.phone::after{right:-6px;top:220px;height:100px}
+.screen{position:relative;width:393px;height:852px;border-radius:52px;overflow:hidden;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;color-scheme:light}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#0c1416;z-index:50}
+.status{height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:4px 34px 0 44px;font-weight:700;font-size:14px;color:#000}
 #view{flex:1;display:flex;flex-direction:column;min-height:0}
 .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 24px 28px;display:flex;flex-direction:column;gap:24px;scrollbar-width:none}
 .scroll::-webkit-scrollbar{display:none}
@@ -225,13 +237,19 @@ canvas{display:block;width:100%;height:auto}
 .toast{position:absolute;left:16px;right:16px;bottom:100px;z-index:45;background:var(--ink-1);color:#fff;border-radius:12px;padding:11px 14px;font-weight:600;font-size:13.5px;display:flex;gap:8px;align-items:center;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
 .toast.show{opacity:1;transform:none}
 .mob-info{display:none}
+body.solo .pitch{display:none}
+body.solo .stage{gap:0}
+.solo-back{position:fixed;left:16px;top:16px;z-index:70;display:none}
+body.solo .solo-back{display:inline-flex}
 @media (max-width:900px){.stage{flex-direction:column-reverse;gap:24px}.pitch{width:min(520px,100%)}}
 @media (max-width:520px){
   .stage{padding:0;display:block;height:100%;min-height:0}
   .pitch{display:none}
   .pitch.open{display:flex;position:fixed;inset:0;z-index:60;background:var(--page);overflow-y:auto;width:100%;padding-block:calc(20px + env(safe-area-inset-top,0px)) 30px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-  .phone{width:100%;height:100%;max-height:none;min-height:0;border-radius:0;padding:0;box-shadow:none}
-  .screen{border-radius:0}
+  .phone-box{width:100%!important;height:100%!important}
+  .phone{position:static;width:100%;height:100%;transform:none!important;border-radius:0;padding:0;box-shadow:none}
+  .phone::before,.phone::after{display:none}
+  .screen{width:100%;height:100%;border-radius:0}
   .island,.status{display:none}
   .hh,.bh{padding-top:calc(12px + env(safe-area-inset-top,0px))}
   .tabbar{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
@@ -246,6 +264,7 @@ canvas{display:block;width:100%;height:auto}
 <body>
 
 
+<button class="btn out solo-back" id="soloBack">Afficher le panneau</button>
 <div class="stage">
   <section class="pitch" id="pitch" aria-label="Présentation">
     <div style="display:flex;justify-content:space-between;align-items:center"><span class="plabel" style="margin:0">Prototype · App propriétaire</span><button class="mob-info btn out" id="closePitch">Fermer</button></div>
@@ -259,17 +278,18 @@ canvas{display:block;width:100%;height:auto}
       <div class="plabel">Les 5 pistes</div>
       <div id="plist"></div>
     </div>
+    <div class="pcard sw"><button class="toggle off" id="soloTog" role="switch" aria-checked="false" aria-label="Téléphone seul"></button><span>Afficher seulement le téléphone (touche Échap pour revenir)</span></div>
     <div class="pcard sw"><button class="toggle off" id="markTog" role="switch" aria-checked="false" aria-label="Surligner les nouveautés"></button><span>Surligner les ajouts gamification dans les écrans</span></div>
     <div class="pnote">Données d’exemple issues des maquettes : Ulysse, Flyer 9 Sundeck, Le Port-Jacquet.</div>
   </section>
 
-  <div class="phone"><div class="screen" id="screen">
+  <div class="phone-box" id="phoneBox"><div class="phone" id="phone"><div class="screen" id="screen">
     <div class="island" aria-hidden="true"></div>
     <div class="status" aria-hidden="true"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg></span></div>
     <div id="view"></div>
     <nav class="tabbar" id="tabbar" aria-label="Navigation"></nav>
     <div class="toast" id="toast" role="status"></div>
-  </div></div>
+  </div></div></div>
 </div>
 
 <script>
@@ -588,6 +608,13 @@ document.addEventListener('click',e=>{
   if(q('#closePitch')){document.getElementById('pitch').classList.remove('open');return;}
 });
 document.addEventListener('keydown',e=>{if(ST.story>=0){if(e.key==='ArrowRight'){ST.story=Math.min(STORY.length-1,ST.story+1);render();}if(e.key==='ArrowLeft'){ST.story=Math.max(0,ST.story-1);render();}if(e.key==='Escape'){ST.story=-1;render();}}});
+function fit(){const box=document.getElementById('phoneBox'),ph=document.getElementById('phone');if(innerWidth<=520){ph.style.transform='';return;}
+  const W=417,H=876,s=Math.min(1,(innerHeight-40)/H,(innerWidth-32)/W);ph.style.transform=`scale(${s})`;box.style.width=W*s+'px';box.style.height=H*s+'px';}
+addEventListener('resize',fit);fit();
+function solo(on){document.body.classList.toggle('solo',on);const t=document.getElementById('soloTog');t.classList.toggle('off',!on);t.setAttribute('aria-checked',on);}
+document.getElementById('soloTog').addEventListener('click',()=>solo(!document.body.classList.contains('solo')));
+document.getElementById('soloBack').addEventListener('click',()=>solo(false));
+addEventListener('keydown',e=>{if(e.key==='Escape'&&ST.story<0)solo(false);});
 render();
 </script>
 
