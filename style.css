@@ -916,5 +916,16 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .tile-o{margin-left:auto;display:inline-flex;gap:4px;align-items:center;font-size:13px;color:var(--blue);font-weight:500}
 .tile-o .xch{color:var(--blue)}
 .kpi,.kpi.is-warn,.kpi.is-crit,.kpi.is-ok{border-left:1px solid var(--line)}
+/* ---------- Fiche bateau : cartes ouvertes sur deux colonnes ---------- */
+.fsecs{background:none;box-shadow:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.fcard{background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.fcard-h{display:flex;flex-direction:column;gap:2px}
+.fcard-h b{font-size:16px;font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.fcard-h .fsum{white-space:normal;font-size:13px}
+.fcard-b{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fcard-b .field{margin-top:0}
+.fcard-b .act:first-child{border-top:0}
+@media (max-width:900px){.fsecs{grid-template-columns:minmax(0,1fr)}}
+.fcard-b>.btn-sm{align-self:flex-start}
 
 html,body{margin:0}
