@@ -236,6 +236,76 @@ body.solo .stage{align-items:center;min-height:100vh}
 body.solo .phone-box{position:relative;top:0}
 body.solo .solo-back{display:inline-flex}
 .mob-info{display:none}
+
+/* ---------- Accessibilité : tailles minimales (texte 16 px, secondaire 14 px, cibles tactiles 44 px) ---------- */
+:root{--ink-3:#5d6876;--ink-4:#6f7984}
+.screen{font-size:16px}
+.small,.screen .small{font-size:14px}
+.hh,.bh{font-size:17px}
+.sh h3{font-size:18px}
+.btn{font-size:15px;min-height:40px;padding:8px 14px}
+.btn.full{font-size:16px;min-height:48px}
+.tag{font-size:13px;padding:4px 10px}
+.tag.code{font-size:11.5px;padding:1px 6px}
+.newdot{font-size:11.5px;padding:3px 8px}
+.seg button{font-size:15px;padding:10px 6px;min-height:44px}
+.trow{font-size:16px;padding:16px}
+.trow small{font-size:14px}
+.toggle{width:52px;height:30px;border-radius:15px}
+.toggle::after{width:24px;height:24px;left:25px}
+.toggle.off::after{left:3px}
+.ib{width:46px;height:46px}
+.stats b{font-size:19px}
+.stats span{font-size:13px}
+.sens .nm{font-size:15px}
+.sens .val{font-size:18px}
+.sens .val.big{font-size:24px}
+.sens .val small{font-size:14px}
+.sens .ft{font-size:13px}
+.sens .bm{width:38px;height:38px}
+.acc{font-size:16px;padding:14px 16px;min-height:50px}
+.cbody b.t{font-size:18px}
+.cbody .d{font-size:15px}
+.cimg{height:140px}
+.jstats div{font-size:13px}
+.jstats b{font-size:15px}
+.doc b{font-size:15.5px}
+.tcell{font-size:15.5px}
+.tcell small{font-size:13.5px}
+.tcell img{width:84px;height:84px}
+.msg{font-size:15px}
+.who{font-size:14.5px}
+.av{width:32px;height:32px;font-size:12.5px}
+.legs button{font-size:15px;padding:11px 16px}
+.tl div{font-size:14px}
+.tl div b{font-size:16px}
+.mini3 div{font-size:13px}
+.mini3 b{font-size:15px}
+.periods button{font-size:15px;padding:10px}
+.season h2{font-size:21px}
+.season p{font-size:15px}
+.season .eb{font-size:12.5px}
+.health b{font-size:16.5px}
+.mis{padding:13px 0}
+.mis .tk{width:28px;height:28px}
+.mis .tx b{font-size:16px}
+.mis .tx span{font-size:14px}
+.tier .ti{width:48px;height:48px}
+.tier{grid-template-columns:48px minmax(0,1fr) auto}
+.port{font-size:14px;padding:12px 6px}
+.port .pi{width:38px;height:38px}
+.tabbar button{font-size:13px;gap:4px}
+.story p{font-size:17px}
+.story .k{font-size:14px}
+.story h2{font-size:28px}
+.toast{font-size:15px}
+.lagoon{font-size:8.5px}
+.prem{font-size:12.5px;padding:5px 9px}
+.pitch,.lead{font-size:15.5px}
+.pitem span,.pnote{font-size:14px}
+.chk{font-size:15.5px}
+.chk input{width:20px;height:20px}
+.seasons button{font-size:14.5px;padding:9px 2px}
 @media (max-width:900px){.stage{flex-direction:column-reverse;align-items:center;gap:24px}.pitch{width:min(520px,100%)}.phone-box{position:relative;top:0}}
 @media (max-width:520px){
   .stage{padding:0;display:block;height:100%;min-height:0}
@@ -314,7 +384,7 @@ const P={
   leaf:'<path d="M5 21c0-9 5-15 15-16-1 10-7 15-15 16z"/><path d="M5 21 14 12"/>', snow:'<path d="M12 2v20M4.9 7l14.2 10M4.9 17 19.1 7"/>', wave:'<path d="M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/><path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', sparkle:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>', wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'
 };
-const ic=(n,s=20,w=1.7)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const ic=(n,s=20,w=1.7)=>{s=s>=40?s:Math.max(18,Math.round(s*1.25));return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;};
 const NEW=(w='')=>`<span class="newdot" role="button" tabindex="0" ${w?`data-why="${w}"`:''}>Nouveau ⓘ</span>`;
 const LAG=`<span class="lagoon" aria-label="Lagoon"><svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 1c2 2 2 5 0 7-2-2-2-5 0-7zM2 11c2-2 8-2 10 0" fill="none" stroke="#47a7a3" stroke-width="1.2"/></svg>LAGOON</span>`;
 const WAVE=`<svg class="wave" width="34" height="8" viewBox="0 0 34 8" aria-hidden="true"><path d="M1 2.5c2.7 0 2.7-1.5 5.3-1.5s2.7 1.5 5.3 1.5S14.3 1 17 1s2.7 1.5 5.3 1.5S25 1 27.7 1 30.3 2.5 33 2.5M1 6.5c2.7 0 2.7-1.5 5.3-1.5s2.7 1.5 5.3 1.5S14.3 5 17 5s2.7 1.5 5.3 1.5S25 5 27.7 5s2.6 1.5 5.3 1.5" fill="none" stroke="#13807f" stroke-width="1.3" stroke-linecap="round"/></svg>`;
@@ -340,7 +410,7 @@ const ST={why:null,cSheet:false,contrib:false,ans:{},moor:false,coll:false,tab:'
 function header(){return `<div class="hh">${LAG}${ST.prem?`<span class="prem">${ic('plus',11,3)} PREMIUM</span>`:''}<span style="flex:1"></span><button class="ib" aria-label="Notifications">${ic('bell',19)}<span class="bd"></span></button><button class="ib" aria-label="Changer de bateau">${ic('myboat',19)}</button><button class="ib" aria-label="Profil" data-open-pitch>${ic('user',19)}</button></div>`;}
 function boatHeader(){return `<div class="bh"><div class="grow"><b>Lagon Bleu</b>, Lagoon 46</div><button class="ib sq" aria-label="Changer de bateau">${ic('updown',18)}</button></div>`;}
 function back(t,right=''){return `<div class="bh"><button class="ib sq" data-back aria-label="Retour">${ic('back',18)}</button><b class="grow">${t}</b>${right}</div>`;}
-function season_(){const S=SEASONS[season];return `<button class="season gx" data-why="${S.story?'bilan':'saisons'}" style="background:${S.grad}" ${S.story?'data-story':S.race?'data-tab="challenges"':''}><span style="display:flex;justify-content:space-between;align-items:center"><span class="eb">${S.eb}</span><span class="tag nv" style="font-size:10.5px;border:0">Nouveau</span></span><h2>${S.title}</h2><p>${S.text}</p><span class="go">${S.cta} ${ic('arrow',16,2.2)}</span>${ic(S.ic,110,1.2).replace('<svg','<svg class="deco"')}</button>`;}
+function season_(){const S=SEASONS[season];return `<button class="season gx" data-why="${S.story?'bilan':'saisons'}" style="background:${S.grad}" ${S.story?'data-story':S.race?'data-tab="challenges"':''}><span style="display:flex;justify-content:space-between;align-items:center"><span class="eb">${S.eb}</span><span class="tag nv" style="font-size:13px;border:0">Nouveau</span></span><h2>${S.title}</h2><p>${S.text}</p><span class="go">${S.cta} ${ic('arrow',16,2.2)}</span>${ic(S.ic,110,1.2).replace('<svg','<svg class="deco"')}</button>`;}
 function missions(){const S=SEASONS[season],st=ms(),ok=st.every(Boolean);return `<section class="gx" data-why="missions"><div class="sh"><h3>${S.mTitle} ${NEW()}</h3><span class="small muted">${st.filter(Boolean).length}/${st.length}</span></div>
   <div class="card cp" style="display:flex;flex-direction:column;gap:6px"><div class="health ${ok?'ok':'warn'}"><span class="hi">${ic(ok?'shield':'alert',18,2)}</span><div><b>${ok?S.state[1]:S.state[0]}</b><span class="small">État de Lagon Bleu</span></div></div>
   <div>${S.missions.map((m,i)=>`<button class="mis ${st[i]?'done':''}" data-mis="${i}"><span class="tk">${st[i]?ic('check',13,3):''}</span><span class="tx"><b>${m[0]}</b><span>${m[1]}</span></span></button>`).join('')}</div>
@@ -369,7 +439,7 @@ function vHome(){return header()+`<div class="scroll">
   <section><div style="font-size:15.5px;color:var(--ink)"><b>Lagon Bleu</b>, Lagoon 46</div><div class="small" style="color:var(--ink-2);margin:3px 0 10px">N 46° 8.616′ · O 1° 9.972′</div>
     <button data-go="carte" style="display:block;width:100%;height:165px;border-radius:14px;background:url(${A.homemap}) center/cover;position:relative" aria-label="Ouvrir ma carte"><span data-why="carte" class="tag nv gx" style="position:absolute;left:10px;bottom:10px;border:0;box-shadow:0 1px 3px rgba(0,0,0,.15)">${ic('map',12,2)} Ma carte · 14 % de la côte explorée</span></button>
     <div class="small muted" style="margin-top:8px;display:flex;gap:6px;align-items:center">${ic('clock',14)} Il y a 2 minutes</div></section>
-  <section><div class="sh"><h3>Mes statistiques</h3><span data-why="series" class="tag ok gx" style="font-size:10.5px">Saison 2026 · 3e saison</span></div>
+  <section><div class="sh"><h3>Mes statistiques</h3><span data-why="series" class="tag ok gx" style="font-size:13px">Saison 2026 · 3e saison</span></div>
     <div class="stats"><div><b>412</b><span>nm</span></div><div><b>31</b><span>Jours</span></div><div><b>17</b><span>Ports</span></div><div><b>24</b><span>Voyages</span></div></div></section>
   ${missions()}
   <section><div class="sh"><h3>Alerte de déplacement ${ic('info',15)}</h3><button class="btn">Éditer ${ic('arrow',15,2)}</button></div><div class="trow"><span>Geofence<small>Auto</small></span><button class="toggle ${ST.geo?'':'off'}" data-tog="geo" aria-label="Geofence"></button></div></section>
@@ -404,7 +474,7 @@ function vCapteur(){const pts=[[0,95],[18,95],[19,6],[20,95],[95,95],[96,4]];
   <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center"><span class="tag" style="color:var(--pink);border-color:transparent;background:var(--pink-bg)">${ic('tri',13)} Critique</span><span style="display:flex;gap:6px"><button class="ib sq" style="width:34px;height:34px">${ic('send',15)}</button><button class="tag" style="padding:6px 10px">Effacer ${ic('x',12,2)}</button></span></div><div style="margin-top:10px;color:var(--ink)">Pompe de cale activée</div><div class="small muted">Il y a 3 minutes</div></div>
   <div class="periods">${['1 h','12 h','24 h','7 j'].map((p,i)=>`<button class="${ST.period===i?'on':''}" data-per="${i}">${p}</button>`).join('')}</div>
   <div style="display:flex;justify-content:space-between"><b style="font-size:22px;color:var(--ink)">Détecté</b><span class="small muted">12 oct. 2026, 09:41</span></div>
-  <svg viewBox="0 0 345 190" width="100%" aria-label="Historique de la pompe de cale"><path d="${pts.map((p,i)=>(i?'L':'M')+(p[0]*2.8+10)+' '+(p[1]*1.5+10)).join(' ')}" fill="none" stroke="#13807f" stroke-width="2"/><circle cx="${96*2.8+10}" cy="16" r="5" fill="#fff" stroke="#d6337a" stroke-width="2.5"/><text x="290" y="20" font-size="10" fill="#6b7684" font-family="Sen">Détecté</text><text x="292" y="160" font-size="10" fill="#6b7684" font-family="Sen">Normal</text>${['09 h','15 h','20 h','02 h','07 h'].map((t,i)=>`<text x="${10+i*56}" y="186" font-size="10" fill="#6b7684" font-family="Sen">${t}</text>`).join('')}</svg>
+  <svg viewBox="0 0 345 190" width="100%" aria-label="Historique de la pompe de cale"><path d="${pts.map((p,i)=>(i?'L':'M')+(p[0]*2.8+10)+' '+(p[1]*1.5+10)).join(' ')}" fill="none" stroke="#13807f" stroke-width="2"/><circle cx="${96*2.8+10}" cy="16" r="5" fill="#fff" stroke="#d6337a" stroke-width="2.5"/><text x="290" y="20" font-size="12" fill="#6b7684" font-family="Sen">Détecté</text><text x="292" y="160" font-size="12" fill="#6b7684" font-family="Sen">Normal</text>${['09 h','15 h','20 h','02 h','07 h'].map((t,i)=>`<text x="${10+i*56}" y="186" font-size="12" fill="#6b7684" font-family="Sen">${t}</text>`).join('')}</svg>
   <div class="mini3" style="grid-template-columns:repeat(2,1fr)"><div><span>Source<b>BT</b></span></div><div><span>Statut<b>Bon</b></span></div><div><span>Niveau de batterie<b>82 %</b></span></div><div><span>Dernière mise à jour<b>Il y a 3 min</b></span></div></div>
   <div style="display:flex;gap:8px;align-items:center"><b style="color:var(--ink)">Paramètre de l’alerte</b><span class="tag">Défaut</span></div>
   <button class="btn full out" data-go="messagerie-share">${ic('send',16)} Partager l’alerte avec Lagoon Marine Center</button></div>`;}
@@ -416,20 +486,20 @@ function vVoyage(){return `<div style="position:relative;flex:1;min-height:0;dis
     <div class="legs" style="margin:12px -20px 14px 0">${['En cours','1. La Rochelle - Sablanceaux','2. Sablanceaux - Saint-Martin'].map((l,i)=>`<button class="${ST.leg===i?'on':''}" data-leg="${i}">${i===0?ic('live',13)+' ':''}${l}</button>`).join('')}</div>
     <div class="tl"><div><b>La Rochelle</b>10 oct. 2026, 09:12<br>N 46° 8.616′ · O 1° 9.972′</div><div><b>Sablanceaux</b>10 oct. 2026, 11:40<br>N 46° 9.912′ · O 1° 14.844′</div></div>
     <div class="mini3" style="margin-top:14px"><div>${ic('clock',15)}<span>Durée<b>2h 28m</b></span></div><div>${ic('ruler',15)}<span>Distance<b>6,1nm</b></span></div><div>${ic('nav',15)}<span>Navigation<b>2h 28m</b></span></div></div>
-    <div class="card cp gx" data-why="carte" style="margin-top:14px;display:flex;gap:10px;align-items:center;background:var(--teal-tint);border:0"><span style="color:var(--teal)">${ic('anchor',20)}</span><span style="flex:1;font-size:13px;color:var(--ink-2)"><b style="color:var(--ink)">Nouveau port : Saint-Martin-de-Ré</b><br>Ajouté à votre collection · 17 ports</span>${NEW()}</div>
+    <div class="card cp gx" data-why="carte" style="margin-top:14px;display:flex;gap:10px;align-items:center;background:var(--teal-tint);border:0"><span style="color:var(--teal)">${ic('anchor',20)}</span><span style="flex:1;font-size:14.5px;color:var(--ink-2)"><b style="color:var(--ink)">Nouveau port : Saint-Martin-de-Ré</b><br>Ajouté à votre collection · 17 ports</span>${NEW()}</div>
     <b style="display:block;margin:16px 0 8px;color:var(--ink)">Images</b>
-    <div style="border:1.5px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--ink-3);font-size:13px">${ic('image',30,1.3)}<div style="margin:6px 0 8px">Les images que vous ajouterez apparaîtront ici</div><button class="tag" style="padding:5px 12px">${ic('plus',13,2)} Ajouter</button></div>
-    <div class="card cp gx" data-why="contrib" style="margin-top:14px;display:flex;gap:10px;align-items:center"><span style="color:var(--teal)">${ic('edit',19)}</span><span style="flex:1;font-size:13px;color:var(--ink-2)">${ST.contrib?'<b style="color:var(--ink)">Merci ! Avis ajouté pour Saint-Martin-de-Ré</b><br>Contributeur · '+(6+1)+' contributions':'<b style="color:var(--ink)">Comment était Saint-Martin-de-Ré ?</b><br>3 questions, utiles aux autres propriétaires'}</span>${ST.contrib?NEW('contrib'):'<button class="btn" data-contrib>Répondre</button>'}</div>
-    <b style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;color:var(--ink)">Registre <span class="tag ok gx" data-why="journal" style="font-size:10.5px">Rempli automatiquement</span></b>
-    <div style="background:var(--teal-tint);border-radius:14px;padding:14px;font-size:13px;color:var(--ink-2)">Vent de nord-ouest 12 nœuds, mer belle. Pause déjeuner au mouillage de Sablanceaux, eau à 18 °C.<div style="margin-top:10px"><button class="tag" style="padding:5px 12px">${ic('edit',13)} Éditer</button></div></div>
+    <div style="border:1.5px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--ink-3);font-size:14.5px">${ic('image',30,1.3)}<div style="margin:6px 0 8px">Les images que vous ajouterez apparaîtront ici</div><button class="tag" style="padding:5px 12px">${ic('plus',13,2)} Ajouter</button></div>
+    <div class="card cp gx" data-why="contrib" style="margin-top:14px;display:flex;gap:10px;align-items:center"><span style="color:var(--teal)">${ic('edit',19)}</span><span style="flex:1;font-size:14.5px;color:var(--ink-2)">${ST.contrib?'<b style="color:var(--ink)">Merci ! Avis ajouté pour Saint-Martin-de-Ré</b><br>Contributeur · '+(6+1)+' contributions':'<b style="color:var(--ink)">Comment était Saint-Martin-de-Ré ?</b><br>3 questions, utiles aux autres propriétaires'}</span>${ST.contrib?NEW('contrib'):'<button class="btn" data-contrib>Répondre</button>'}</div>
+    <b style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;color:var(--ink)">Registre <span class="tag ok gx" data-why="journal" style="font-size:13px">Rempli automatiquement</span></b>
+    <div style="background:var(--teal-tint);border-radius:14px;padding:14px;font-size:14.5px;color:var(--ink-2)">Vent de nord-ouest 12 nœuds, mer belle. Pause déjeuner au mouillage de Sablanceaux, eau à 18 °C.<div style="margin-top:10px"><button class="tag" style="padding:5px 12px">${ic('edit',13)} Éditer</button></div></div>
   </div></div>`;}
 
 /* ---------- Challenges ---------- */
-function chHeader(){return `<div class="hh" style="gap:12px"><span class="av" style="width:34px;height:34px;font-size:13px">J</span><div style="flex:1"><b style="color:var(--ink)">johndoe_17</b><div class="small muted">John Doe <span class="gx" data-why="series" style="border-radius:6px">· 3e saison</span></div></div><button class="ib" data-open-pitch aria-label="Profil">${ic('user',19)}</button></div>`;}
+function chHeader(){return `<div class="hh" style="gap:12px"><span class="av" style="width:34px;height:34px;font-size:14.5px">J</span><div style="flex:1"><b style="color:var(--ink)">johndoe_17</b><div class="small muted">John Doe <span class="gx" data-why="series" style="border-radius:6px">· 3e saison</span></div></div><button class="ib" data-open-pitch aria-label="Profil">${ic('user',19)}</button></div>`;}
 function tro(img,t,d,cls=''){return `<div class="tcell ${cls}"><img src="${img}" alt="">${t}<small>${d}</small></div>`;}
 function vChallenges(){const seg=ST.chSeg;let b='';
   if(seg==='challenges') b=`${collectif()}${chal(C1)}${chal(C2())}`;
-  else if(seg==='stats') b=`${season==='automne'||season==='hiver'?`<button class="season gx" data-why="bilan" data-story style="background:linear-gradient(135deg,#0b4f55,#13807f)"><span style="display:flex;justify-content:space-between"><span class="eb">Votre saison en mer 2026</span><span class="tag nv" style="font-size:10.5px;border:0">Nouveau</span></span><h2>412 nm · 31 jours · 17 ports</h2><span class="go">Voir mon bilan ${ic('arrow',16,2.2)}</span></button>`:''}
+  else if(seg==='stats') b=`${season==='automne'||season==='hiver'?`<button class="season gx" data-why="bilan" data-story style="background:linear-gradient(135deg,#0b4f55,#13807f)"><span style="display:flex;justify-content:space-between"><span class="eb">Votre saison en mer 2026</span><span class="tag nv" style="font-size:13px;border:0">Nouveau</span></span><h2>412 nm · 31 jours · 17 ports</h2><span class="go">Voir mon bilan ${ic('arrow',16,2.2)}</span></button>`:''}
     <section><div class="sh"><h3>Trophées récents</h3><button class="btn" data-go="trophees">Voir tout ${ic('arrow',15,2)}</button></div><div class="tgrid">${tro(A.tr_map,'Collectionneur<br>de miles','24/09/2026')}${tro(A.tr_bino,'Marin en série','31/08/2026')}${tro(A.tr_bino,'Explorateur','12/07/2026','wide')}</div></section>
     <section><div class="sh"><h3>Vos Challenges terminés</h3></div>${chal(C3)}</section>`;
   else b=avantages();
@@ -450,7 +520,7 @@ function vMsg(){const extra=ST.msgs.map(m=>`<div class="who" style="justify-cont
     <div class="who"><span class="av">JM</span>Julie Martin</div><div class="msg">Je regarde ça avec l’atelier. Pouvez-vous m’envoyer l’alerte depuis l’application ?</div><div class="small muted">18:47</div>
     <div class="who" style="justify-content:flex-end"><span class="av">JD</span>John Doe <span class="muted">(Vous)</span></div><div class="msg me">Partage d’une alerte de niveau Critique : Pompe de cale activée</div><div class="small muted" style="text-align:right">18:50</div>
     <div class="who"><span class="av">JM</span>Julie Martin</div><div class="msg">Bien reçu. Je vous propose un passage du technicien jeudi à 9 h au ponton. Je vous envoie le devis dans la foulée.</div><div class="small muted">09:05</div>
-    ${season==='automne'?`<div class="card cp gx" data-why="missions" style="display:flex;gap:10px;align-items:center;border-color:var(--line)"><span style="color:var(--teal)">${ic('wrench',20)}</span><span style="flex:1;font-size:13px"><b style="color:var(--ink)">Hivernage : créneau le 24 novembre</b><br><span class="muted">${ms('automne')[1]?'Réservé · mission validée':'Compte dans vos missions d’hivernage'}</span></span>${ms('automne')[1]?'':'<button class="btn" data-rdv>Réserver</button>'}</div>`:''}
+    ${season==='automne'?`<div class="card cp gx" data-why="missions" style="display:flex;gap:10px;align-items:center;border-color:var(--line)"><span style="color:var(--teal)">${ic('wrench',20)}</span><span style="flex:1;font-size:14.5px"><b style="color:var(--ink)">Hivernage : créneau le 24 novembre</b><br><span class="muted">${ms('automne')[1]?'Réservé · mission validée':'Compte dans vos missions d’hivernage'}</span></span>${ms('automne')[1]?'':'<button class="btn" data-rdv>Réserver</button>'}</div>`:''}
     ${extra}</div>
   <form id="compose" style="display:flex;gap:10px;padding:10px 20px;border-top:1px solid var(--line-2)"><label for="mi" style="position:absolute;left:-9999px">Message</label><input id="mi" placeholder="Écrivez un message…" style="flex:1;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font:inherit"><button class="ib sq" type="submit" aria-label="Envoyer">${ic('send',17)}</button></form>
   ${ST.sheet?`<div class="scrim" data-close-sheet></div><div class="sheet"><div class="grab"></div><b style="color:var(--ink)">Lagoon Marine Center</b><div class="small muted" style="margin:4px 0 14px">3 Quai Louis Prunier<br>17000 La Rochelle</div><div style="display:flex;gap:8px"><span class="ib">${ic('globe',17)}</span><span class="ib">${ic('mail',17)}</span><span class="ib">${ic('phone',17)}</span><button class="btn" style="flex:1;justify-content:center;border-radius:12px" data-close-sheet>${ic('chat',16)} Envoyer un message</button></div></div>`:''}`;}
@@ -492,7 +562,7 @@ function vMouillage(){return back('Mouillage',NEW('mouillage'))+`<div class="scr
     <span class="tag" style="position:absolute;left:10px;bottom:10px">${ic('anchor',12,2)} Île d’Aix · rayon 40 m</span></div>
   ${ST.moor?`<div class="health ok"><span class="hi">${ic('shield',18,2)}</span><div><b>On veille sur Lagon Bleu</b><span class="small">Vous serez alerté seulement si le bateau dérive</span></div></div>
     <div class="card cp"><b style="color:var(--ink)">Cette nuit</b>${[['23:00','Tout va bien · 2 m du point d’ancrage'],['02:00','Tout va bien · vent 14 nœuds'],['05:00','Tout va bien · batterie 12,5 V']].map(r=>`<div class="first"><span class="tag ok">${r[0]}</span><span class="small" style="color:var(--ink-2)">${r[1]}</span></div>`).join('')}</div>
-    <div class="card cp" style="font-size:13px;color:var(--ink-2)">${ic('share',15)} Partager la position du mouillage avec un proche : il voit « tout va bien » sans installer l’app.</div>
+    <div class="card cp" style="font-size:14.5px;color:var(--ink-2)">${ic('share',15)} Partager la position du mouillage avec un proche : il voit « tout va bien » sans installer l’app.</div>
     <button class="btn full" data-moor>Lever l’ancre · terminer le mouillage</button>`
   :`<div class="card cp" style="display:flex;flex-direction:column;gap:10px"><b style="color:var(--ink)">Rayon d’alerte</b><div class="periods">${['20 m','40 m','60 m','80 m'].map((r,i)=>`<button class="${i===1?'on':''}">${r}</button>`).join('')}</div><span class="small muted">Calculé avec la longueur de chaîne et la profondeur. Vous pouvez l’ajuster.</span></div>
     <button class="btn full" data-moor>${ic('anchor',16,2)} Lancer la surveillance</button>
@@ -500,7 +570,7 @@ function vMouillage(){return back('Mouillage',NEW('mouillage'))+`<div class="scr
   </div>`;}
 function collectif(){const pct=ST.coll?63:62;return `<div class="card cp gx" data-why="collectif" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,#eaf4f5,#fff)">
   <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ink)">Objectif de la flotte Lagoon</b>${NEW('collectif')}</div>
-  <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${ST.coll?'634 120':'633 708'} <span style="font-size:13px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm cette saison</span></div>
+  <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${ST.coll?'634 120':'633 708'} <span style="font-size:14.5px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm cette saison</span></div>
   <span class="prog" style="height:8px"><i style="width:${pct}%"></i></span>
   <span class="small" style="color:var(--ink-2)">À 1 million de milles, Lagoon reverse un don à une cause liée à la mer (exemple, à définir). Votre part : 412 nm.</span>
   ${ST.coll?`<span class="tag ok" style="align-self:flex-start">${ic('check',12,2.4)} Vous participez</span>`:'<button class="btn" data-coll style="align-self:flex-start">Participer avec mes milles</button>'}</div>`;}
@@ -557,9 +627,9 @@ const MECH=[
 const EXCL=[['Série quotidienne (Duolingo)','on ne navigue pas tous les jours, une série cassée l’hiver serait punitive.'],['Niveaux et points (Finch, WeWard)','ton enfantin et comparaison injuste entre propriétaires.'],['Course virtuelle avec classement (Virtual Regatta)','remplacée par Navigation d’hiver, déjà prévue, sans classement public.'],['Défi d’équipe avec classement (Pikmin Bloom)','gardé seulement sous forme d’objectif collectif, sans comparaison.']];
 function whyHTML(){const m=MECH.find(x=>x.id===ST.why);if(!m)return'';return `<div class="scrim" data-close-why></div><div class="sheet" style="z-index:47;max-height:78%;overflow-y:auto"><div class="grab"></div>
   <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><span class="newdot">Fiche ${m.n} · ${m.insp}</span><h3 style="margin:8px 0 4px;font-size:18px;color:var(--ink)">${m.name}</h3><div class="small muted">${m.where}</div></div><button class="ib sq" data-close-why aria-label="Fermer">${ic('x',16)}</button></div>
-  <div style="margin-top:12px;font-size:13.5px;color:var(--ink-2)"><b style="color:var(--ink)">Ce qu’on adapte : </b>${m.adapt}</div>
-  <div style="margin-top:12px"><b style="color:var(--teal-dk);font-size:12px;letter-spacing:.06em;text-transform:uppercase">Pourquoi pour Seanapps</b><ul style="margin:6px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px">${m.why.map(w=>`<li>${w}</li>`).join('')}</ul></div>
-  <div style="margin-top:12px;font-size:13px;color:var(--orange-ink);background:var(--orange-bg);border-radius:10px;padding:8px 10px"><b>On évite : </b>${m.avoid}</div></div>`;}
+  <div style="margin-top:12px;font-size:15px;color:var(--ink-2)"><b style="color:var(--ink)">Ce qu’on adapte : </b>${m.adapt}</div>
+  <div style="margin-top:12px"><b style="color:var(--teal-dk);font-size:14px;letter-spacing:.06em;text-transform:uppercase">Pourquoi pour Seanapps</b><ul style="margin:6px 0 0;padding-left:18px;font-size:15px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px">${m.why.map(w=>`<li>${w}</li>`).join('')}</ul></div>
+  <div style="margin-top:12px;font-size:14.5px;color:var(--orange-ink);background:var(--orange-bg);border-radius:10px;padding:8px 10px"><b>On évite : </b>${m.avoid}</div></div>`;}
 /* ---------- rendu ---------- */
 const TABS=[['home','Accueil','home'],['boat','Mon bateau','myboat'],['challenges','Challenges','trophy'],['msg','Messagerie','chat']];
 function render(){const v=document.getElementById('view');
