@@ -333,7 +333,7 @@ body.solo .solo-back{display:inline-flex}
   <section class="pitch" id="pitch" aria-label="Panneau de démo">
     <div style="display:flex;justify-content:space-between;align-items:center"><span class="plabel" style="margin:0">Prototype · App propriétaire</span><button class="mob-info btn out" id="closePitch">Fermer</button></div>
     <h1>Seanapps, saison après saison</h1>
-    <p class="lead">La base du prototype de Killian, avec 11 mécaniques du benchmark adaptées à Seanapps. Dans l’app, touche « Nouveau ⓘ » pour voir pourquoi chaque ajout a du sens.</p>
+    <p class="lead">La base du prototype de Killian, avec 9 mécaniques du benchmark adaptées à Seanapps, sans doublon avec l’existant. Dans l’app, touche « Nouveau ⓘ » pour voir pourquoi chaque ajout a du sens.</p>
     <div class="pcard"><div class="plabel">Saison</div><div class="seasons" id="seasonBtns"></div></div>
     <div class="pcard"><div class="plabel">Mécaniques retenues · touche pour voir pourquoi</div><div id="plist"></div></div>
     <div class="pcard"><div class="plabel">Écartées</div><div id="xlist" class="pnote" style="display:flex;flex-direction:column;gap:8px"></div></div>
@@ -396,7 +396,7 @@ const SEASONS={
   printemps:{label:'Printemps',ic:'leaf',grad:'linear-gradient(135deg,#2f8f6e,#5fbf8f)',eb:'Printemps · remise à l’eau',title:'Lagon Bleu retourne à l’eau dans 12 jours',text:'Lagoon Marine Center a prévu la mise à l’eau le 18 avril.',cta:'Préparer la saison',mTitle:'Préparer la remise à l’eau',state:['Presque prêt pour la saison','Prêt pour la saison'],
     missions:[['Vérifier la batterie de service','Dernière valeur : 12,4 V'],['Mettre à jour l’assurance','Le document expire le 30/04'],['Réactiver la géofence','Coupée pendant l’hivernage'],['Confirmer la mise à l’eau','Lagoon Marine Center · 18 avril, 9 h']],done:[0]},
   ete:{label:'Été',ic:'sun',grad:'linear-gradient(135deg,#0f7f86,#2bb3c4)',eb:'Été · pleine saison',title:'Vent de NO 12 nœuds demain matin',text:'Bonne fenêtre pour l’île d’Aix. Défi du mois : 50 milles entre plaisanciers de La Rochelle.',cta:'Voir le défi',mTitle:'Avant les vacances',state:['Encore 2 points avant l’été','Prêt pour l’été'],
-    missions:[['Ajouter un invité à bord','Il recevra les alertes avec vous'],['Tester la surveillance au mouillage','En un geste, à l’arrivée'],['Contrôler la pompe de cale','Elle s’est déclenchée il y a 3 minutes'],['Faire une sortie de 20 milles','Compte pour votre plaque de coque']],done:[0,1]},
+    missions:[['Ajouter un invité à bord','Il recevra les alertes avec vous'],['Vérifier le rayon de la géofence','Avant de partir en vacances'],['Contrôler la pompe de cale','Elle s’est déclenchée il y a 3 minutes'],['Faire une sortie de 20 milles','Compte pour votre plaque de coque']],done:[0,1]},
   automne:{label:'Automne',ic:'wave',grad:'linear-gradient(135deg,#0b4f55,#13807f)',eb:'Votre saison en mer 2026',title:'412 milles, 17 ports et 24 voyages',text:'Votre bilan de saison est prêt.',cta:'Voir mon bilan',story:1,mTitle:'Préparer l’hivernage',state:['Encore 3 points avant l’hiver','Bateau prêt pour l’hiver'],
     missions:[['Lire le guide d’hivernage','Nouveau document de Lagoon Marine Center'],['Prendre rendez-vous pour l’hivernage','Créneau proposé : 24 novembre'],['Activer la surveillance d’hiver','Alertes batterie et intrusion'],['Vérifier la pompe de cale','Elle s’est déclenchée le 12 octobre'],['Retirer les équipements de valeur','Électronique portable, gilets, papiers']],done:[3,4]},
   hiver:{label:'Hiver',ic:'snow',grad:'linear-gradient(135deg,#1f2f5c,#3b5aa8)',eb:'Hiver · le bateau se repose',title:'Lagon Bleu est bien au chaud',text:'Dernier relevé dimanche : batterie 12,7 V, pas d’humidité. Votre série de saisons est en pause, rien ne se perd.',cta:'Voir Navigation d’hiver',race:1,mTitle:'Surveiller pendant l’hiver',state:['1 point à vérifier','Tout va bien'],
@@ -424,7 +424,7 @@ function sensor(k){
 function chal(o){return `<div class="ccard ${o.gx?'gx':''}" ${o.why?`data-why="${o.why}"`:''}><div class="cimg" style="background-image:url(${A.turtle})"><span class="lg">${LAG}</span><span class="tag ${o.tag==='Nouveau'?'nv':''}">${o.tag}</span></div>
   <div class="cbody"><div style="display:flex;gap:6px;flex-wrap:wrap">${o.chips.map(c=>`<span class="tag">${c}</span>`).join('')}</div><span class="small muted">${o.dates}</span><b class="t">${o.title}</b><span class="d">${o.desc}</span>${o.extra||''}${o.btn?`<button class="btn full" ${o.act||''}>${o.btn}</button>`:''}</div></div>`;}
 const C1={tag:'En cours',chips:['50 jours restants','128 participants'],dates:'Du 02/10/2026 au 01/12/2026',title:'Le grand large',desc:'Parcourez la plus grande distance cumulée pendant la durée du challenge. Chaque mille…',btn:'Classement',act:'data-toast="Classement : vous êtes 14e sur 128"'};
-const C2=()=>({tag:'Nouveau',chips:['Débute le 01/12/2026',(ST.joined?23:22)+' inscrits'],dates:'Du 01/12/2026 au 28/02/2027',title:'Navigation d’hiver',desc:'Restez actif tout l’hiver : naviguez au moins une fois par mois jusqu’à la fin février.',btn:ST.joined?ic('check',16,2.4)+' Inscrit':'Découvrir le challenge',act:'data-join',gx:1,why:'series',extra:'<span class="small" style="color:var(--teal-dk)">Une sortie par mois suffit : la série se compte en mois, pas en jours.</span>'});
+const C2=()=>({tag:'Nouveau',chips:['Débute le 01/12/2026',(ST.joined?23:22)+' inscrits'],dates:'Du 01/12/2026 au 28/02/2027',title:'Navigation d’hiver',desc:'Restez actif tout l’hiver : naviguez au moins une fois par mois jusqu’à la fin février.',btn:ST.joined?ic('check',16,2.4)+' Inscrit':'Découvrir le challenge',act:'data-join',gx:1,why:'saisons',extra:'<span class="small" style="color:var(--teal-dk)">Une sortie par mois suffit : la série se compte en mois, pas en jours.</span>'});
 const C3={tag:'Terminé',chips:['Classement : 2e','342 participants'],dates:'Du 01/07/2026 au 31/08/2026',title:'Été en mer',desc:'Le challenge de l’été : naviguez le plus de jours possible entre juillet et août.',btn:'Classement',act:'data-toast="Classement final : 2e sur 342"'};
 function trip(o){return `<button class="card cp" data-go="voyage" style="width:100%;display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b style="font-size:15px;color:var(--ink)">${o.t}</b>${o.live?`<span class="live">${ic('live',14)}</span>`:''}</div>
   <div class="small muted" style="margin-top:4px">${o.d}</div>${o.badge?`<span data-why="carte" class="tag ok gx" style="margin-top:8px">${ic('anchor',12,2)} ${o.badge}</span>`:''}
@@ -439,13 +439,11 @@ function vHome(){return header()+`<div class="scroll">
   <section><div style="font-size:15.5px;color:var(--ink)"><b>Lagon Bleu</b>, Lagoon 46</div><div class="small" style="color:var(--ink-2);margin:3px 0 10px">N 46° 8.616′ · O 1° 9.972′</div>
     <button data-go="carte" style="display:block;width:100%;height:165px;border-radius:14px;background:url(${A.homemap}) center/cover;position:relative" aria-label="Ouvrir ma carte"><span data-why="carte" class="tag nv gx" style="position:absolute;left:10px;bottom:10px;border:0;box-shadow:0 1px 3px rgba(0,0,0,.15)">${ic('map',12,2)} Ma carte · 14 % de la côte explorée</span></button>
     <div class="small muted" style="margin-top:8px;display:flex;gap:6px;align-items:center">${ic('clock',14)} Il y a 2 minutes</div></section>
-  <section><div class="sh"><h3>Mes statistiques</h3><span data-why="series" class="tag ok gx" style="font-size:13px">Saison 2026 · 3e saison</span></div>
+  <section><div class="sh"><h3>Mes statistiques</h3><span class="small muted">Saison 2026</span></div>
     <div class="stats"><div><b>412</b><span>nm</span></div><div><b>31</b><span>Jours</span></div><div><b>17</b><span>Ports</span></div><div><b>24</b><span>Voyages</span></div></div></section>
   ${missions()}
   <section><div class="sh"><h3>Alerte de déplacement ${ic('info',15)}</h3><button class="btn">Éditer ${ic('arrow',15,2)}</button></div><div class="trow"><span>Geofence<small>Auto</small></span><button class="toggle ${ST.geo?'':'off'}" data-tog="geo" aria-label="Geofence"></button></div></section>
   <section><div class="sh"><h3>Alerte de présence ${ic('info',15)}</h3></div><div class="trow"><span>Présence à bord</span><button class="toggle ${ST.pres?'':'off'}" data-tog="pres" aria-label="Présence à bord"></button></div></section>
-  ${ST.moor?'':`<section class="gx" data-why="mouillage"><div class="sh"><h3>Au mouillage ce soir ? ${NEW('mouillage')}</h3></div><button class="card cp" data-go="mouillage" style="width:100%;display:flex;gap:12px;align-items:center"><span style="width:44px;height:44px;border-radius:12px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center">${ic('anchor',22)}</span><span style="flex:1;text-align:left"><b style="display:block;color:var(--ink)">Lancer la surveillance du mouillage</b><span class="small muted">Un geste en arrivant, on veille pour vous cette nuit</span></span>${ic('chev',17)}</button></section>`}
-  ${ST.moor?`<section class="gx" data-why="mouillage"><button class="health ok" data-go="mouillage"><span class="hi">${ic('anchor',18,2)}</span><span style="flex:1;text-align:left"><b>Mouillage surveillé · Île d’Aix</b><span class="small">Rayon 40 m · dernier contrôle il y a 2 min · tout va bien</span></span>${ic('chev',17)}</button></section>`:''}
   <section><div class="sh"><h3>Capteurs favoris</h3><button class="btn" data-tab="boat">Voir tout ${ic('arrow',15,2)}</button></div><div style="display:flex;flex-direction:column;gap:12px">${sensor('pompe')}${sensor('fuel')}${sensor('batt')}</div></section>
   <section><div class="sh"><h3>Challenges en cours</h3><button class="btn" data-tab="challenges">Voir tout ${ic('arrow',15,2)}</button></div>${chal(C1)}</section>
   <section><div class="sh"><h3>Dernier voyage</h3><button class="btn" data-tab="boat" data-seg="voyages">Voir tout ${ic('arrow',15,2)}</button></div>${trip({...T1,img:A.trip1,badge:'Saint-Martin-de-Ré ajouté à vos ports'})}</section>
@@ -489,13 +487,12 @@ function vVoyage(){return `<div style="position:relative;flex:1;min-height:0;dis
     <div class="card cp gx" data-why="carte" style="margin-top:14px;display:flex;gap:10px;align-items:center;background:var(--teal-tint);border:0"><span style="color:var(--teal)">${ic('anchor',20)}</span><span style="flex:1;font-size:14.5px;color:var(--ink-2)"><b style="color:var(--ink)">Nouveau port : Saint-Martin-de-Ré</b><br>Ajouté à votre collection · 17 ports</span>${NEW()}</div>
     <b style="display:block;margin:16px 0 8px;color:var(--ink)">Images</b>
     <div style="border:1.5px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--ink-3);font-size:14.5px">${ic('image',30,1.3)}<div style="margin:6px 0 8px">Les images que vous ajouterez apparaîtront ici</div><button class="tag" style="padding:5px 12px">${ic('plus',13,2)} Ajouter</button></div>
-    <div class="card cp gx" data-why="contrib" style="margin-top:14px;display:flex;gap:10px;align-items:center"><span style="color:var(--teal)">${ic('edit',19)}</span><span style="flex:1;font-size:14.5px;color:var(--ink-2)">${ST.contrib?'<b style="color:var(--ink)">Merci ! Avis ajouté pour Saint-Martin-de-Ré</b><br>Contributeur · '+(6+1)+' contributions':'<b style="color:var(--ink)">Comment était Saint-Martin-de-Ré ?</b><br>3 questions, utiles aux autres propriétaires'}</span>${ST.contrib?NEW('contrib'):'<button class="btn" data-contrib>Répondre</button>'}</div>
-    <b style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;color:var(--ink)">Registre <span class="tag ok gx" data-why="journal" style="font-size:13px">Rempli automatiquement</span></b>
+    <b style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px;color:var(--ink)">Registre <span class="tag ok gx" data-why="journal" style="font-size:13px">Pré-rempli</span></b>
     <div style="background:var(--teal-tint);border-radius:14px;padding:14px;font-size:14.5px;color:var(--ink-2)">Vent de nord-ouest 12 nœuds, mer belle. Pause déjeuner au mouillage de Sablanceaux, eau à 18 °C.<div style="margin-top:10px"><button class="tag" style="padding:5px 12px">${ic('edit',13)} Éditer</button></div></div>
   </div></div>`;}
 
 /* ---------- Challenges ---------- */
-function chHeader(){return `<div class="hh" style="gap:12px"><span class="av" style="width:34px;height:34px;font-size:14.5px">J</span><div style="flex:1"><b style="color:var(--ink)">johndoe_17</b><div class="small muted">John Doe <span class="gx" data-why="series" style="border-radius:6px">· 3e saison</span></div></div><button class="ib" data-open-pitch aria-label="Profil">${ic('user',19)}</button></div>`;}
+function chHeader(){return `<div class="hh" style="gap:12px"><span class="av" style="width:34px;height:34px;font-size:14.5px">J</span><div style="flex:1"><b style="color:var(--ink)">johndoe_17</b><div class="small muted">John Doe</div></div><button class="ib" data-open-pitch aria-label="Profil">${ic('user',19)}</button></div>`;}
 function tro(img,t,d,cls=''){return `<div class="tcell ${cls}"><img src="${img}" alt="">${t}<small>${d}</small></div>`;}
 function vChallenges(){const seg=ST.chSeg;let b='';
   if(seg==='challenges') b=`${collectif()}${chal(C1)}${chal(C2())}`;
@@ -505,7 +502,7 @@ function vChallenges(){const seg=ST.chSeg;let b='';
   else b=avantages();
   return chHeader()+`<div class="scroll" style="gap:16px"><div class="seg">${[['challenges','Challenges'],['stats','Statistiques'],['avantages','Avantages']].map(s=>`<button class="${seg===s[0]?'on':''}" data-cseg="${s[0]}">${s[1]}${s[0]==='avantages'?' •':''}</button>`).join('')}</div>${b}</div>`;}
 function avantages(){const tiers=[['Fanion Lagoon',25,'flag','LAG25-JD7K-Q4'],['Plaque de coque gravée',50,'plate'],['Porte-clés flottant gravé',100,'key']];const st=ms('automne'),hiv=st.every(Boolean);
-  return `<section class="gx" data-why="objets"><div class="sh"><h3>Paliers de sorties ${NEW()}</h3><span class="small muted">${ST.trips} sorties</span></div>
+  return `<section class="gx" data-why="objets"><div class="sh"><h3>Paliers Aventurier ${NEW()}</h3><span class="small muted">${ST.trips} sorties</span></div>
   <div class="card cp">${tiers.map(t=>{const got=ST.trips>=t[1];
     if(got) return `<div style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line-2)">
       <div style="display:flex;gap:12px;align-items:center"><span class="ti" style="width:48px;height:48px;border-radius:12px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center">${ic(t[2],22)}</span><div style="flex:1"><b style="color:var(--ink)">${t[0]}</b><div class="small" style="color:var(--teal-dk)">Palier ${t[1]} sorties atteint le 14/09/2026</div></div></div>
@@ -517,7 +514,7 @@ function avantages(){const tiers=[['Fanion Lagoon',25,'flag','LAG25-JD7K-Q4'],['
         <span class="small muted">Valable 6 mois, une fois, réservé aux propriétaires qui ont atteint le palier.</span></div>`}</div>`;
     return `<div class="tier"><span class="ti">${ic(t[2],21)}</span><div><b style="color:var(--ink)">${t[0]}</b><div class="small muted">Code débloqué à ${t[1]} sorties · encore ${t[1]-ST.trips}</div></div><span class="small muted">${ST.trips}/${t[1]}</span><span class="prog"><i style="width:${ST.trips/t[1]*100}%"></i></span></div>`;}).join('')}</div>
     <div class="small muted" style="margin-top:8px">Les sorties se comptent sur toutes les saisons et ne se perdent jamais.</div></section>
-  <section class="gx" data-why="objets"><div class="sh"><h3>Avec le réseau</h3><span class="tag">À définir avec Bénéteau</span></div><div class="card cp">
+  <section class="gx" data-why="reseau"><div class="sh"><h3>Avec le réseau</h3><span class="tag">À définir avec Bénéteau</span></div><div class="card cp">
     <div class="tier got"><span class="ti">${ic('anchor',21)}</span><div><b style="color:var(--ink)">Une nuitée offerte dans un port partenaire</b><div class="small muted">Débloquée par vos 10 nuits au mouillage</div></div><span class="tag ok">Disponible</span></div>
     <div class="tier ${hiv?'got':''}"><span class="ti">${ic('wrench',21)}</span><div><b style="color:var(--ink)">−15 % sur l’hivernage</b><div class="small muted">${hiv?'Débloqué par vos missions d’hivernage':'Terminez les missions d’hivernage'}</div></div>${hiv?'<span class="tag ok">Disponible</span>':`<span class="small muted">${st.filter(Boolean).length}/${st.length}</span><span class="prog"><i style="width:${st.filter(Boolean).length/st.length*100}%"></i></span>`}</div>
     <div class="tier"><span class="ti">${ic('gift',21)}</span><div><b style="color:var(--ink)">Accessoire Lagoon</b><div class="small muted">À 5 saisons avec Seanapps · vous en êtes à 3</div></div><span class="small muted">3/5</span><span class="prog"><i style="width:60%"></i></span></div></div></section>`;}
@@ -542,7 +539,7 @@ function firsts(){return [['anchor','1re nuit au mouillage','Île d’Aix · 27 
 function vCarte(){const v=PORTS.filter(p=>p.v).length;return back('Ma carte',NEW('carte'))+`<div class="scroll" style="gap:16px"><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag ok">${ic('map',12,2)} 14 % de la côte explorée</span><span class="tag">17 ports</span><span class="tag">9 mouillages</span></div>
   <div style="border-radius:16px;overflow:hidden;border:1px solid var(--line)"><canvas id="fog" width="700" height="760" aria-label="Carte des pertuis charentais, dévoilée là où Lagon Bleu a navigué"></canvas></div>
   <div class="small muted">La carte se dévoile au fil des milles. C’est votre carte, elle ne se compare à personne.</div>
-  <section><div class="sh"><h3>Collection des ports</h3><span class="small muted">${v}/${PORTS.length} autour de La Rochelle</span></div><div class="collect">${PORTS.map(p=>`<div class="port ${p.v?'':'lock'}"><div class="pi">${ic(p.v?'anchor':'lock',15)}</div>${p.n}</div>`).join('')}</div></section>
+  <section><div class="sh"><h3>Ports visités</h3><span class="small muted">${v}/${PORTS.length} autour de La Rochelle</span></div><div class="collect">${PORTS.map(p=>`<div class="port ${p.v?'':'lock'}"><div class="pi">${ic(p.v?'anchor':'lock',15)}</div>${p.n}</div>`).join('')}</div></section>
   <section><div class="sh"><h3>Premières fois</h3></div><div class="card cp">${firsts()}</div></section></div>`;}
 function drawFog(){const c=document.getElementById('fog');if(!c)return;const x=c.getContext('2d'),W=c.width,H=c.height;
   x.fillStyle='#b5d3e3';x.fillRect(0,0,W,H);x.fillStyle='#f1efe8';
@@ -566,18 +563,6 @@ const STORY=[
 function storyHTML(){const i=ST.story,s=STORY[i];return `<div class="story" style="background:${s.bg}" role="dialog" aria-label="Votre saison en mer"><div class="bars">${STORY.map((_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div><div class="top"><span>Lagon Bleu · Lagoon 46</span><button data-close-story aria-label="Fermer">${ic('x',22,2)}</button></div><div class="body">${s.h}</div><button class="tap l" data-prev aria-label="Précédent"></button><button class="tap r" data-next aria-label="Suivant"></button><div class="foot"><button class="obtn" data-toast="Image du bilan prête à partager">${ic('share',16)} Partager</button>${s.last?'<button class="wbtn" data-close-story>Garder Premium</button>':'<button class="wbtn" data-next>Suivant</button>'}</div></div>`;}
 
 /* ---------- nouvelles mécaniques ---------- */
-function vMouillage(){return back('Mouillage',NEW('mouillage'))+`<div class="scroll" style="gap:16px">
-  <div style="height:200px;border-radius:16px;background:url(${A.bigmap}) 70% 85%/cover;position:relative;overflow:hidden">
-    <svg viewBox="0 0 345 200" width="100%" height="100%" style="position:absolute;inset:0" aria-hidden="true"><circle cx="172" cy="100" r="58" fill="${ST.moor?'rgba(19,128,127,.18)':'rgba(255,255,255,.35)'}" stroke="#13807f" stroke-width="2" stroke-dasharray="${ST.moor?'0':'6 5'}"/><circle cx="172" cy="100" r="7" fill="#13807f" stroke="#fff" stroke-width="3"/>${ST.moor?'<path d="M172 100l18-12" stroke="#13807f" stroke-width="2"/>':''}</svg>
-    <span class="tag" style="position:absolute;left:10px;bottom:10px">${ic('anchor',12,2)} Île d’Aix · rayon 40 m</span></div>
-  ${ST.moor?`<div class="health ok"><span class="hi">${ic('shield',18,2)}</span><div><b>On veille sur Lagon Bleu</b><span class="small">Vous serez alerté seulement si le bateau dérive</span></div></div>
-    <div class="card cp"><b style="color:var(--ink)">Cette nuit</b>${[['23:00','Tout va bien · 2 m du point d’ancrage'],['02:00','Tout va bien · vent 14 nœuds'],['05:00','Tout va bien · batterie 12,5 V']].map(r=>`<div class="first"><span class="tag ok">${r[0]}</span><span class="small" style="color:var(--ink-2)">${r[1]}</span></div>`).join('')}</div>
-    <div class="card cp" style="font-size:14.5px;color:var(--ink-2)">${ic('share',15)} Partager la position du mouillage avec un proche : il voit « tout va bien » sans installer l’app.</div>
-    <button class="btn full" data-moor>Lever l’ancre · terminer le mouillage</button>`
-  :`<div class="card cp" style="display:flex;flex-direction:column;gap:10px"><b style="color:var(--ink)">Rayon d’alerte</b><div class="periods">${['20 m','40 m','60 m','80 m'].map((r,i)=>`<button class="${i===1?'on':''}">${r}</button>`).join('')}</div><span class="small muted">Calculé avec la longueur de chaîne et la profondeur. Vous pouvez l’ajuster.</span></div>
-    <button class="btn full" data-moor>${ic('anchor',16,2)} Lancer la surveillance</button>
-    <div class="small muted" style="text-align:center">Chaque mouillage s’ajoute à votre journal et à votre collection.</div>`}
-  </div>`;}
 function collectif(){const pct=ST.coll?63:62;return `<div class="card cp gx" data-why="collectif" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,#eaf4f5,#fff)">
   <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ink)">Objectif de la flotte Lagoon</b>${NEW('collectif')}</div>
   <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${ST.coll?'634 120':'633 708'} <span style="font-size:14.5px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm cette saison</span></div>
@@ -590,65 +575,66 @@ function contribHTML(){const Q=[['prof','Profondeur à l’entrée',['Facile','A
   <button class="btn full" data-send-contrib ${done?'':'disabled style="opacity:.5"'}>Publier</button></div>`;}
 const MECH=[
  {id:'bilan',n:12,name:'Bilan de saison',insp:'Polarsteps',go:()=>{season='automne';go('home');},where:'Accueil (automne) et Challenges › Statistiques',
-  adapt:'« Votre saison en mer » en story à l’automne : milles, jours, ports, nuits au mouillage, plus belle sortie, à partager.',
-  why:['Les données existent déjà (voyages, heures moteur, escales) : peu de développement pour un fort effet.','Il tombe en octobre-novembre, juste avant la fin de l’année Premium offerte : le bon moment pour montrer ce que l’app a apporté.','Partagé à la famille et aux amis, il fait connaître Seanapps sans publicité.','Il valorise ce qu’on a vécu, pas une performance : adapté à un plaisancier qui sort quelques fois par an.'],
+  exist:'« Mes statistiques » (nm, jours, ports, voyages) et l’historique des voyages. Aucun récapitulatif de saison aujourd’hui.',
+  adapt:'Une story « Votre saison en mer » à l’automne, construite avec ces mêmes données, à partager.',
+  why:['Aucun développement de collecte : on raconte des données déjà enregistrées.','Elle arrive juste avant la fin de l’année Premium offerte (trophée « Cadeau de bienvenue ») : le bon moment pour montrer ce que l’app a apporté.','Partagée à la famille, elle fait connaître Seanapps sans publicité.'],
   avoid:'Pas de comparaison avec les autres propriétaires.'},
- {id:'missions',n:5,name:'Missions de saison et état du bateau',insp:'Pokémon GO, Finch',go:()=>{go('home');},where:'Accueil, Mon bateau › Capteurs, Documents, Messagerie',
-  adapt:'3 à 5 actions par période (remise à l’eau, avant l’été, hivernage) avec un état clair du bateau, vert ou orange.',
-  why:['Prolonge « Bien démarrer », que les propriétaires connaissent déjà.','Donne une raison d’ouvrir l’app même sans naviguer, surtout l’hiver.','Les actions sont vraiment utiles (guide d’hivernage, pompe de cale, batterie) : on ne fait pas jouer, on aide à entretenir.','Le rendez-vous d’hivernage passe par la concession : c’est du chiffre pour le réseau Bénéteau.'],
-  avoid:'Pas de points ni de niveau : une liste courte et un état.'},
- {id:'series',n:1,name:'Série comptée en saisons',insp:'Duolingo, Finch',go:()=>{go('challenges');ST.chSeg='challenges';},where:'Mes statistiques, en-tête Challenges, Navigation d’hiver',
-  adapt:'« 3e saison avec Seanapps », et l’hiver un défi d’une sortie par mois plutôt qu’une série quotidienne.',
-  why:['On ne navigue pas tous les jours : une série quotidienne serait cassée en permanence, donc punitive.','Compter en saisons récompense la fidélité sur plusieurs années, ce qui correspond à la durée de vie d’un abonnement.','Ce qui est gagné ne se perd jamais : le ton reste adulte, comme les trophées actuels.'],
-  avoid:'Pas de flamme qui s’éteint ni de rappel culpabilisant.'},
- {id:'objets',n:'2 · 3',name:'Objets réels et avantages du réseau',insp:'parkrun, Flying Blue, WeWard, Strava',go:()=>{go('challenges');ST.chSeg='avantages';},where:'Challenges › Avantages, Accueil',
-  adapt:'Comme parkrun : à 25, 50 et 100 sorties, le propriétaire reçoit un code personnel pour commander son objet (fanion, plaque de coque gravée, porte-clés) sur la boutique en ligne Lagoon. À côté, des avantages du réseau : nuitée dans un port partenaire, remise sur l’hivernage.',
-  why:['Le modèle parkrun est éprouvé : l’objet n’est disponible qu’avec le code, réservé à ceux qui ont atteint le palier. C’est ce qui lui donne de la valeur.','Pour une cible adulte qui a les moyens, un objet réel motive plus qu’un badge, et un fanion ou une plaque se voient au port : ils font parler de Seanapps.','Le code amène le propriétaire sur la boutique en ligne Lagoon, où il peut acheter d’autres accessoires : c’est du trafic pour la marque.','Pas de stock en concession : la boutique gère la commande et la livraison, le palier se suit automatiquement avec les sorties enregistrées.'],
-  avoid:'Pas de monnaie virtuelle ni de boutique de points : un code par palier, utilisable une fois.'},
- {id:'carte',n:'11 · 4',name:'Carte qui se dévoile et collection de ports',insp:'Fog of World, Geocaching, Been',go:()=>{go('home');ST.sub='carte';},where:'Accueil, Mon bateau › Voyages, détail voyage',
-  adapt:'La côte se dévoile au fil des voyages, chaque port visité rejoint la collection, avec les « premières fois » (1re nuit au mouillage…).',
-  why:['Le GPS enregistre déjà les trajets : la carte se construit sans effort.','Une collection grandit sur plusieurs années : c’est une raison de rester sur le long terme.','Elle valorise l’exploration à son rythme : un petit navigateur a aussi sa carte.','Les « premières fois » deviennent des souvenirs, réutilisés dans le bilan.'],
+ {id:'missions',n:5,name:'Missions de saison et état du bateau',insp:'Pokémon GO, Finch',go:()=>{go('home');},where:'Accueil, Mon bateau › Capteurs',
+  exist:'Des briques séparées : alertes capteurs, révisions « Due / Soon » dans Maintenance, Guide d’hivernage dans Documents, réglages de géofence. Rien ne les regroupe par période.',
+  adapt:'Une courte liste par période (remise à l’eau, avant l’été, hivernage) qui renvoie vers ces écrans existants, avec un état vert ou orange.',
+  why:['On ne crée pas de nouvelles fonctions : on rassemble au bon moment celles qui existent et que les propriétaires oublient.','Ça donne une raison d’ouvrir l’app hors saison, quand il n’y a pas de voyage.','Le rendez-vous d’hivernage passe par la concession : c’est du chiffre pour le réseau.'],
+  avoid:'Pas de points en plus : le système de trophées en a déjà.'},
+ {id:'objets',n:'2 · 3',name:'Code boutique aux paliers de sorties',insp:'parkrun, Flying Blue, WeWard',go:()=>{go('challenges');ST.chSeg='avantages';},where:'Challenges › Avantages, Accueil',
+  exist:'Le trophée « Aventurier » compte déjà les sorties (1 à 250, 10 paliers) et donne des points. Ces points ne débloquent rien de réel.',
+  adapt:'Aux paliers 25, 50 et 100 sorties de l’Aventurier, un code personnel pour commander un objet sur la boutique Lagoon (fanion, plaque de coque, porte-clés), comme parkrun.',
+  why:['On s’appuie sur un compteur qui existe déjà : seul le code est nouveau.','Le code est réservé à ceux qui ont atteint le palier : c’est ce qui donne de la valeur à l’objet.','Un fanion ou une plaque se voient au port, et le code amène du trafic sur la boutique Lagoon.'],
+  avoid:'Pas de monnaie virtuelle : un code par palier, utilisable une fois.'},
+ {id:'reseau',n:3,name:'Avantages du réseau',insp:'WeWard, Strava',go:()=>{go('challenges');ST.chSeg='avantages';},where:'Challenges › Avantages',
+  exist:'Les challenges ont déjà des lots (top 10), mais seulement pour les meilleurs. Aucun avantage lié à l’usage courant.',
+  adapt:'Des avantages concrets avec le réseau et les ports : nuitée dans un port partenaire, remise sur l’hivernage quand les missions sont faites.',
+  why:['Tout le monde peut en profiter, pas seulement le podium d’un challenge.','La remise d’hivernage ramène le propriétaire en concession.','Le réseau a déjà ce type d’accord avec les ports (Passeport Escales).'],
+  avoid:'À valider avec Bénéteau avant tout affichage.'},
+ {id:'carte',n:'11 · 4',name:'Carte qui se dévoile',insp:'Fog of World, Geocaching',go:()=>{go('home');ST.sub='carte';},where:'Accueil, Mon bateau › Voyages',
+  exist:'Chaque voyage a sa carte, et des badges comptent les escales (« Collectionneur d’escale », « Chercheur d’horizons », « Marin du Nouvel An »). Il n’y a pas de vue d’ensemble.',
+  adapt:'Une seule carte qui cumule tous les voyages et dévoile la côte au fil des milles, avec la liste des ports déjà visités.',
+  why:['Les traces GPS existent déjà : on les additionne au lieu de les montrer voyage par voyage.','Elle rend visibles des badges d’escale qui sont aujourd’hui abstraits.','Elle grandit sur plusieurs années : une raison de rester sur le long terme.'],
   avoid:'Pas de pourcentage comparé aux autres.'},
  {id:'saisons',n:6,name:'Une app qui suit la saison',insp:'Animal Crossing',go:()=>{season='hiver';go('home');},where:'Accueil (sélecteur de saison)',
-  adapt:'L’accueil change avec la saison nautique : remise à l’eau, météo l’été, bilan et hivernage l’automne, veille l’hiver.',
-  why:['Le vrai problème du nautisme : l’app est délaissée d’octobre à avril.','Un contenu qui change donne une raison de revenir, sans rien inventer d’artificiel.','Il peut s’adapter à la zone (Atlantique ou Méditerranée) avec les données déjà connues du bateau.'],
+  exist:'L’accueil est le même toute l’année.',
+  adapt:'L’accueil change avec la saison nautique : remise à l’eau, pleine saison, bilan et hivernage, veille d’hiver.',
+  why:['Le vrai problème du nautisme : l’app est délaissée d’octobre à avril.','On réutilise le challenge « Navigation d’hiver » déjà prévu et les trophées « Les 12 mois » et « Quatre saisons ».'],
   avoid:'Pas de contenu « pour occuper » : seulement ce qui sert à cette période.'},
- {id:'mouillage',n:13,name:'Rituel du mouillage',insp:'Hooked',go:()=>{go('home');ST.sub='mouillage';},where:'Accueil › Au mouillage ce soir ?',
-  adapt:'En arrivant au mouillage, on lance la surveillance en un geste. On reçoit une alerte seulement si le bateau dérive, et le mouillage rejoint le journal et la collection.',
-  why:['C’est un vrai besoin de sécurité, à chaque mouillage : l’habitude se crée naturellement.','Hooked, un concurrent direct, fait payer ce service 19,99 € : c’est un argument fort pour Premium.','Seanapps a déjà la position et la géofence : c’est une extension de l’existant.','Partager « tout va bien » à un proche rassure la famille et fait connaître l’app.'],
-  avoid:'Aucune notification la nuit si tout va bien.'},
  {id:'collectif',n:8,name:'Objectif collectif de la flotte',insp:'Ecosia, Pikmin Bloom',go:()=>{go('challenges');ST.chSeg='challenges';},where:'Challenges',
-  adapt:'Les milles de tous les propriétaires Lagoon comptent pour un objectif commun qui débloque un don à une cause liée à la mer.',
-  why:['On crée un sentiment d’appartenance à la marque sans classement entre propriétaires.','Chaque sortie compte, même courte : les petits navigateurs participent autant.','Bon pour l’image de Bénéteau, avec une action concrète et visible.'],
-  avoid:'Pas de classement individuel : on montre seulement « votre part ».'},
- {id:'contrib',n:9,name:'Contribution sur les ports',insp:'Google Local Guides, noforeignland',go:()=>{go('boat');ST.sub='voyage';},where:'Détail voyage',
-  adapt:'Après une escale, 3 questions rapides (profondeur, places visiteurs, services), et un statut « Contributeur » sans classement.',
-  why:['Les réponses sont utiles aux autres propriétaires : l’app gagne de la valeur même quand on ne navigue pas.','C’est une reconnaissance discrète, dans le ton des trophées actuels.','Ces infos intéressent aussi le réseau et les ports partenaires.'],
-  avoid:'Pas de note sur 5 ni d’avis libres non modérés.'},
- {id:'journal',n:7,name:'Journal de sortie automatique',insp:'Pikmin Bloom',go:()=>{go('boat');ST.sub='voyage';},where:'Détail voyage › Registre',
-  adapt:'Le registre se remplit tout seul (vent, état de la mer, escales), on ajoute juste ses photos.',
-  why:['Chaque sortie laisse un souvenir sans effort.','Le registre existe déjà dans le prototype : on l’enrichit au lieu d’ajouter un écran.','Le journal alimente le bilan de saison et la carte.'],
-  avoid:'Rien à remplir obligatoirement.'},
- {id:'delai',n:'Pro',name:'Délai de réponse de la concession',insp:'Airbnb, Malt (benchmark Pro)',go:()=>{go('msg');},where:'Messagerie',
+  exist:'Les challenges globaux existent, mais avec un classement. Le trophée « Collectif » existe aussi, mais il récompense l’invitation de proches, pas un objectif commun.',
+  adapt:'Un compteur commun de milles pour tous les propriétaires Lagoon, qui débloque un don à une cause liée à la mer.',
+  why:['C’est la seule façon de faire participer tout le monde sans classement : chaque sortie compte, même courte.','Il réutilise le format des challenges globaux.','Bon pour l’image de Bénéteau avec une action concrète.'],
+  avoid:'Pas de classement individuel. Nom à choisir pour ne pas confondre avec le trophée « Collectif ».'},
+ {id:'journal',n:7,name:'Registre pré-rempli',insp:'Pikmin Bloom',go:()=>{go('boat');ST.sub='voyage';},where:'Détail voyage › Registre',
+  exist:'Le registre du voyage existe, mais il se remplit à la main.',
+  adapt:'Le registre arrive déjà rempli (vent, mer, escales) et le propriétaire complète s’il le veut.',
+  why:['Une petite amélioration de l’existant, pas un nouvel écran.','Plus de voyages documentés, donc un bilan de saison plus riche.'],
+  avoid:'Rien d’obligatoire à remplir.'},
+ {id:'delai',n:'Pro',name:'Délai de réponse de la concession',insp:'Airbnb, Malt',go:()=>{go('msg');},where:'Messagerie',
+  exist:'La messagerie avec la concession existe, sans indication de délai.',
   adapt:'« Répond en 2 h en moyenne » sous le nom de la concession.',
-  why:['Rassure le propriétaire : il sait qu’il sera lu.','Fait le lien avec la piste retenue côté Seanapps Pro, qui pousse la concession à répondre vite.'],
+  why:['Rassure le propriétaire : il sait qu’il sera lu.','Fait le lien avec la piste retenue côté Seanapps Pro.'],
   avoid:'Affiché seulement si la concession le veut.'}
 ];
-const EXCL=[['Série quotidienne (Duolingo)','on ne navigue pas tous les jours, une série cassée l’hiver serait punitive.'],['Niveaux et points (Finch, WeWard)','ton enfantin et comparaison injuste entre propriétaires.'],['Course virtuelle avec classement (Virtual Regatta)','remplacée par Navigation d’hiver, déjà prévue, sans classement public.'],['Défi d’équipe avec classement (Pikmin Bloom)','gardé seulement sous forme d’objectif collectif, sans comparaison.']];
+const EXCL=[['Surveillance du mouillage (Hooked)','déjà couverte par l’Alerte de déplacement (géofence).'],['Série comptée en saisons','déjà couverte par les trophées « Joyeux anniversaire », « Régulier », « Les 12 mois » et « Quatre saisons ». À revoir : « Fidèle au poste » (jours d’affilée), contraire au rythme de la navigation.'],['Collection de ports en badges','déjà couverte par « Collectionneur d’escale », « Chercheur d’horizons » et « Marin du Nouvel An » : on les montre sur la carte au lieu d’en créer.'],['Contribution sur les ports (Google Local Guides)','demande une base de ports qui n’existe pas : trop lourd pour l’effet attendu.'],['Niveaux et points façon jeu','les trophées ont déjà des points (Scoreur) : on n’en ajoute pas.'],['Course virtuelle avec classement','remplacée par « Navigation d’hiver », sans classement public.']];
 function whyHTML(){const m=MECH.find(x=>x.id===ST.why);if(!m)return'';return `<div class="scrim" data-close-why></div><div class="sheet" style="z-index:47;max-height:78%;overflow-y:auto"><div class="grab"></div>
   <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><span class="newdot">Fiche ${m.n} · ${m.insp}</span><h3 style="margin:8px 0 4px;font-size:18px;color:var(--ink)">${m.name}</h3><div class="small muted">${m.where}</div></div><button class="ib sq" data-close-why aria-label="Fermer">${ic('x',16)}</button></div>
-  <div style="margin-top:12px;font-size:15px;color:var(--ink-2)"><b style="color:var(--ink)">Ce qu’on adapte : </b>${m.adapt}</div>
+  <div style="margin-top:12px;font-size:15px;color:var(--ink-2);background:var(--tile);border-radius:10px;padding:10px 12px"><b style="color:var(--ink)">Déjà dans Seanapps : </b>${m.exist}</div><div style="margin-top:10px;font-size:15px;color:var(--ink-2)"><b style="color:var(--ink)">Ce qu’on ajoute : </b>${m.adapt}</div>
   <div style="margin-top:12px"><b style="color:var(--teal-dk);font-size:14px;letter-spacing:.06em;text-transform:uppercase">Pourquoi pour Seanapps</b><ul style="margin:6px 0 0;padding-left:18px;font-size:15px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px">${m.why.map(w=>`<li>${w}</li>`).join('')}</ul></div>
   <div style="margin-top:12px;font-size:14.5px;color:var(--orange-ink);background:var(--orange-bg);border-radius:10px;padding:8px 10px"><b>On évite : </b>${m.avoid}</div></div>`;}
 /* ---------- rendu ---------- */
 const TABS=[['home','Accueil','home'],['boat','Mon bateau','myboat'],['challenges','Challenges','trophy'],['msg','Messagerie','chat']];
 function render(){const v=document.getElementById('view');
-  const subs={carte:vCarte,trophees:vTrophees,capteur:vCapteur,voyage:vVoyage,mouillage:vMouillage};const tabs={home:vHome,boat:vBoat,challenges:vChallenges,msg:vMsg};
+  const subs={carte:vCarte,trophees:vTrophees,capteur:vCapteur,voyage:vVoyage};const tabs={home:vHome,boat:vBoat,challenges:vChallenges,msg:vMsg};
   const key=ST.tab+'|'+ST.sub+'|'+ST.boatSeg+ST.chSeg;const s0=v.querySelector('.scroll');const top=s0&&v.dataset.k===key?s0.scrollTop:0;
   v.innerHTML=(ST.sub?subs[ST.sub]():tabs[ST.tab]())+(ST.story>=0?storyHTML():'')+(ST.why?whyHTML():'')+(ST.cSheet?contribHTML():'');v.dataset.k=key;const sc=v.querySelector('.scroll');if(sc)sc.scrollTop=top;
   const ms_=document.getElementById('msgScroll');if(ms_&&ST.tab==='msg'&&!ST.sub)ms_.scrollTop=ms_.scrollHeight;
   document.getElementById('tabbar').innerHTML=TABS.map(t=>`<button class="${ST.tab===t[0]&&ST.sub!=='voyage'?'on':''}" data-tab="${t[0]}">${ic(t[2],23,1.5)}${t[1]}${ST.tab===t[0]?WAVE:'<span class="wave"></span>'}</button>`).join('');
-  document.getElementById('tabbar').style.display=ST.story>=0||ST.sub==='voyage'||ST.sub==='capteur'||ST.sub==='trophees'||ST.sub==='carte'||ST.sub==='mouillage'?'none':'';
+  document.getElementById('tabbar').style.display=ST.story>=0||ST.sub==='voyage'||ST.sub==='capteur'||ST.sub==='trophees'||ST.sub==='carte'?'none':'';
   drawFog();renderPitch();}
 function renderPitch(){document.getElementById('seasonBtns').innerHTML=Object.entries(SEASONS).map(([k,s])=>`<button data-season="${k}" aria-pressed="${season===k}">${s.label}</button>`).join('');
   document.getElementById('plist').innerHTML=MECH.map((m,i)=>`<button class="pitem" data-mech="${m.id}"><span class="n">${i+1}</span><span><b>${m.name}</b><span>Fiche ${m.n} · ${m.insp}</span></span></button>`).join('');
