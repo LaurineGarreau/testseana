@@ -30,12 +30,12 @@ const S = {
   ],
   boats:[
     {id:'b1',name:'Princess 3',owner:'killian hocquet',status:'Mise en service',brand:'P',hin:'FR-BEN3K401G526',order:'CMD-24-0612',steps:[true,true,true,false,false]},
-    {id:'b2',name:'Princess 2',owner:'Jean Teste',status:'Vendu',brand:'P',notif:3},
-    {id:'b3',name:'Test Boat',owner:'Jane Doe',status:'Vendu',brand:'T',insp:'Contrôle à 1 an en retard'},
-    {id:'b4',name:'Fastkiti',owner:'killian hocquet',status:'Vendu',brand:'C'},
+    {id:'b2',name:'Princess 2',owner:'Jean Teste',status:'Vendu',brand:'P',notif:3,hin:'FR-PRI2B114H526',order:'63871'},
+    {id:'b3',name:'Test Boat',owner:'Jane Doe',status:'Vendu',brand:'T',insp:'Contrôle à 1 an en retard',hin:'FR-CNBZW121J122',order:'64090'},
+    {id:'b4',name:'Fastkiti',owner:'killian hocquet',status:'Vendu',brand:'C',hin:'FR-CNB45F902K526',order:'62214'},
     {id:'b5',name:'Virtual Customer Test Boat',owner:'Test A',status:'Mise en service',brand:'K',steps:[true,true,false,false,false]},
-    {id:'b6',name:'Princess 1',owner:'Edouard Gatouillat',status:'Vendu',brand:'S',notif:3},
-    {id:'b7',name:'Mate (Simulation 22)',owner:'Ronan Leroy',status:'Vendu',brand:'M'}
+    {id:'b6',name:'Princess 1',owner:'Edouard Gatouillat',status:'Vendu',brand:'S',notif:3,hin:'FR-PRI1A087G526',order:'61540'},
+    {id:'b7',name:'Mate (Simulation 22)',owner:'Ronan Leroy',status:'Vendu',brand:'M',hin:'FR-JEA22M310L526',order:'63002'}
   ],
   sel:'b1',
   convs:[
@@ -768,7 +768,8 @@ function boatRowsHTML(){
     <div class="muted lcnt">${S.bpage*PER+1}–${Math.min(L.length,S.bpage*PER+PER)} sur ${L.length} bateaux</div>`;
   return `<div class="boats-in">${rows}</div>${pager}`;
 }
-S.listOpen=true;S.fsec={};
+S.listOpen=true;S.fsec={};S.loc={b3:true};
+const INSP={b3:[{t:'Contrôle à 1 an',due:'27/08/2026',st:'late'}],b7:[{t:'Contrôle après 1ère saison',due:'01/12/2026',st:'todo'}],b6:[{t:'Contrôle après 1ère saison',due:'06/12/2026',st:'todo'}]};
 function vBateaux(){
   const b=sel(),nf_=BF.find(f=>f.id===S.bf);
   if(!S.listOpen&&!b)S.listOpen=true;
@@ -793,10 +794,15 @@ function fiche(b){
       ${S.fsec.steps?`<div class="tsteps">${STEPS.map((x,i)=>`<div class="step ${steps[i]?'ok':i===cur?'cur':''}"><span class="n">${steps[i]?ic('check',14,3):i+1}</span><div class="sb"><b>${x.t}</b></div></div>`).join('')}</div>`:''}
       <button class="linkbtn" data-fsec="steps">${S.fsec.steps?'Masquer les étapes':'Voir les 5 étapes'}</button></div>
       ${s.btn&&cur!==4?`<button class="btn btn-out btn-sm" data-step="${cur}">${s.btn}</button>`:''}</div>`);}
-  if(b.insp)todo.push(`<div class="todo-i warn"><span class="ti">${ic('alert',18)}</span><div class="tb"><b>Inspection en retard</b><div class="muted">${b.insp} · prévue avant le 27/08/2026</div></div><button class="btn btn-pri btn-sm" data-insp="t1">${S.tasks.find(t=>t.id==='t1').done?'Inspection faite ✓':'Commencer l’inspection'}</button></div>`);
+  const insps=INSP[b.id]||[],late=insps.filter(x=>x.st==='late'&&!(b.id==='b3'&&S.tasks.find(t=>t.id==='t1').done));
+  late.forEach(x=>todo.push(`<div class="todo-i crit"><span class="ti">${ic('clip',18)}</span><div class="tb"><b>Inspection en retard : ${x.t}</b><div class="muted">Prévue avant le ${x.due}</div></div><button class="btn btn-pri btn-sm" data-insp="t1">Commencer l’inspection</button></div>`));
   if(al)todo.push(`<div class="todo-i ${boatState(b.id)==='crit'?'crit':'warn'}"><span class="ti">${ic('pulse',18)}</span><div class="tb"><b>${al} alerte${al>1?'s':''} capteur${al>1?'s':''}</b><div class="muted">${devicesOf(b.id).filter(d=>d.s[0]!=='ok').map(d=>`${d.n} : ${d.main(V[b.id])}`).join(' · ')}</div></div><a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${b.id}">Voir dans Capteurs</a></div>`);
   const hist=b.status==='Vendu'?[['12/09/2026','Contrôle après 1ère saison'],['03/05/2026','Livraison au client'],['28/04/2026','Mise en service']]:[['02/11/2026','Réception du bateau']];
   const docs=['Bon de livraison.pdf','Facture.pdf','Manuel du propriétaire.pdf'];
+  const loc=!!S.loc[b.id];
+  const aboFleet=has?(loc?['Actif','Le bateau est loué via Fleet.','c-green']:['Disponible','Activez la gestion locative pour en profiter.','c-grey']):['Indisponible','Ce bateau n’est pas équipé d’un boîtier Seanapps.','c-red'];
+  const aboIns=has?['Indisponible','Pas de consentement du propriétaire.','c-red']:['Indisponible','Ce bateau n’est pas équipé d’un boîtier Seanapps.','c-red'];
+  const acts=has?journal(b).slice(0,4).map(e=>[e[0],e[1]]):[];
   return `
     <div class="fh2">
       <div class="fh2-back"><button class="btn btn-ghost btn-sm" data-blist>${ic('back',16)} Mes bateaux</button></div><div class="fh2-top"><span class="fh2-ic">${ic('boat',24)}</span><h2>${esc(b.name)}</h2><span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}">${b.status}</span><a href="#bateaux" class="linkbtn" style="margin-left:auto">Transférer</a></div>
@@ -807,10 +813,15 @@ function fiche(b){
     <section class="todo"><div class="todo-h"><b>À faire</b>${todo.length?`<span class="scount">${todo.length}</span>`:''}</div>
       ${todo.length?todo.join(''):`<div class="todo-ok">${ic('check',18,2.4)} Rien à faire sur ce bateau pour le moment.</div>`}</section>
     <div class="fsecs">
-      ${fsec('equip','Équipement',has||b.id==='b1'?'Unité principale 3426100474':'Aucune unité principale',`<div class="field"><span>Unité principale</span><span style="display:flex;gap:8px;align-items:center">${has||b.id==='b1'?'3426100474':'—'} ${ic('edit',16)}</span></div><button class="btn btn-out btn-sm" data-step="3" style="margin-top:10px">Diagnostics</button>`)}
-      ${fsec('abo','Abonnements','Propriétaire : aucun · Insight : indisponible',`<div class="act"><span style="flex:1">Abonnement propriétaire</span><span class="chip c-grey">${ic('x',12,2)} Aucun</span></div><div class="act"><span style="flex:1">Abonnement Insight<div class="muted" style="font-size:12.5px">Pas de consentement du propriétaire</div></span><span class="chip c-red">${ic('x',12,2)} indisponible</span></div>`,true)}
-      ${fsec('loc','Gestion locative','Désactivée',`<div class="act"><span style="flex:1">Activez la gestion locative pour gérer ce bateau depuis Fleet.</span><span class="toggle" role="switch" aria-checked="false" aria-label="Gestion locative"></span></div>`)}
-      ${fsec('notif','Notifications',al?`${al} alerte${al>1?'s':''} capteur${al>1?'s':''}`:'Aucune',has?`<a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${b.id}">Voir le détail dans Capteurs</a>`:'<div class="muted">Aucune notification.</div>',al>0)}
+      ${fsec('insp',`Inspections${insps.length?` <span class="scount">${insps.length}</span>`:''}`,insps.length?insps.map(x=>`${x.t} · ${x.st==='late'?'en retard':'à faire'} avant le ${x.due}`).join(' · '):'Aucune inspection à faire',
+        (insps.length?insps.map(x=>`<div class="insp"><div style="flex:1"><div class="t">${x.t} <span class="chip ${x.st==='late'?'c-orange':'c-yellow'}">${x.st==='late'?'En retard':'À faire'}</span></div><div class="d">À faire avant le ${x.due}</div></div>${ic('clip',22,1.6)}</div>`).join(''):'<div class="muted">Aucune inspection prévue.</div>')+`<button class="btn btn-out btn-sm" style="margin-top:10px">Voir tout ${ic('chev',14)}</button>`,insps.some(x=>x.st==='late'))}
+      ${fsec('equip','Équipement',has||b.id==='b1'?'Unité principale 3426100474':'Aucun boîtier : à scanner',(has||b.id==='b1'?`<div class="field"><span>Unité principale</span><span style="display:flex;gap:8px;align-items:center">3426100474 ${ic('edit',16)}</span></div><button class="btn btn-out btn-sm" data-step="3" style="margin-top:10px">Diagnostics</button>`:`<button class="big-btn" style="padding:12px">Scanner le boîtier principal</button>`)+`<button class="btn btn-out" style="width:100%;justify-content:center;margin-top:10px">Découvrez nos packs retrofit</button>`,!(has||b.id==='b1'))}
+      ${fsec('loc','Gestion locative',loc?'Activée · disponible depuis Fleet':'Désactivée',`<div class="act"><span style="flex:1">${loc?'Ce bateau est disponible depuis Fleet.':'Activez la gestion locative pour gérer ce bateau depuis Fleet.'}</span><span class="toggle" role="switch" tabindex="0" data-loctog="${b.id}" aria-checked="${loc}" aria-label="Gestion locative"></span></div>`)}
+      ${fsec('abo','Abonnements',`Fleet : ${aboFleet[0]} · Insight : ${aboIns[0]}`,`<div class="act"><span style="flex:1"><b style="font-weight:500">Abonnement Fleet</b><div class="muted" style="font-size:12.5px">${aboFleet[1]}</div></span><span class="chip ${aboFleet[2]}">${aboFleet[2]==='c-red'?ic('x',12,2):''} ${aboFleet[0]}</span></div>
+        <div class="act"><span style="flex:1"><b style="font-weight:500">Abonnement Insight</b><div class="muted" style="font-size:12.5px">${aboIns[1]}</div></span><span class="chip ${aboIns[2]}">${aboIns[2]==='c-red'?ic('x',12,2):''} ${aboIns[0]}</span></div>
+        <div class="act"><span style="flex:1"><b style="font-weight:500">Abonnement propriétaire</b></span><span class="chip c-grey">Aucun</span></div>`,aboFleet[2]==='c-red'||aboIns[2]==='c-red')}
+      ${fsec('notif','Notifications',al?`${al} alerte${al>1?'s':''} capteur${al>1?'s':''}`:'Aucune',(al?devicesOf(b.id).filter(d=>d.s[0]!=='ok').map(d=>`<div class="act"><span class="b" style="background:${d.s[0]==='crit'?'var(--red)':'var(--orange)'}"></span><span style="flex:1">${d.n} : ${d.main(V[b.id])}</span><span class="muted">${esc(d.s[1])}</span></div>`).join(''):'<div class="field" style="justify-content:center;margin-top:0">(Aucune)</div>')+(has?`<a class="btn btn-out" href="#capteurs" data-capboat="${b.id}" style="width:100%;justify-content:center;margin-top:10px">Voir plus</a>`:''),al>0)}
+      ${fsec('acts','Activités',has?`${acts.length} dernières activités`:'Aucune activité',(acts.length?acts.map(x=>`<div class="act"><span class="b" style="background:var(--blue)"></span><span style="flex:1">${esc(x[1])}</span><span class="muted">${esc(x[0])}</span></div>`).join(''):'<div class="muted">Aucune activité enregistrée.</div>')+`<button class="btn btn-out" style="width:100%;justify-content:center;margin-top:10px">Voir toutes les activités</button>`)}
       ${fsec('hist','Historique',`${hist.length} événement${hist.length>1?'s':''} · dernier le ${hist[0][0]}`,hist.map(h=>`<div class="act"><span class="b" style="background:var(--blue)"></span><span style="flex:1">${h[1]}</span><span class="muted" style="font-variant-numeric:tabular-nums">${h[0]}</span></div>`).join(''))}
       ${fsec('docs','Documents',`${docs.length} documents`,docs.map(d=>`<div class="act"><span class="b" style="background:var(--ink-3)"></span><span style="flex:1">${d}</span></div>`).join(''))}
     </div>`;
@@ -1697,6 +1708,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-bfopen]')){S.bfOpen=!S.bfOpen;render();return;}
   const bp=e.target.closest('[data-bpage]');if(bp){if(bp.disabled)return;S.bpage=+bp.dataset.bpage;updateBoats();const l=document.getElementById('blist');if(l)l.scrollTop=0;return;}
   if(e.target.closest('[data-fold]')){S.ficheOpen=!S.ficheOpen;render();return;}
+  const lt=e.target.closest('[data-loctog]');if(lt){const id=lt.dataset.loctog;S.loc[id]=!S.loc[id];render();toast(S.loc[id]?'Gestion locative activée : bateau disponible depuis Fleet':'Gestion locative désactivée');return;}
   if(e.target.closest('[data-bclear]')){S.bq='';S.bpage=0;render();return;}
   if(e.target.closest('[data-blist]')){S.listOpen=true;render();document.getElementById('main').scrollTop=0;return;}
   const fs=e.target.closest('[data-fsec]');if(fs){const k=fs.dataset.fsec;S.fsec[k]=!S.fsec[k];render();return;}
