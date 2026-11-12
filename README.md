@@ -6,6 +6,20 @@ Les bateaux, clients et valeurs affichés sont des **données d'exemple**.
 
 Ouvrir `index.html` dans un navigateur, ou visiter la version en ligne (GitHub Pages).
 
+La page d'accueil affiche une double vue : l'app Pro à gauche, l'arborescence Seanapps Pro avant / après à droite (cliquable, reliée à l'app).
+
+## Versions
+
+Chaque version publiée est conservée dans `versions/vN/` et listée dans `versions.json`. Le bouton « Versions » en haut de la page permet de les rouvrir.
+
+| Version | Date | Contenu |
+|---|---|---|
+| v5 | 12/11/2026 | Double vue app + arborescence avant / après, versions |
+| v4 | 12/11/2026 | Courbes : historique au mois, vues ensemble / individuelle, zoom |
+| v3 | 10/11/2026 | Proposition commerciale avec message et lien produit |
+| v2 | 10/11/2026 | Page Bateaux alignée sur Seanapps Pro |
+| v1 | 10/11/2026 | Premier prototype : tableau de bord par métier et capteurs |
+
 ## Prototypes gamification
 
 Deux prototypes cliquables issus des benchmarks gamification (données d'exemple) :

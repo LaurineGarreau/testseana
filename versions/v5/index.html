@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seanapps Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell"><header class="topbar" id="topbar"></header><div class="dual"><div class="dual-app">
+<div class="app">
+  <div class="mobbar">
+    <button class="btn-ghost btn btn-sm" id="menuBtn" aria-label="Ouvrir le menu">☰</button>
+    <div class="logo"><span class="p">Pro.</span><span class="s">seanapps</span></div>
+  </div>
+  <aside class="side" id="side">
+    <div class="logo"><span class="p">Pro.</span><span class="s">seanapps</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="me" id="me" style="margin-top:auto"></div>
+  </aside>
+  <main class="main" id="main"><div class="gbar"><div class="gwrap"><label class="gin" for="gq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="gq" type="search" placeholder="Rechercher un capteur, un bateau, un client, un écran…" autocomplete="off" aria-label="Rechercher partout" role="combobox" aria-expanded="false" aria-controls="gres"><kbd>/</kbd></label><div class="gres" id="gres" role="listbox" hidden></div></div></div><div id="view"></div></main>
+</div>
+</div><aside class="dual-tree" id="tree" aria-label="Arborescence Seanapps Pro"></aside></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="tip" id="tip" hidden></div>
+<div id="pmodal" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

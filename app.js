@@ -1185,6 +1185,139 @@ document.addEventListener('click',e=>{
   hideTip();renderExplorer();
 },true);
 
+
+/* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
+const APP_VERSION='v5';
+const VERSIONS_FALLBACK=[
+  {v:'v5',date:'2026-11-12',t:'Double vue : app + arborescence avant / après, versions'},
+  {v:'v4',date:'2026-11-12',t:'Courbes : historique au mois, vues ensemble / individuelle, zoom'},
+  {v:'v3',date:'2026-11-10',t:'Commercial : proposition en un clic avec message et lien produit'},
+  {v:'v2',date:'2026-11-10',t:'Page Bateaux alignée sur Seanapps Pro, capteurs regroupés'},
+  {v:'v1',date:'2026-11-10',t:'Premier prototype : tableau de bord par métier et capteurs'}
+];
+const ST={new:['Nouveau','c-new'],mod:['Modifié','c-yellow'],same:['Inchangé','c-grey'],gone:['N’existait pas','c-grey'],chg:['Change','c-yellow']};
+const APRES=[
+  {id:'search',n:1,t:'Recherche universelle',st:'new',k:['*search'],go:{focus:true},why:'169 capteurs aux noms techniques, en plusieurs langues, et une flotte qui grandit : sans recherche, on ne retrouve rien.',gain:'Un capteur, un bateau, un client ou un écran en 2 secondes, avec des recherches conseillées par métier.',bm:'Hors benchmark : besoin d’usage'},
+  {id:'dash',n:2,t:'Tableau de bord',st:'mod',k:['dashboard'],go:{hash:'dashboard'},why:'Avant, un seul tableau pour tout le monde, avec des chiffres sans action à faire.',gain:'Chaque métier ouvre l’app sur ses 4 sujets du jour. Moins de bruit, plus de tâches traitées à temps.',bm:'N° 4 Ma journée · n° 11 Santé du compte',
+    kids:[{dec:'Quel métier ?'},
+      {id:'v-dir',t:'Vue Directeur',e:'directeur',st:'new',k:['dashboard:directeur'],go:{hash:'dashboard',role:'directeur'},why:'Le directeur veut l’état de la concession, pas le détail de chaque alerte.',gain:'Une vue d’ensemble en 4 cases : journée, parc, alertes, ventes et statut.',bm:'N° 1 Statut · n° 7 Tout est traité · n° 11 Santé du compte',chips:[['jour','Ma journée'],['parc','État du parc'],['alertes','Alertes capteurs'],['perf','Ventes et statut']]},
+      {id:'v-com',t:'Vue Commercial',e:'commercial',st:'new',k:['dashboard:commercial'],go:{hash:'dashboard',role:'commercial'},why:'Les capteurs repèrent des besoins (batterie usée, capteur manquant) que personne ne transformait en vente.',gain:'Des ventes de capteurs et de services repérées automatiquement, avec le client à contacter.',bm:'Hors benchmark : levier de chiffre d’affaires',chips:[['opp','Ventes à proposer'],['ventes','Capteurs vendus'],['equip','Capteurs à poser'],['cat','Catalogue']]},
+      {id:'v-tec',t:'Vue Technicien',e:'technicien',st:'new',k:['dashboard:technicien'],go:{hash:'dashboard',role:'technicien'},why:'Les alertes arrivaient dans les notifications, sans priorité ni diagnostic.',gain:'Les alertes classées par gravité, le diagnostic à distance et les boîtiers à vérifier : moins de déplacements inutiles.',bm:'N° 4 Ma journée · n° 11 Santé du compte',chips:[['alertes','Alertes ouvertes'],['diag','Diagnostic batterie'],['boitiers','Boîtiers hors ligne'],['mes','Mises en service']]},
+      {id:'v-ate',t:'Vue Atelier',e:'atelier',st:'new',k:['dashboard:atelier'],go:{hash:'dashboard',role:'atelier'},why:'Les révisions se planifiaient de mémoire, sans les heures moteur réelles.',gain:'Les révisions prévues à partir des heures moteur, la charge de l’atelier par semaine et les pièces à commander.',bm:'Suit la saison nautique',chips:[['rev','Révisions'],['charge','Charge atelier'],['plan','Planning'],['pieces','Pièces']]},
+      {id:'bilan',t:'Bilan du lundi',e:'chaque lundi, par e-mail',st:'new',k:['bilan'],go:{hash:'bilan'},why:'Les concessions qui n’ouvrent pas l’app tous les jours ratent les échéances.',gain:'Un e-mail court avec un lien direct vers chaque tâche : la concession revient agir.',bm:'N° 8 Bilan hebdomadaire'}]},
+  {id:'cap',n:3,t:'Capteurs',st:'new',k:['capteurs'],go:{hash:'capteurs',capBoat:null,dev:null},why:'L’app Pro n’avait pas d’écran pour les capteurs : les 169 valeurs étaient illisibles pour la plupart des métiers.',gain:'Tout le parc d’un coup d’œil. Les problèmes ressortent en couleur, avec l’action à faire pour chaque métier.',bm:'N° 11 Santé du compte, à l’échelle de la flotte',
+    kids:[
+      {id:'grid',t:'Grille du parc',e:'ouverture',st:'new',k:['capteurs:grid'],go:{hash:'capteurs',capBoat:null,dev:null},why:'Comparer 41 bateaux capteur par capteur était impossible.',gain:'Une ligne par bateau, une colonne par capteur : seules les alertes ressortent.',bm:'N° 11 Santé du compte'},
+      {id:'zoomcap',t:'Zoom sur un capteur',e:'tap sur une colonne',st:'new',k:['capteurs:dev'],go:{hash:'capteurs',capBoat:null,dev:'battS'},why:'Savoir combien de bateaux sont concernés par un même problème.',gain:'Équipés, en alerte, sans capteur, et la répartition du parc.',bm:'N° 2 Score avec actions (sans note)'},
+      {dec:'Tap sur un bateau'},
+      {id:'plan',t:'Le bateau en plan + journal',e:'oui',st:'new',k:['capteurs:boat'],go:{hash:'capteurs',capBoat:'b2'},why:'Les noms techniques du fichier ne parlent qu’aux techniciens.',gain:'Le bateau vu de dessus, zone par zone, avec l’histoire des derniers jours : compréhensible par tous.',bm:'Hors benchmark : lisibilité'},
+      {id:'courbes',t:'Courbes et historique',e:'déplier',st:'new',k:['capteurs:boat:courbes'],go:{hash:'capteurs',capBoat:'b2',acc:{courbes:true}},why:'Sept jours ne suffisent pas pour comprendre une panne ou préparer un hivernage.',gain:'Le mois entier, les courbes ensemble ou une par une, et un zoom à l’heure près.',bm:'Suit la saison nautique'},
+      {id:'prop',t:'Proposer un produit',e:'commercial',st:'new',k:['*prop'],go:{hash:'capteurs',role:'commercial',capBoat:null,dev:null,prop:'b4|cale'},why:'Le commercial devait rédiger chaque proposition à la main.',gain:'Un message personnalisé avec le lien du produit, prêt à envoyer en un clic.',bm:'Récompenser le travail bien fait'},
+      {id:'liste',t:'Les 169 capteurs du fichier',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,acc:{liste:true},scroll:'liste'},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
+  {id:'bat',n:4,t:'Bateaux',st:'mod',k:['bateaux'],go:{hash:'bateaux'},why:'La liste ne tenait pas avec une grande flotte et la mise en service était éclatée entre plusieurs écrans.',gain:'Même mise en page qu’aujourd’hui, mais des filtres, des pages et une checklist qui évite les oublis.',bm:'N° 3 Checklist de démarrage',
+    kids:[
+      {id:'blist',t:'Liste : filtres, tri, pages',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Une seule recherche, pas de filtre ni de tri.',gain:'Retrouver les bateaux urgents en un clic, 10 par page.',bm:'Hors benchmark'},
+      {id:'check',t:'Checklist de mise en service',e:'bateau en mise en service',st:'new',k:['bateaux:mes'],go:{hash:'bateaux',sel:'b1'},why:'Réception, stock, client, boîtier, livraison : des étapes oubliées.',gain:'« 3 étapes sur 5 » sur la fiche : chaque bateau livré remonte ses données.',bm:'N° 3 Checklist de démarrage'},
+      {id:'bnotif',t:'Notifications → Capteurs',e:'fiche',st:'mod',k:['*bnotif'],go:{hash:'bateaux',sel:'b2'},why:'Les alertes n’étaient pas reliées au détail du bateau.',gain:'Le nombre d’alertes sur la fiche et un lien vers les capteurs, sans doublon.',bm:'N° 11 Santé du compte'}]},
+  {id:'msg',n:5,t:'Messages',st:'mod',k:['messages'],go:{hash:'messages'},why:'Une alerte capteur entraîne souvent un message du client, traité sans délai visible.',gain:'Le délai de réponse affiché, et les propositions commerciales arrivent dans la conversation du client.',bm:'N° 10 Délai de réponse'},
+  {id:'conc',n:6,t:'Ma concession',st:'new',k:['concession'],go:{hash:'concession'},why:'Rien ne valorisait la concession qui fait tout à temps.',gain:'Un statut trimestriel sur 3 critères, sans classement entre concessions.',bm:'N° 1 Statut à critères'},
+  {id:'same',n:7,t:'Écrans inchangés',st:'same',k:['clients','fleet','notifications','stock','historique','partage','services','parametres'],go:{hash:'clients'},why:'Ces écrans fonctionnent : le prototype se concentre sur ce qui manque.',gain:'Aucun changement d’habitude pour les équipes.',bm:'—',
+    chipsH:[['clients','Clients'],['fleet','Fleet'],['notifications','Notifications'],['stock','Déclaration de stock'],['historique','Historique'],['partage','Stock partagé'],['services','Services'],['parametres','Paramètres']]}
+];
+const AVANT=[
+  {id:'a-dash',n:1,t:'Tableau de bord',st:'chg',k:['dashboard'],go:{hash:'dashboard',role:'directeur'},why:'Un seul tableau pour tous les métiers : ventes, stock, inspections, clientèle, connectivité.',gain:'Devient 4 vues par métier, avec des cases qui se déplient.',chipsS:['Mes ventes','État des stocks','Inspections à effectuer','Clientèle','Connectivité']},
+  {id:'a-bat',n:2,t:'Bateaux',st:'chg',k:['bateaux'],go:{hash:'bateaux'},why:'Liste simple et fiche : équipement, abonnements, notifications, historique, documents.',gain:'Garde sa mise en page ; gagne filtres, pages, checklist et lien vers les capteurs.',chipsS:['Liste + recherche','Équipement et diagnostics','Gestion locative','Abonnements','Notifications','Historique','Documents','Préparer la mise en service']},
+  {id:'a-cli',n:3,t:'Clients',st:'same',k:['clients'],go:{hash:'clients'},why:'Liste des propriétaires rattachés.',gain:'Inchangé.'},
+  {id:'a-msg',n:4,t:'Messages',st:'chg',k:['messages'],go:{hash:'messages'},why:'Conversations avec les propriétaires.',gain:'Ajoute le délai de réponse et les propositions avec lien produit.'},
+  {id:'a-fleet',n:5,t:'Fleet · Notifications',st:'same',k:['fleet','notifications'],go:{hash:'notifications'},why:'Gestion locative et alertes reçues.',gain:'Inchangé. Les alertes capteurs ont en plus leur propre écran.'},
+  {id:'a-stock',n:6,t:'Stock',st:'same',k:['stock','historique','partage'],go:{hash:'stock'},why:'Déclaration, historique, stock partagé.',gain:'Inchangé.',chipsS:['Déclaration','Historique','Stock partagé']},
+  {id:'a-cpt',n:7,t:'Compte',st:'chg',k:['services','parametres','concession'],go:{hash:'services'},why:'Services et paramètres.',gain:'Ajoute « Ma concession » et son statut.',chipsS:['Services','Paramètres']},
+  {id:'a-none',t:'Ce qui n’existait pas',st:'gone',ghost:true,k:['capteurs','*search'],go:{hash:'capteurs',capBoat:null,dev:null},why:'Pas d’écran capteurs, pas de recherche globale, pas de statut concession ni de bilan.',gain:'Tout cela arrive dans la version « Après ».',chipsS:['Écran Capteurs','Recherche universelle','Statut concession','Bilan du lundi']}
+];
+S.tree={mode:'apres',sel:'dash'};
+S.layout=(()=>{try{return localStorage.getItem('sp-layout')||(innerWidth<900?'app':'both')}catch(e){return innerWidth<900?'app':'both'}})();
+function curKey(){const r=route();
+  if(r==='dashboard')return `dashboard:${S.role}:${S.dtab[S.role]||''}`;
+  if(r==='capteurs')return S.capBoat?('capteurs:boat'+(S.acc.courbes?':courbes':'')):(S.dev?'capteurs:dev':'capteurs:grid');
+  if(r==='bateaux')return 'bateaux:'+(sel().steps?'mes':'fiche');
+  return r;}
+const isOn=n=>{const c=curKey();return (n.k||[]).some(k=>!k.startsWith('*')&&(c===k||c.startsWith(k+':')))};
+function allNodes(L){const o=[];L.forEach(n=>{if(n.id)o.push(n);(n.kids||[]).forEach(k=>{if(k.id)o.push(k)})});return o}
+function nodeHTML(n,main){
+  if(n.dec)return `<div class="tdec"><span>${esc(n.dec)}</span></div>`;
+  const on=isOn(n),s=ST[n.st];
+  return `<div class="tnode ${main?'main':''} ${n.ghost?'ghost':''} ${on?'on':''} ${S.tree.sel===n.id?'picked':''}" data-tn="${n.id}" role="button" tabindex="0" aria-pressed="${S.tree.sel===n.id}">
+    ${n.n?`<span class="tn">${n.n}</span>`:''}<div class="tt"><b>${esc(n.t)}</b><span class="chip ${s[1]}">${s[0]}</span></div>
+    ${n.chips?`<div class="tchips">${n.chips.map(([d,l])=>`<button class="tchip ${S.role===n.go.role&&S.dtab[n.go.role]===d&&route()==='dashboard'?'on':''}" data-tc="${n.id}|${d}">${esc(l)}</button>`).join('')}</div>`:''}
+    ${n.chipsH?`<div class="tchips">${n.chipsH.map(([h,l])=>`<button class="tchip ${route()===h?'on':''}" data-th="${h}">${esc(l)}</button>`).join('')}</div>`:''}
+    ${n.chipsS?`<div class="tchips">${n.chipsS.map(l=>`<span class="tchip static">${esc(l)}</span>`).join('')}</div>`:''}
+  </div>`;
+}
+function treeHTML(L){
+  return `<div class="tflow">${L.map(n=>`<div class="tsec">
+    ${nodeHTML(n,true)}
+    ${n.kids?`<div class="tkids">${n.kids.map(k=>`<div class="tk">${k.e?`<span class="te">${esc(k.e)}</span>`:''}${nodeHTML(k,false)}</div>`).join('')}</div>`:''}
+  </div>`).join('')}</div>`;
+}
+function detailHTML(){
+  const n=allNodes(APRES).concat(allNodes(AVANT)).find(x=>x.id===S.tree.sel);
+  if(!n)return `<div class="tdetail muted">Tapez sur une section : l’app à gauche s’y rend et le détail s’affiche ici.</div>`;
+  const av=AVANT.includes(n);
+  return `<div class="tdetail"><div class="tdh"><b>${esc(n.t)}</b><span class="chip ${ST[n.st][1]}">${ST[n.st][0]}</span></div>
+    <div class="tdl">${av?'Avant':'Pourquoi'}</div><p>${esc(n.why)}</p>
+    <div class="tdl">${av?'Ce qui change':'Ce que ça rapporte'}</div><p class="gain">${esc(n.gain)}</p>
+    ${n.bm?`<div class="tdl">Benchmark</div><p class="muted">${esc(n.bm)}</p>`:''}</div>`;
+}
+function renderTree(){
+  const el=document.getElementById('tree');if(!el)return;
+  const m=S.tree.mode;
+  el.innerHTML=`<div class="th">
+      <div><b>Arborescence Seanapps Pro</b><div class="muted" style="font-size:12.5px">Tapez sur une section : l’app s’y rend.</div></div>
+      <div class="seg" role="group" aria-label="Version de l’arborescence">${[['avant','Avant'],['apres','Après'],['comparer','Comparer']].map(([k,l])=>`<button data-tm="${k}" aria-pressed="${m===k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="tlegend"><span><span class="chip c-new">Nouveau</span></span><span><span class="chip c-yellow">Modifié</span></span><span><span class="chip c-grey">Inchangé</span></span><span class="muted">Contour bleu : écran affiché dans l’app</span></div>
+    ${detailHTML()}
+    <div class="tbody ${m==='comparer'?'cmp':''}">${m==='comparer'?`<div><div class="tcol">Avant</div>${treeHTML(AVANT)}</div><div><div class="tcol">Après</div>${treeHTML(APRES)}</div>`:treeHTML(m==='avant'?AVANT:APRES)}</div>`;
+}
+function goNode(g){
+  if(!g)return;
+  if(g.role){S.role=g.role;try{localStorage.setItem('sp-role',g.role)}catch(_){}}
+  if(g.dtab&&g.role)S.dtab[g.role]=g.dtab;
+  if('capBoat' in g)S.capBoat=g.capBoat;
+  if('dev' in g)S.dev=g.dev;
+  if(g.acc)Object.assign(S.acc,g.acc);
+  if(g.sel)S.sel=g.sel;
+  if(g.bfOpen!=null)S.bfOpen=g.bfOpen;
+  if(S.layout==='tree')setLayout(innerWidth<900?'app':'both');
+  if(g.hash){if(location.hash!=='#'+g.hash)location.hash='#'+g.hash;else render();}
+  setTimeout(()=>{
+    if(g.focus){const q=document.getElementById('gq');if(q)q.focus();}
+    if(g.prop&&typeof openProp==='function')openProp(g.prop);
+    if(g.scroll){const a=document.querySelector(`[data-acc="${g.scroll}"]`);if(a)a.scrollIntoView({block:'start',behavior:'smooth'});}
+  },60);
+}
+function setLayout(l){S.layout=l;try{localStorage.setItem('sp-layout',l)}catch(_){}document.body.dataset.layout=l;renderTop();if(document.getElementById('explorer'))renderExplorer();}
+function verBase(){const p=location.pathname;const i=p.indexOf('/versions/v');return i>=0?'../../':''}
+let VERS=VERSIONS_FALLBACK,verOpen=false;
+fetch(verBase()+'versions.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(Array.isArray(j)&&j.length){VERS=j;renderTop();}}).catch(()=>{});
+function renderTop(){
+  const el=document.getElementById('topbar');if(!el)return;const b=verBase();
+  el.innerHTML=`<div class="tb-l"><b>Seanapps Pro</b><span class="muted">prototype · données d’exemple</span></div>
+    <div class="seg" role="group" aria-label="Affichage">${[['app','App'],['both','Les deux'],['tree','Arborescence']].map(([k,l])=>`<button data-lay="${k}" aria-pressed="${S.layout===k}">${l}</button>`).join('')}</div>
+    <div class="vwrap"><button class="btn btn-out btn-sm" data-vers aria-expanded="${verOpen}">${ic('hist',16)} Versions · ${APP_VERSION}</button>
+      ${verOpen?`<div class="vmenu" role="menu"><div class="muted" style="font-size:12px;padding:4px 8px 8px">Chaque version publiée reste disponible.</div>${VERS.map(v=>{const cur=v.v===APP_VERSION;const href=v.v===VERS[0].v?b+'index.html':b+'versions/'+v.v+'/index.html';
+        return `<a class="vitem ${cur?'on':''}" href="${href}" role="menuitem"><span class="vv">${v.v}</span><span class="vt"><b>${esc(v.t)}</b><span class="muted">${v.date.split('-').reverse().join('/')}${v.v===VERS[0].v?' · la plus récente':''}</span></span>${cur?`<span class="chip c-new">Affichée</span>`:''}</a>`}).join('')}</div>`:''}</div>`;
+}
+document.addEventListener('click',e=>{
+  const ly=e.target.closest('[data-lay]');if(ly){setLayout(ly.dataset.lay);return;}
+  if(e.target.closest('[data-vers]')){verOpen=!verOpen;renderTop();return;}
+  if(verOpen&&!e.target.closest('.vwrap')){verOpen=false;renderTop();}
+  const tm=e.target.closest('[data-tm]');if(tm){S.tree.mode=tm.dataset.tm;renderTree();return;}
+  const tc=e.target.closest('[data-tc]');if(tc){const [id,d]=tc.dataset.tc.split('|');const n=allNodes(APRES).find(x=>x.id===id);S.tree.sel=id;goNode({...n.go,dtab:d});renderTree();return;}
+  const th=e.target.closest('[data-th]');if(th){S.tree.sel='same';goNode({hash:th.dataset.th});renderTree();return;}
+  const tn=e.target.closest('[data-tn]');if(tn){const id=tn.dataset.tn;const n=allNodes(APRES).concat(allNodes(AVANT)).find(x=>x.id===id);S.tree.sel=id;goNode(n.go);renderTree();return;}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.tn){e.preventDefault();e.target.click();}if(e.key==='Escape'&&verOpen){verOpen=false;renderTop();}});
 /* ======================= Messages ======================= */
 function vMessages(){
   const c=S.convs.find(x=>x.id===S.conv);
@@ -1321,7 +1454,7 @@ function render(){
   for(const k in CH)delete CH[k];
   hideTip();
   document.getElementById('view').innerHTML=(views[r]||vDashboard)();
-  renderNav();bindCharts();if(document.getElementById('explorer')&&typeof renderExplorer==='function')renderExplorer();
+  renderNav();bindCharts();if(typeof renderTree==='function')renderTree();if(document.getElementById('explorer')&&typeof renderExplorer==='function')renderExplorer();
   const nb=document.getElementById('blist');if(nb&&bs)nb.scrollTop=bs;
   document.getElementById('side').classList.remove('open');
 }
@@ -1394,5 +1527,5 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{if(e.target.id==='sf'){S.fam=e.target.value;updateList();}if(e.target.id==='bsort'){S.bsort=e.target.value;S.bpage=0;updateBoats();}if(e.target.id==='devsel'){S.dev=e.target.value;S.cf='all';S.clim=15;render();}});
 window.addEventListener('hashchange',()=>{closeSearch();render();document.getElementById('main').scrollTop=0;});
-render();
+document.body.dataset.layout=S.layout;renderTop();render();
 
