@@ -563,14 +563,18 @@ const STORY=[
 function storyHTML(){const i=ST.story,s=STORY[i];return `<div class="story" style="background:${s.bg}" role="dialog" aria-label="Votre saison en mer"><div class="bars">${STORY.map((_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div><div class="top"><span>Lagon Bleu · Lagoon 46</span><button data-close-story aria-label="Fermer">${ic('x',22,2)}</button></div><div class="body">${s.h}</div><button class="tap l" data-prev aria-label="Précédent"></button><button class="tap r" data-next aria-label="Suivant"></button><div class="foot"><button class="obtn" data-toast="Image du bilan prête à partager">${ic('share',16)} Partager</button>${s.last?'<button class="wbtn" data-close-story>Garder Premium</button>':'<button class="wbtn" data-next>Suivant</button>'}</div></div>`;}
 
 /* ---------- nouvelles mécaniques ---------- */
-function collectif(){const pct=ST.coll?63:62;return `<div class="card cp gx" data-why="collectif" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,#eaf4f5,#fff)">
+function collectif(){const out=ST.coll;const tot=out?'633 708':'634 120';return `<div class="card cp gx" data-why="collectif" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,#eaf4f5,#fff)">
   <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ink)">Objectif de la flotte Lagoon</b>${NEW('collectif')}</div>
-  <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${ST.coll?'634 120':'633 708'} <span style="font-size:14.5px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm cette saison</span></div>
-  <span class="prog" style="height:8px"><i style="width:${pct}%"></i></span>
-  <span class="small" style="color:var(--ink-2)">Tous les milles parcourus cette saison par les bateaux Lagoon équipés du boîtier s’additionnent automatiquement. Rien à saisir : ce sont les milles de vos voyages.</span>
-  <div style="display:flex;gap:10px;align-items:center;background:#fff;border-radius:10px;padding:8px 10px"><span style="color:var(--teal)">${ic('myboat',18)}</span><span class="small" style="color:var(--ink-2);flex:1">Votre part : <b style="color:var(--ink)">412 nm</b> (vos 24 voyages de 2026)</span></div>
-  <span class="small muted">À 1 million de milles, Lagoon reverse un don à une cause liée à la mer (exemple, à définir).</span>
-  ${ST.coll?`<span class="tag ok" style="align-self:flex-start">${ic('check',12,2.4)} Vous participez</span>`:'<button class="btn" data-coll style="align-self:flex-start">Ajouter mes milles au compteur</button>'}</div>`;}
+  <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${tot} <span style="font-size:14.5px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm · saison 2026</span></div>
+  <span class="prog" style="height:8px"><i style="width:63%"></i></span>
+  <span class="small" style="color:var(--ink-2)">Les milles de tous les bateaux Lagoon connectés s’additionnent automatiquement. À 1 million, Lagoon reverse un don à une cause liée à la mer (exemple, à définir).</span>
+  ${out?`<div class="small" style="background:#fff;border-radius:10px;padding:10px 12px;color:var(--ink-2)">Vos milles ne sont plus comptés dans l’objectif commun. <button class="linkbtn" data-coll style="color:var(--teal);font-weight:700;text-decoration:underline">Les compter à nouveau</button></div>`:`
+  <div style="background:#fff;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span class="small" style="color:var(--ink-2)">Votre part</span><b style="color:var(--ink)">412 nm</b></div>
+    <div class="small" style="color:var(--teal-dk);display:flex;gap:6px;align-items:flex-start">${ic('check',14,2.4)}<span>Vos milles ne sont pas dépensés : ils restent à vous et comptent en même temps partout.</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${[['Mes statistiques','412 nm'],['Trophée Explorateur','niveau 4'],['Le grand large','en cours'],['Objectif de la flotte','412 nm']].map(r=>`<div style="background:var(--teal-tint);border-radius:8px;padding:6px 8px"><div class="small muted">${r[0]}</div><b style="font-size:15px;color:var(--ink)">${r[1]}</b></div>`).join('')}</div>
+  </div>
+  <span class="small muted">Fin de saison le 31/12 : le compteur commun repart à zéro, vos milles restent dans vos statistiques. Objectif atteint ou non, le don est versé au prorata. <button class="linkbtn" data-coll style="color:var(--ink-3);text-decoration:underline">Ne pas compter mes milles</button></span>`}</div>`;}
 function contribHTML(){const Q=[['prof','Profondeur à l’entrée',['Facile','Attention à marée basse']],['place','Places visiteurs',['Faciles','Réserver avant']],['serv','Services',['Bons','Limités']]];const done=Object.keys(ST.ans).length===3;
   return `<div class="scrim" data-close-contrib></div><div class="sheet" style="z-index:46"><div class="grab"></div><b style="color:var(--ink)">Saint-Martin-de-Ré</b><div class="small muted" style="margin:2px 0 12px">Vos réponses aident les autres propriétaires</div>
   ${Q.map(q=>`<div style="margin-bottom:12px"><div class="small" style="color:var(--ink-2);margin-bottom:6px">${q[1]}</div><div style="display:flex;gap:8px">${q[2].map(o=>`<button class="tag" data-ans="${q[0]}" data-v="${o}" style="padding:7px 12px;${ST.ans[q[0]]===o?'background:var(--teal);color:#fff;border-color:var(--teal)':''}">${o}</button>`).join('')}</div></div>`).join('')}
@@ -608,9 +612,9 @@ const MECH=[
   avoid:'Pas de contenu « pour occuper » : seulement ce qui sert à cette période.'},
  {id:'collectif',n:8,name:'Objectif collectif de la flotte',insp:'Ecosia, Pikmin Bloom',go:()=>{go('challenges');ST.chSeg='challenges';},where:'Challenges',
   exist:'Les challenges globaux existent, mais avec un classement. Le trophée « Collectif » existe aussi, mais il récompense l’invitation de proches, pas un objectif commun.',
-  adapt:'Un compteur commun qui additionne automatiquement les milles des voyages enregistrés par le boîtier (la même donnée que « Mes statistiques » et le trophée « Explorateur »). Le propriétaire n’a rien à saisir : il accepte seulement que ses milles comptent. L’objectif se fixe à partir de la flotte réelle (ex. 2 500 bateaux connectés × 400 nm en moyenne ≈ 1 million).',
-  why:['C’est la seule façon de faire participer tout le monde sans classement : chaque sortie compte, même courte.','Il réutilise le format des challenges globaux.','Bon pour l’image de Bénéteau avec une action concrète.'],
-  avoid:'Pas de classement individuel. Nom à choisir pour ne pas confondre avec le trophée « Collectif ».'},
+  adapt:'Un compteur commun qui additionne automatiquement les milles des voyages enregistrés par le boîtier (la même donnée que « Mes statistiques » et le trophée « Explorateur »). Les milles ne sont jamais dépensés : ils comptent en même temps pour les statistiques, les trophées, les challenges et l’objectif commun. Rien à saisir, compté par défaut, désactivable. Le compteur repart à zéro chaque saison et le don est versé au prorata, même si l’objectif n’est pas atteint.',
+  why:['Les milles ne sont pas une monnaie : personne ne perd rien en participant, donc aucune raison de refuser.','C’est la seule façon de faire participer tout le monde sans classement : chaque sortie compte, même courte.','Il réutilise le format des challenges globaux.','Bon pour l’image de Bénéteau avec une action concrète.'],
+  avoid:'Pas de monnaie à dépenser, pas d’échec si l’objectif n’est pas atteint, pas de classement individuel. Nom à choisir pour ne pas confondre avec le trophée « Collectif ».'},
  {id:'journal',n:7,name:'Registre pré-rempli',insp:'Pikmin Bloom',go:()=>{go('boat');ST.sub='voyage';},where:'Détail voyage › Registre',
   exist:'Le registre du voyage existe, mais il se remplit à la main.',
   adapt:'Le registre arrive déjà rempli (vent, mer, escales) et le propriétaire complète s’il le veut.',
@@ -652,7 +656,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s);let el;
   if(q('[data-send-contrib]')){ST.cSheet=false;ST.contrib=true;render();toast('Avis publié · merci pour les autres propriétaires');return;}
   if(q('[data-close-contrib]')){ST.cSheet=false;render();return;}
   if(q('[data-moor]')){ST.moor=!ST.moor;render();toast(ST.moor?'Surveillance du mouillage activée':'Mouillage terminé · ajouté à votre journal');return;}
-  if(q('[data-coll]')){ST.coll=true;render();toast('Merci ! Vos 412 nm comptent pour la flotte');return;}
+  if(q('[data-coll]')){ST.coll=!ST.coll;render();toast(ST.coll?'Vos milles ne comptent plus pour l’objectif commun':'Vos milles comptent à nouveau pour la flotte');return;}
   if(el=q('[data-season]')){season=el.dataset.season;go('home');render();return;}
   if(q('[data-story]')){ST.story=0;render();return;}
   if(q('[data-close-story]')){ST.story=-1;render();return;}
