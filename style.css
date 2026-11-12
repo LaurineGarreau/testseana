@@ -832,5 +832,13 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .gmenu .vitem{border:0;background:none;width:100%;text-align:left;font:inherit;cursor:pointer}
 .gmenu .vv{color:var(--blue)}
 @media (prefers-reduced-motion:reduce){.tour-ring,.newscard{animation:none}}
+/* ---------- Profil connecté (v12) ---------- */
+.tb-user{display:inline-flex;gap:8px;align-items:center;font-size:13px}
+.tb-user select{font:inherit;font-weight:500;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.roles-l{font-size:12.5px;color:var(--ink-3);padding:0 6px 0 8px;align-self:center}
+.gitem2{border:0;background:none;width:100%;text-align:left;font:inherit;cursor:pointer}
+.gitem2 .vv{color:var(--blue)}
+@media (max-width:640px){.tb-user .muted{display:none}}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
 
 html,body{margin:0}

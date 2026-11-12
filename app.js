@@ -18,7 +18,8 @@ const roleOf=id=>ROLES.find(r=>r.id===id);
 
 /* ======================= Données d'exemple ======================= */
 const S = {
-  role:(()=>{try{return localStorage.getItem('sp-role')||'directeur'}catch(e){return 'directeur'}})(),
+  user:(()=>{try{return localStorage.getItem('sp-user')||'directeur'}catch(e){return 'directeur'}})(),
+  role:(()=>{try{const u=localStorage.getItem('sp-user')||'directeur';return u==='directeur'?(localStorage.getItem('sp-role')||'directeur'):u}catch(e){return 'directeur'}})(),
   cb:'b2', capOnlyMine:false, q:'', fam:'',
   tasks:[
     {id:'t1',kind:'insp',title:'Faire le « Contrôle à 1 an » de Test Boat',ctx:'Prévu avant le 27/08/2026',late:true,go:'#bateaux',boat:'b3',done:false},
@@ -329,11 +330,14 @@ function renderNav(){
     const c=n.cnt?n.cnt():0;
     const on=r===n.h||(r==='bilan'&&n.h==='dashboard');
     return `<a href="#${n.h}" class="${on?'on':''}">${ic(n.i,22,1.6)}${n.l}${c?`<span class="cnt">${c}</span>`:''}${n.nw&&!c?`<span class="nw">${NEW}</span>`:''}</a>`;
-  }).join('');
+  }).join('')+`<div class="nav-sec">Aide</div><a href="#" data-guide>${ic('book',22,1.6)}Guide et nouveautés${typeof tKey==='function'&&tKey('sp-news-seen')!==TOURS.nouveautes.ver?`<span class="nw">${NEW}</span>`:''}</a>`;
   const ro=roleOf(S.role);
-  document.getElementById('me').innerHTML=`${ic('user',20)}<span style="min-width:0">Laurine G.<span class="muted" style="display:block;font-size:12.5px;font-weight:400">Vue ${ro.l}</span></span>`;
+  const P=PEOPLE[S.user];
+  document.getElementById('me').innerHTML=`${ic('user',20)}<span style="min-width:0">${P.n}<span class="muted" style="display:block;font-size:12.5px;font-weight:400">${P.t}${S.user==='directeur'&&S.role!=='directeur'?` · voit la vue ${ro.l.toLowerCase()}`:''}</span></span>`;
 }
-const roleTabs=()=>`<div class="roles" role="group" aria-label="Choisir le métier">${ROLES.map(r=>`<button data-role="${r.id}" aria-pressed="${S.role===r.id}">${ic(r.i,16,1.8)}${r.l}</button>`).join('')}</div>`;
+const PEOPLE={directeur:{n:'Laurine G.',t:'Directrice de concession'},commercial:{n:'Hugo M.',t:'Commercial'},technicien:{n:'Sami B.',t:'Technicien'},atelier:{n:'Marc D.',t:'Chef d’atelier'}};
+const roleTabs=()=>S.user!=='directeur'?'':`<div class="roles" role="group" aria-label="Voir comme"><span class="roles-l">Voir comme</span>${ROLES.map(r=>`<button data-role="${r.id}" aria-pressed="${S.role===r.id}">${ic(r.i,16,1.8)}${r.l}</button>`).join('')}</div>`;
+function setUser(u){S.user=u;S.role=u;try{localStorage.setItem('sp-user',u);localStorage.setItem('sp-role',u)}catch(_){}if(typeof renderTop==='function')renderTop();render();}
 const kpi=(l,v,s,st='')=>`<section class="card kpi ${st?'is-'+st:''}"><small>${l}</small><b>${v}</b><span class="s">${s}</span></section>`;
 const stChip=s=>s==='crit'?`<span class="chip c-red">${ic('alert',13,2)} Alerte</span>`:s==='warn'?`<span class="chip c-orange">${ic('alert',13,2)} À surveiller</span>`:s==='off'?`<span class="chip c-grey">${ic('wifi',13,2)} Pas de données</span>`:`<span class="chip c-green">${ic('check',13,2.4)} OK</span>`;
 
@@ -853,7 +857,7 @@ function pages(){
     {l:'Bilan du lundi',k:'email semaine resume',go:()=>{location.hash='#bilan'}},
     {l:'Déclaration de stock',k:'stock declarer',go:()=>{location.hash='#stock'}}
   ];
-  ROLES.forEach(r=>TABS[r.id]().forEach(t=>P.push({l:`${r.l} › ${t.l}`,k:`${r.l} ${t.s}`,go:()=>{S.role=r.id;try{localStorage.setItem('sp-role',r.id)}catch(e){}S.dtab[r.id]=t.id;location.hash==='#dashboard'?render():location.hash='#dashboard'}})));
+  ROLES.filter(r=>S.user==='directeur'||r.id===S.user).forEach(r=>TABS[r.id]().forEach(t=>P.push({l:`${r.l} › ${t.l}`,k:`${r.l} ${t.s}`,go:()=>{S.role=r.id;try{localStorage.setItem('sp-role',r.id)}catch(e){}S.dtab[r.id]=t.id;location.hash==='#dashboard'?render():location.hash='#dashboard'}})));
   return P;
 }
 function score(q,...fields){let best=0;fields.forEach((f,i)=>{const n=norm(f);const w=i===0?3:i===1?2:1;if(n.startsWith(q))best=Math.max(best,10*w);else if(n.includes(' '+q))best=Math.max(best,6*w);else if(n.includes(q))best=Math.max(best,3*w)});return best}
@@ -1305,16 +1309,16 @@ document.addEventListener('change',e=>{
 /* ======================= Guides : visite de bienvenue et nouveautés (écran assombri + bulle) ======================= */
 const TOURS={
   bienvenue:{t:'Visite de l’app',steps:[
-    {title:'Bienvenue dans Seanapps Pro',text:'En une minute, voici où trouver l’essentiel. Vous pouvez passer la visite à tout moment et la revoir avec le bouton « Guide », en haut.',center:true,cta:'Commencer'},
-    {go:{hash:'dashboard'},sel:['.roles'],title:'Choisissez votre métier',text:'Directeur, commercial, technicien ou atelier : le tableau de bord n’affiche que ce qui vous concerne. Tapez sur un métier pour essayer.',click:true},
+    {title:'Bienvenue dans Seanapps Pro',text:'En une minute, voici où trouver l’essentiel. Vous pouvez passer la visite à tout moment et la revoir depuis « Guide et nouveautés », dans le menu.',center:true,cta:'Commencer'},
+    {go:{hash:'dashboard'},sel:['.roles'],only:'directeur',title:'Voyez le parc comme chaque métier',text:'Vous êtes directeur : vous pouvez afficher la vue du commercial, du technicien ou de l’atelier. Tapez sur un métier pour essayer.',click:true},
     {go:{hash:'dashboard'},sel:['.tabk'],title:'Une case, un sujet',text:'Chaque case donne un chiffre clé. Tapez dessus pour déplier le détail en dessous.',click:true},
     {sel:['.gbar .gin'],title:'Cherchez tout ici',text:'Un capteur, un bateau, un client ou un écran. Des recherches sont conseillées selon votre métier. Raccourci clavier : la touche « / ».'},
     {go:{hash:'capteurs',capBoat:null,dev:null},sel:['.nav a[href="#capteurs"]','#menuBtn'],title:'Les capteurs de tout le parc',text:'Une ligne par bateau, une colonne par capteur : seuls les problèmes ressortent en couleur.'},
     {go:{hash:'capteurs',capBoat:null,dev:null},sel:['.mx tbody tr:first-child .bc'],title:'Tapez sur un bateau',text:'Vous le voyez zone par zone, avec son journal et ses courbes. Tapez sur le nom d’une colonne pour comparer un capteur sur tout le parc.'},
     {go:{hash:'capteurs',capBoat:null},sel:['[data-info]'],title:'Le guide des 169 capteurs',text:'Ce bouton explique chaque capteur et comment lire ses valeurs.'},
     {go:{hash:'stock'},sel:['.nav a[href="#stock"]','#menuBtn'],title:'Déclaration de stock',text:'Chaque mois, vous confirmez votre stock. Les bateaux à régulariser arrivent en premier, avec la réponse déjà préparée quand c’est possible.'},
-    {sel:['[data-vers]'],title:'Toutes les versions',text:'Chaque version du prototype reste disponible ici.'},
-    {title:'C’est parti',text:'Vous pouvez revoir cette visite et les nouveautés à tout moment avec le bouton « Guide », en haut de l’écran.',center:true,cta:'Terminer'}
+    {sel:['.nav a[data-guide]','#menuBtn'],title:'Revoir ce guide',text:'« Guide et nouveautés », dans le menu, relance cette visite ou montre ce qui est nouveau.'},
+    {title:'C’est parti',text:'Votre tableau de bord est réglé sur votre métier. Bonne navigation !',center:true,cta:'Terminer'}
   ]},
   nouveautes:{t:'Nouveautés de la version',ver:'v11',intro:'Bateaux à régulariser dans la déclaration de stock, nouvelle vue du bateau, et ce guide.',steps:[
     {go:{hash:'stock'},sel:['.sacc-h'],title:'Nouveau : À régulariser',text:'Les bateaux en stock depuis plus de 23 mois, ou dont le statut se contredit, arrivent en tête de la déclaration.',badge:true},
@@ -1328,13 +1332,14 @@ let TOUR=null;
 function tKey(k){try{return localStorage.getItem(k)}catch(_){return null}}
 function tSet(k,v){try{localStorage.setItem(k,v)}catch(_){}}
 function visibleEl(sels){for(const s of sels||[]){const el=[...document.querySelectorAll(s)].find(e=>{const r=e.getBoundingClientRect();return r.width>2&&r.height>2&&r.right>0&&r.left<innerWidth&&getComputedStyle(e).visibility!=='hidden'});if(el)return el}return null}
-function startTour(name){closeNewsCard();TOUR={name,i:0};document.getElementById('tour').hidden=false;stepTour(0);}
+function startTour(name){closeNewsCard();TOUR={name,i:0,last:0};document.getElementById('tour').hidden=false;stepTour(0);}
 function endTour(done){const n=TOUR&&TOUR.name;TOUR=null;const el=document.getElementById('tour');el.hidden=true;el.innerHTML='';
   if(n==='bienvenue'){tSet('sp-tour-done','1');}if(n==='nouveautes'||n==='bienvenue')tSet('sp-news-seen',TOURS.nouveautes.ver);
   if(n==='bienvenue'&&done)toast('Visite terminée');}
 function stepTour(i){
   const steps=TOURS[TOUR.name].steps;if(i<0)i=0;if(i>=steps.length){endTour(true);return}
   TOUR.i=i;const s=steps[i];
+  if(s.only&&S.user!==s.only){const d=i>=TOUR.last?1:-1;TOUR.last=i;return stepTour(i+d);}TOUR.last=i;
   if(s.go)goNode(s.go);
   setTimeout(()=>{const el=s.center?null:visibleEl(s.sel);if(el)el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});setTimeout(()=>drawTour(el),40)},s.go?140:20);
 }
@@ -1343,14 +1348,14 @@ function drawTour(el){
   const W=innerWidth,H=innerHeight,pad=8;let hole='',r=null;
   if(el){const b=el.getBoundingClientRect();r={x:Math.max(4,b.left-pad),y:Math.max(4,b.top-pad),w:Math.min(W-8,b.width+pad*2),h:Math.min(H-8,b.height+pad*2)};
     const rr=10;hole=`M${r.x+rr},${r.y}H${r.x+r.w-rr}Q${r.x+r.w},${r.y} ${r.x+r.w},${r.y+rr}V${r.y+r.h-rr}Q${r.x+r.w},${r.y+r.h} ${r.x+r.w-rr},${r.y+r.h}H${r.x+rr}Q${r.x},${r.y+r.h} ${r.x},${r.y+r.h-rr}V${r.y+rr}Q${r.x},${r.y} ${r.x+rr},${r.y}Z`;}
-  const n=steps.length,last=TOUR.i===n-1,first=TOUR.i===0;
+  const vis=steps.map((x,k)=>k).filter(k=>!steps[k].only||steps[k].only===S.user),pos=vis.indexOf(TOUR.i),n=vis.length,last=pos===n-1,first=pos===0;
   root.innerHTML=`<svg class="tour-mask" width="${W}" height="${H}" aria-hidden="true"><path d="M0,0H${W}V${H}H0Z${hole}" fill-rule="evenodd"/></svg>
     ${r?`<div class="tour-ring" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"></div>`:''}
     <div class="tour-pop ${r?'':'center'}" role="dialog" aria-modal="true" aria-labelledby="tourt">
-      <div class="tour-top">${s.badge?`<span class="chip c-new">Nouveau</span>`:`<span class="muted">${TOURS[TOUR.name].t}</span>`}<span class="muted">${TOUR.i+1} / ${n}</span></div>
+      <div class="tour-top">${s.badge?`<span class="chip c-new">Nouveau</span>`:`<span class="muted">${TOURS[TOUR.name].t}</span>`}<span class="muted">${pos+1} / ${n}</span></div>
       <h3 id="tourt">${esc(s.title)}</h3><p>${esc(s.text)}</p>
       ${s.click&&r?`<div class="tour-hint">${ic('sparkle',15)} Vous pouvez taper sur la zone éclairée.</div>`:''}
-      <div class="tour-dots">${steps.map((_,k)=>`<i class="${k===TOUR.i?'on':''}"></i>`).join('')}</div>
+      <div class="tour-dots">${vis.map(k=>`<i class="${k===TOUR.i?'on':''}"></i>`).join('')}</div>
       <div class="tour-act">${last?'':`<button class="btn btn-ghost btn-sm" data-tour="skip">Passer</button>`}<span style="flex:1"></span>${first?'':`<button class="btn btn-out btn-sm" data-tour="prev">Précédent</button>`}<button class="btn btn-pri btn-sm" data-tour="next">${s.cta||(last?'Terminer':'Suivant')}</button></div>
     </div>`;
   const pop=root.querySelector('.tour-pop');
@@ -1369,15 +1374,14 @@ function showNewsCard(){const el=document.getElementById('newscard');if(!el)retu
   el.innerHTML=`<div class="nc-h"><span class="chip c-new">Nouveau</span><b>Dans la version ${N.ver}</b><button class="btn btn-ghost btn-sm" data-nc="close" aria-label="Fermer">${ic('x',14)}</button></div><p>${esc(N.intro)}</p><div class="nc-act"><button class="btn btn-ghost btn-sm" data-nc="later">Plus tard</button><button class="btn btn-pri btn-sm" data-nc="go">Voir en ${N.steps.length} étapes</button></div>`;}
 function closeNewsCard(){const el=document.getElementById('newscard');if(el){el.hidden=true;el.innerHTML='';}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nc]');if(!b)return;const a=b.dataset.nc;if(a==='go')startTour('nouveautes');else{closeNewsCard();if(a==='close')tSet('sp-news-seen',TOURS.nouveautes.ver);}});
-/* Bouton « Guide » dans la barre du haut */
-let guideOpen=false;
-function guideBtn(){return `<div class="vwrap"><button class="btn btn-ghost btn-sm" data-guide aria-expanded="${guideOpen}">${ic('book',16)} Guide</button>${guideOpen?`<div class="vmenu gmenu" role="menu">
-  <button class="vitem" data-gstart="bienvenue" role="menuitem"><span class="vv">${ic('sparkle',18)}</span><span class="vt"><b>Visite de l’app</b><span class="muted">${TOURS.bienvenue.steps.length} étapes, environ 1 minute</span></span></button>
-  <button class="vitem" data-gstart="nouveautes" role="menuitem"><span class="vv">${ic('star',18)}</span><span class="vt"><b>Nouveautés ${TOURS.nouveautes.ver}</b><span class="muted">${esc(TOURS.nouveautes.intro)}</span></span></button></div>`:''}</div>`}
+/* « Guide et nouveautés » dans le menu de l'app */
+function showGuideCard(){const el=document.getElementById('newscard');if(!el)return;el.hidden=false;
+  el.innerHTML=`<div class="nc-h">${ic('book',18)}<b>Guide et nouveautés</b><button class="btn btn-ghost btn-sm" data-nc="close" aria-label="Fermer">${ic('x',14)}</button></div>
+  <button class="vitem gitem2" data-gstart="bienvenue"><span class="vv">${ic('sparkle',18)}</span><span class="vt"><b>Visite de l’app</b><span class="muted">Environ une minute</span></span></button>
+  <button class="vitem gitem2" data-gstart="nouveautes"><span class="vv">${ic('star',18)}</span><span class="vt"><b>Ce qui est nouveau</b><span class="muted">${esc(TOURS.nouveautes.intro)}</span></span></button>`;}
 document.addEventListener('click',e=>{
-  if(e.target.closest('[data-guide]')){guideOpen=!guideOpen;renderTop();return;}
-  const g=e.target.closest('[data-gstart]');if(g){guideOpen=false;renderTop();startTour(g.dataset.gstart);return;}
-  if(guideOpen&&!e.target.closest('.vwrap')){guideOpen=false;renderTop();}
+  if(e.target.closest('[data-guide]')){e.preventDefault();showGuideCard();document.getElementById('side').classList.remove('open');return;}
+  const g=e.target.closest('[data-gstart]');if(g){startTour(g.dataset.gstart);return;}
 });
 function tourBoot(){
   if(new URLSearchParams(location.search).has('noguide'))return;
@@ -1386,8 +1390,9 @@ function tourBoot(){
 
 
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
-const APP_VERSION='v11';
+const APP_VERSION='v12';
 const VERSIONS_FALLBACK=[
+  {v:'v12',date:'2026-11-12',t:'Profil fixé à la connexion (choix hors application), le directeur voit toutes les vues'},
   {v:'v11',date:'2026-11-12',t:'Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée'},
   {v:'v10',date:'2026-11-12',t:'Déclaration de stock : bateaux à régulariser, mise en service en un clic'},
   {v:'v9',date:'2026-11-12',t:'Nouvelle vue du bateau : silhouette avec pastilles et liste des zones'},
@@ -1495,7 +1500,7 @@ function renderTree(){
 }
 function goNode(g){
   if(!g)return;
-  if(g.role){S.role=g.role;try{localStorage.setItem('sp-role',g.role)}catch(_){}}
+  if(g.role){if(S.user!=='directeur'&&S.user!==g.role){S.user=g.role;try{localStorage.setItem('sp-user',g.role)}catch(_){}}S.role=g.role;try{localStorage.setItem('sp-role',g.role)}catch(_){}renderTop();}
   if(g.dtab&&g.role)S.dtab[g.role]=g.dtab;
   if('capBoat' in g)S.capBoat=g.capBoat;
   if('dev' in g)S.dev=g.dev;
@@ -1518,9 +1523,10 @@ let VERS=VERSIONS_FALLBACK,verOpen=false;
 fetch(verBase()+'versions.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(Array.isArray(j)&&j.length){VERS=j;renderTop();}}).catch(()=>{});
 function renderTop(){
   const el=document.getElementById('topbar');if(!el)return;const b=verBase();
-  el.innerHTML=`<div class="tb-l"><b>Seanapps Pro</b><span class="muted">prototype · données d’exemple</span></div>
+  el.innerHTML=`<div class="tb-l"><b>Prototype</b><span class="muted">hors application · données d’exemple</span></div>
+    <label class="tb-user"><span class="muted">Connecté en tant que</span><select id="tbuser" aria-label="Profil connecté">${ROLES.map(r=>`<option value="${r.id}" ${S.user===r.id?'selected':''}>${PEOPLE[r.id].n} · ${r.l}</option>`).join('')}</select></label>
     <div class="seg" role="group" aria-label="Affichage">${[['app','App'],['both','Les deux'],['tree','Arborescence']].map(([k,l])=>`<button data-lay="${k}" aria-pressed="${S.layout===k}">${l}</button>`).join('')}</div>
-    ${typeof guideBtn==='function'?guideBtn():''}<div class="vwrap"><button class="btn btn-out btn-sm" data-vers aria-expanded="${verOpen}">${ic('hist',16)} Versions · ${APP_VERSION}</button>
+    <div class="vwrap"><button class="btn btn-out btn-sm" data-vers aria-expanded="${verOpen}">${ic('hist',16)} Versions · ${APP_VERSION}</button>
       ${verOpen?`<div class="vmenu" role="menu"><div class="muted" style="font-size:12px;padding:4px 8px 8px">Chaque version publiée reste disponible.</div>${VERS.map(v=>{const cur=v.v===APP_VERSION;const href=v.v===VERS[0].v?b+'index.html':b+'versions/'+v.v+'/index.html';
         return `<a class="vitem ${cur?'on':''}" href="${href}" role="menuitem"><span class="vv">${v.v}</span><span class="vt"><b>${esc(v.t)}</b><span class="muted">${v.date.split('-').reverse().join('/')}${v.v===VERS[0].v?' · la plus récente':''}</span></span>${cur?`<span class="chip c-new">Affichée</span>`:''}</a>`}).join('')}</div>`:''}</div>`;
 }
@@ -1533,6 +1539,7 @@ document.addEventListener('click',e=>{
   const th=e.target.closest('[data-th]');if(th){S.tree.sel='same';goNode({hash:th.dataset.th});renderTree();return;}
   const tn=e.target.closest('[data-tn]');if(tn){const id=tn.dataset.tn;const n=allNodes(APRES).concat(allNodes(AVANT)).find(x=>x.id===id);S.tree.sel=id;goNode(n.go);renderTree();return;}
 });
+document.addEventListener('change',e=>{if(e.target.id==='tbuser')setUser(e.target.value);});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.tn){e.preventDefault();e.target.click();}if(e.key==='Escape'&&verOpen){verOpen=false;renderTop();}});
 /* ======================= Messages ======================= */
 function vMessages(){
@@ -1698,7 +1705,7 @@ document.addEventListener('click',e=>{
   const cb=e.target.closest('[data-cb]');
   if(cb&&cb.dataset.cb){S.cb=cb.dataset.cb;if(cb.tagName==='BUTTON'||route()==='capteurs'){render();document.getElementById('main').scrollTop=0;if(cb.tagName==='BUTTON')return;}}
   const ro=e.target.closest('[data-role]');
-  if(ro){S.role=ro.dataset.role;try{localStorage.setItem('sp-role',S.role)}catch(_){}render();return;}
+  if(ro){if(S.user!=='directeur')return;S.role=ro.dataset.role;try{localStorage.setItem('sp-role',S.role)}catch(_){}render();return;}
   const tick=e.target.closest('[data-tick]');
   if(tick){doneTask(tick.dataset.tick);render();checkAllDone();return;}
   if(e.target.closest('#resetDay')){S.tasks.forEach(t=>t.done=t.id==='t5');const b1=S.boats.find(b=>b.id==='b1');b1.steps=[true,true,true,false,false];b1.status='Mise en service';S.convs[0].unread=true;render();return;}

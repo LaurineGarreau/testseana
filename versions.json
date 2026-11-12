@@ -1,5 +1,10 @@
 [
   {
+    "v": "v12",
+    "date": "2026-11-12",
+    "t": "Profil fixé à la connexion (choix hors application), le directeur voit toutes les vues"
+  },
+  {
     "v": "v11",
     "date": "2026-11-12",
     "t": "Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée"
