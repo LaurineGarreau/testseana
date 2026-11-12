@@ -1,7 +1,32 @@
 [
-  {"v":"v5","date":"2026-11-12","t":"Double vue : app + arborescence avant / après, versions"},
-  {"v":"v4","date":"2026-11-12","t":"Courbes : historique au mois, vues ensemble / individuelle, zoom"},
-  {"v":"v3","date":"2026-11-10","t":"Commercial : proposition en un clic avec message et lien produit"},
-  {"v":"v2","date":"2026-11-10","t":"Page Bateaux alignée sur Seanapps Pro, capteurs regroupés"},
-  {"v":"v1","date":"2026-11-10","t":"Premier prototype : tableau de bord par métier et capteurs"}
+  {
+    "v": "v6",
+    "date": "2026-11-12",
+    "t": "Courbes : cartes comme avant, mois ou tout l’historique, vue d’ensemble qui croise les données"
+  },
+  {
+    "v": "v5",
+    "date": "2026-11-12",
+    "t": "Double vue : app + arborescence avant / après, versions"
+  },
+  {
+    "v": "v4",
+    "date": "2026-11-12",
+    "t": "Courbes : historique au mois, vues ensemble / individuelle, zoom"
+  },
+  {
+    "v": "v3",
+    "date": "2026-11-10",
+    "t": "Commercial : proposition en un clic avec message et lien produit"
+  },
+  {
+    "v": "v2",
+    "date": "2026-11-10",
+    "t": "Page Bateaux alignée sur Seanapps Pro, capteurs regroupés"
+  },
+  {
+    "v": "v1",
+    "date": "2026-11-10",
+    "t": "Premier prototype : tableau de bord par métier et capteurs"
+  }
 ]

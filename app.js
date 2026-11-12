@@ -702,7 +702,7 @@ function tabCapteurs(b){
     ${zi.missing.length?`<div class="${S.role==='commercial'?'warn-note':'muted'}" style="font-size:13px;margin-top:10px">${S.role==='commercial'?ic('euro',16):''}<span>Pas de capteur ici pour : ${zi.missing.map(k=>DEV.find(d=>d.k===k).n.toLowerCase()).join(', ')}.${S.role==='commercial'?' C’est une vente possible.':''}</span></div>`:''}
   </div>
   <div class="blk"><h4>Journal du bateau</h4><ol class="jrnl">${J.map(e=>`<li class="is-${e[2]}"><span class="jd">${esc(e[0])}</span><span>${esc(e[1])}</span></li>`).join('')}</ol></div></div>
-  <div class="accs">${acc('courbes','Courbes et historique','<span>7 jours ou mois · ensemble ou individuel · zoom</span>',()=>`<div id="explorer" data-boat="${b.id}">${explorerHTML(b.id)}</div>${CHARTS_FOR[S.role].includes('res')?`<div class="grid g2">${CH4.res()}</div>`:''}`,false)}</div>`;
+  <div class="accs">${acc('courbes','Courbes et historique','<span>7 jours, mois ou tout l’historique · graphiques ou vue d’ensemble</span>',()=>`<div id="explorer" data-boat="${b.id}">${explorerHTML(b.id)}</div>${CHARTS_FOR[S.role].includes('res')?`<div class="grid g2">${CH4.res()}</div>`:''}`,false)}</div>`;
 }
 
 /* ======================= Capteurs : la grille du parc (bateaux × capteurs) ======================= */
@@ -1037,17 +1037,19 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{if(e.target.id==='pmsg'&&S.prop)S.prop.msg=e.target.value;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.prop){S.prop=null;renderProp();}});
 
-/* ======================= Explorateur de courbes : 7 jours ou mois, ensemble ou individuel, zoom ======================= */
+/* ======================= Courbes : cartes comme avant, 7 jours / mois / tout l'historique, vue d'ensemble qui croise les données ======================= */
 const XS={
-  batt:{l:'Batterie de service',u:'V',d:1,thr:11.8,thrL:'Seuil d’alerte 11,8 V'},
-  hum:{l:'Humidité de la cabine',u:'%',d:0,thr:75,thrL:'Au-dessus de 75 % : moisissure'},
-  pres:{l:'Pression atmosphérique',u:'hPa',d:0}
+  batt:{l:'Batterie de service',sub:'Tension',u:'V',d:1,thr:11.8,thrL:'Seuil d’alerte 11,8 V',c:'--s1'},
+  hum:{l:'Humidité de la cabine',sub:'Humidité relative',u:'%',d:0,thr:75,thrL:'Au-dessus de 75 % : moisissure',c:'--s2'},
+  pres:{l:'Pression atmosphérique',sub:'Comme un baromètre',u:'hPa',d:0,c:'--s3'},
+  temp:{l:'Température cabine',sub:'Air intérieur',u:'°C',d:1,c:'--s4'}
 };
-const H0=Date.UTC(2026,10,4)/36e5, HNOW=H0+NOWH;
+const H0=Date.UTC(2026,10,4)/36e5, HNOW=H0+NOWH, HSTART=Date.UTC(2026,7,1)/36e5;
 const WD=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'],MO=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],MOL=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const dOf=t=>new Date(t*36e5);
 const lblT=t=>{const d=dOf(t);return `${WD[d.getUTCDay()]} ${d.getUTCDate()} ${MO[d.getUTCMonth()]} · ${d.getUTCHours()} h`};
 const lblD=t=>{const d=dOf(t);return `${WD[d.getUTCDay()]} ${d.getUTCDate()}`};
+const lblDM=t=>{const d=dOf(t);return `${d.getUTCDate()} ${MO[d.getUTCMonth()]}`};
 const hsh=(i,s)=>{const x=Math.sin(i*12.9898+s*78.233)*43758.5453;return x-Math.floor(x)};
 function seedOf(id){let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%9973;return h}
 function genVal(id,k,t){
@@ -1057,138 +1059,168 @@ function genVal(id,k,t){
   return 1013+8*Math.sin(2*Math.PI*t/(24*6.3)+ph)+4*Math.sin(2*Math.PI*t/(24*2.1)+ph*2)+n*.5;
 }
 function xval(id,k,t){
-  if(t>HNOW)return null;
-  const i=Math.round(t-H0),ser=serOf(id)[k];
+  t=Math.round(t);if(t>HNOW||t<HSTART)return null;
+  if(k==='temp'){const h=xval(id,'hum',t);if(h==null)return null;const s=seedOf(id);const seas=-4*Math.max(0,(t-HSTART)/(HNOW-HSTART));return 19+seas+2.2*Math.sin(2*Math.PI*((t%24)-9)/24)-(h-62)*.32+(hsh(t,s+9)-.5)*.3;}
+  const i=t-H0,ser=serOf(id)[k];
   if(i>=0&&i<ser.length)return ser[i];
   if(i>=ser.length)return null;
   const g=genVal(id,k,t);
   if(i>-24){const w=(i+24)/24;return g*(1-w)+ser[0]*w;}
   return g;
 }
-S.ex={per:'7j',y:2026,m:10,mode:'ensemble',sel:null,one:null,z:null,boat:null};
+S.ex={per:'7j',y:2026,m:10,mode:'cartes',show:null,mix:null,z:null,boat:null};
 const MONTHS=[[2026,7],[2026,8],[2026,9],[2026,10]];
-function exRange(){if(S.ex.per==='7j')return [H0,HNOW];const a=Date.UTC(S.ex.y,S.ex.m,1)/36e5,b=Date.UTC(S.ex.y,S.ex.m+1,1)/36e5;return [a,b];}
-function exWin(){const [a,b]=exRange();if(!S.ex.z)return [a,b];let [z0,z1]=S.ex.z;z0=Math.max(a,z0);z1=Math.min(b,z1);if(z1-z0<3)return [a,b];return [z0,z1];}
-function exKeys(){
-  const def=CHARTS_FOR[S.role].filter(k=>XS[k]);if(!S.ex.sel)S.ex.sel=def.length?def:['batt'];if(!S.ex.one||!XS[S.ex.one])S.ex.one=S.ex.sel[0];
-  return S.ex.mode==='ensemble'?Object.keys(XS).filter(k=>S.ex.sel.includes(k)):[S.ex.one];
-}
+function exRange(){if(S.ex.per==='7j')return [H0,HNOW];if(S.ex.per==='tout')return [HSTART,HNOW];return [Date.UTC(S.ex.y,S.ex.m,1)/36e5,Date.UTC(S.ex.y,S.ex.m+1,1)/36e5];}
+function exWin(){const [a,b]=exRange();if(!S.ex.z)return [a,b];let [z0,z1]=S.ex.z;z0=Math.max(a,z0);z1=Math.min(b,z1);return z1-z0<3?[a,b]:[z0,z1];}
+function exDefaults(){const def=CHARTS_FOR[S.role].filter(k=>XS[k]);if(!S.ex.show)S.ex.show=def.length?def:['batt'];if(!S.ex.mix)S.ex.mix=['batt','pres'];}
 function niceTicks(lo,hi){const span=hi-lo||1,raw=span/4,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p,st=(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p;const t0=Math.floor(lo/st)*st,t1=Math.ceil(hi/st)*st,out=[];for(let v=t0;v<=t1+st*.001;v+=st)out.push(+v.toFixed(6));return {ticks:out,lo:out[0],hi:out[out.length-1]}}
-function timeTicks(a,b){const span=b-a,steps=[1,2,3,6,12,24,48,72,96,120,168];const st=steps.find(s=>span/s<=(XW<500?5:8))||168;const out=[];const base=st>=24?(S.ex.per==='mois'?exRange()[0]:Math.ceil(a/24)*24):0;let t=st>=24?base+Math.ceil((a-base)/st)*st:Math.ceil(a/st)*st;for(;t<=b;t+=st)out.push(t);return {ticks:out,st}}
-const XEX={};let xexN=0,XW=760,XL=58;
-function exMeasure(){const el=document.getElementById('explorer');const w=el&&el.clientWidth?el.clientWidth-18:(innerWidth<760?innerWidth-70:760);XW=Math.max(300,Math.min(760,Math.round(w)));XL=XW<500?44:58;}
-function panelSVG(id,k,a,b,h,showX,big,first){
-  const pid='xp'+(xexN++),W=XW,L=XL,R=16,T=14,B=showX?28:8,cfg=XS[k];
-  const n=Math.ceil(b-a),step=Math.max(1,Math.floor(n/700)),pts=[];
-  for(let t=Math.ceil(a);t<=b;t+=step)pts.push([t,xval(id,k,t)]);
-  const vs=pts.map(p=>p[1]).filter(v=>v!=null);
-  let lo=Math.min(...vs),hi=Math.max(...vs);if(!vs.length){lo=0;hi=1}
-  if(cfg.thr!=null){lo=Math.min(lo,cfg.thr);hi=Math.max(hi,cfg.thr)}
-  const pad=(hi-lo)*.12||1;const nt=niceTicks(lo-pad,hi+pad);
+let XW=640,XL=50;
+function timeTicks(a,b){const span=b-a,steps=[1,2,3,6,12,24,48,72,96,120,168,336,720];const mx=XW<500?4:7;const st=steps.find(s=>span/s<=mx)||720;const out=[];
+  const base=st>=24?(S.ex.per==='mois'?exRange()[0]:Math.ceil(a/24)*24):0;for(let t=st>=24?base+Math.ceil((a-base)/st)*st:Math.ceil(a/st)*st;t<=b;t+=st)out.push(t);return {ticks:out,st}}
+function tickLbl(t,st,first){if(st<24)return dOf(t).getUTCHours()===0?lblD(t):dOf(t).getUTCHours()+' h';if(S.ex.per==='mois')return dOf(t).getUTCDate()+(first?' '+MO[dOf(t).getUTCMonth()]:'');if(S.ex.per==='tout'||st>=168)return lblDM(t);return lblD(t);}
+const XEX={};let xexN=0;
+function samples(id,k,a,b){const n=Math.ceil(b-a),step=Math.max(1,Math.floor(n/600)),pts=[];for(let t=Math.ceil(a);t<=b;t+=step)pts.push([t,xval(id,k,t)]);return pts}
+function pathOf(pts,x,y,base){let d='',area='',seg=[];const segs=[];pts.forEach(([t,v])=>{if(v==null){if(seg.length)segs.push(seg);seg=[];}else seg.push([t,v])});if(seg.length)segs.push(seg);
+  segs.forEach(sg=>{const p=sg.map(([t,v],i)=>`${i?'L':'M'}${x(t).toFixed(1)},${y(v).toFixed(1)}`).join('');d+=p;area+=`${p}L${x(sg[sg.length-1][0]).toFixed(1)},${base}L${x(sg[0][0]).toFixed(1)},${base}Z`;});return {d,area}}
+function frame(a,b,h,T,B,W,L,R,x){const tt=timeTicks(a,b);return {grid:tt.ticks.map((t,i)=>`<line class="gd" x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${h-B}"/><text class="ax" x="${Math.min(Math.max(x(t),L+20),W-R-20)}" y="${h-8}" text-anchor="middle">${tickLbl(t,tt.st,i===0)}</text>`).join(''),
+  fut:HNOW<b?`<rect x="${x(Math.max(a,HNOW))}" y="${T}" width="${x(b)-x(Math.max(a,HNOW))}" height="${h-T-B}" class="fut"/>${b-Math.max(a,HNOW)>(b-a)*.12?`<text class="ax" x="${(x(Math.max(a,HNOW))+x(b))/2}" y="${T+16}" text-anchor="middle">À venir</text>`:''}`:''}}
+function panelSVG(id,k,a,b,h){
+  const pid='xp'+(xexN++),W=XW,L=XL,R=14,T=14,B=28,cfg=XS[k];
+  const pts=samples(id,k,a,b),vs=pts.map(p=>p[1]).filter(v=>v!=null);
+  let lo=vs.length?Math.min(...vs):0,hi=vs.length?Math.max(...vs):1;if(cfg.thr!=null){lo=Math.min(lo,cfg.thr);hi=Math.max(hi,cfg.thr)}
+  const pad=(hi-lo)*.12||1,nt=niceTicks(lo-pad,hi+pad);
   const x=t=>L+(W-L-R)*(t-a)/(b-a),y=v=>T+(h-T-B)*(1-(v-nt.lo)/(nt.hi-nt.lo));
-  let d='',area='',seg=[];const segs=[];
-  pts.forEach(([t,v])=>{if(v==null){if(seg.length)segs.push(seg);seg=[];}else seg.push([t,v])});if(seg.length)segs.push(seg);
-  segs.forEach(sg=>{const p=sg.map(([t,v],i)=>`${i?'L':'M'}${x(t).toFixed(1)},${y(v).toFixed(1)}`).join('');d+=p;area+=`${p}L${x(sg[sg.length-1][0]).toFixed(1)},${h-B}L${x(sg[0][0]).toFixed(1)},${h-B}Z`;});
-  const tt=timeTicks(a,b);
-  const fut=HNOW<b?`<rect x="${x(Math.max(a,HNOW))}" y="${T}" width="${x(b)-x(Math.max(a,HNOW))}" height="${h-T-B}" class="fut"/>${b-Math.max(a,HNOW)>(b-a)*.12?`<text class="ax" x="${(x(Math.max(a,HNOW))+x(b))/2}" y="${T+16}" text-anchor="middle">À venir</text>`:''}`:'';
-  const ev=(id==='b2'&&H0+CUT>a&&H0+CUT<b)?`<line class="ev" x1="${x(H0+CUT)}" x2="${x(H0+CUT)}" y1="${T}" y2="${h-B}"/>${first?`<text class="lbl" x="${x(H0+CUT)-6}" y="${T+12}" text-anchor="end">Prise de quai débranchée</text>`:''}`:'';
-  const last=vs.length&&HNOW>=a&&HNOW<=b?`<circle class="dt" cx="${x(HNOW)}" cy="${y(xval(id,k,HNOW))}" r="4.5"/>`:'';
-  XEX[pid]={id,k,a,b,L,R,W,h,T,B,x,y};
-  return `<svg class="xp" data-xp="${pid}" viewBox="0 0 ${W} ${h}" tabindex="0" role="img" aria-label="${esc(cfg.l)}, ${esc(lblT(a))} à ${esc(lblT(b))}">
-    ${nt.ticks.map(v=>`<line class="gl" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${L-8}" y="${y(v)+4}" text-anchor="end">${nf(v,cfg.d&&nt.hi-nt.lo<5?1:0)}${cfg.u==='%'?' %':''}</text>`).join('')}
-    ${tt.ticks.map(t=>`<line class="gd" x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${h-B}"/>${showX?`<text class="ax" x="${Math.min(Math.max(x(t),L+18),W-R-18)}" y="${h-8}" text-anchor="middle">${tt.st<24?(dOf(t).getUTCHours()===0?lblD(t):dOf(t).getUTCHours()+' h'):(S.ex.per==='mois'?dOf(t).getUTCDate()+(t===tt.ticks[0]?' '+MO[dOf(t).getUTCMonth()]:''):lblD(t))}</text>`:''}`).join('')}
-    ${fut}${ev}
+  const {d,area}=pathOf(pts,x,y,h-B),fr=frame(a,b,h,T,B,W,L,R,x);
+  const ev=(id==='b2'&&H0+CUT>a&&H0+CUT<b&&k==='batt')?`<line class="ev" x1="${x(H0+CUT)}" x2="${x(H0+CUT)}" y1="${T}" y2="${h-B}"/><text class="lbl" x="${x(H0+CUT)-6}" y="${T+12}" text-anchor="end">Prise de quai débranchée</text>`:'';
+  const nowv=HNOW>=a&&HNOW<=b?xval(id,k,HNOW):null;
+  XEX[pid]={id,keys:[k],a,b,L,R,W,h,T,B,x,ys:{[k]:y},norm:false};
+  return `<svg class="xp" data-xp="${pid}" viewBox="0 0 ${W} ${h}" tabindex="0" role="img" aria-label="${esc(cfg.l)} du ${esc(lblT(a))} au ${esc(lblT(b))}">
+    ${nt.ticks.map(v=>`<line class="gl" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${L-8}" y="${y(v)+4}" text-anchor="end">${nf(v,cfg.d&&nt.hi-nt.lo<5?1:0)}</text>`).join('')}
+    ${fr.grid}${fr.fut}${ev}
     ${cfg.thr!=null?`<line class="thr" x1="${L}" x2="${W-R}" y1="${y(cfg.thr)}" y2="${y(cfg.thr)}"/><text class="lbl" x="${L+8}" y="${y(cfg.thr)-6}">${esc(cfg.thrL)}</text>`:''}
-    <path class="ar" d="${area}"/><path class="ln" d="${d}"/>${last}
-    <g class="hov" visibility="hidden"><line class="cross" y1="${T}" y2="${h-B}"/><circle class="dt" r="5"/></g>
+    <path class="ar" d="${area}"/><path class="ln" d="${d}"/>${nowv!=null?`<circle class="dt" cx="${x(HNOW)}" cy="${y(nowv)}" r="4.5"/>`:''}
+    <g class="hov" visibility="hidden"><line class="cross" y1="${T}" y2="${h-B}"/><circle class="dt" data-k="${k}" r="5"/></g>
     <rect class="brush" y="${T}" height="${h-T-B}" width="0" visibility="hidden"/>
-    <rect class="hit" x="${L}" y="${T}" width="${W-L-R}" height="${h-T-B}" fill="transparent"/>
+    <rect x="${L}" y="${T}" width="${W-L-R}" height="${h-T-B}" fill="transparent"/>
   </svg>`;
 }
-function stats(id,k,a,b){const vs=[];for(let t=Math.ceil(a);t<=b;t++){const v=xval(id,k,t);if(v!=null)vs.push(v)}if(!vs.length)return null;const c=XS[k],f=v=>nf(v,c.d)+' '+c.u;return {min:f(Math.min(...vs)),avg:f(vs.reduce((s,v)=>s+v,0)/vs.length),max:f(Math.max(...vs))}}
-function overviewSVG(id,k,a,b,z0,z1){
-  const W=XW,H=40,L=XL,R=16,x=t=>L+(W-L-R)*(t-a)/(b-a);const vs=[];for(let t=Math.ceil(a);t<=b;t+=Math.max(1,Math.floor((b-a)/300)))vs.push([t,xval(id,k,t)]);
-  const ok=vs.filter(p=>p[1]!=null);const lo=Math.min(...ok.map(p=>p[1])),hi=Math.max(...ok.map(p=>p[1]));const y=v=>4+(H-8)*(1-(v-lo)/((hi-lo)||1));
-  const d=ok.map(([t,v],i)=>`${i?'L':'M'}${x(t).toFixed(1)},${y(v).toFixed(1)}`).join('');
-  return `<svg class="xov" data-xov="1" viewBox="0 0 ${W} ${H}" aria-label="Vue d’ensemble de la période : tapez pour déplacer le zoom">
-    <rect x="${L}" y="0" width="${W-L-R}" height="${H}" class="ovbg"/><path d="${d}" class="ovln"/>
-    ${(z0>a||z1<b)?`<rect x="${L}" y="0" width="${x(z0)-L}" height="${H}" class="ovmask"/><rect x="${x(z1)}" y="0" width="${W-R-x(z1)}" height="${H}" class="ovmask"/>`:''}
-    <rect x="${x(z0)}" y="1" width="${Math.max(3,x(z1)-x(z0))}" height="${H-2}" class="ovwin"/>
+function overlaySVG(id,keys,a,b,h){
+  const pid='xp'+(xexN++),W=XW,L=XL,R=XW<500?92:Math.min(150,XW*.24),T=16,B=28;
+  const x=t=>L+(W-L-R)*(t-a)/(b-a);const ys={},lines=[];
+  keys.forEach(k=>{const pts=samples(id,k,a,b),vs=pts.map(p=>p[1]).filter(v=>v!=null);const lo=Math.min(...vs),hi=Math.max(...vs),sp=(hi-lo)||1;
+    const y=v=>T+(h-T-B)*(1-(v-lo)/sp);ys[k]=y;const {d}=pathOf(pts,x,y,h-B);const last=[...pts].reverse().find(p=>p[1]!=null);lines.push({k,d,last,y});});
+  const fr=frame(a,b,h,T,B,W,L,R,x);
+  // étiquettes directes en bout de courbe, écartées pour ne pas se chevaucher
+  const lab=lines.filter(l=>l.last).map(l=>({k:l.k,y:l.y(l.last[1]),x:x(l.last[0])})).sort((p,q)=>p.y-q.y);
+  for(let i=1;i<lab.length;i++)if(lab[i].y-lab[i-1].y<16)lab[i].y=lab[i-1].y+16;
+  XEX[pid]={id,keys,a,b,L,R,W,h,T,B,x,ys,norm:true};
+  return `<svg class="xp" data-xp="${pid}" viewBox="0 0 ${W} ${h}" tabindex="0" role="img" aria-label="Croisement de ${keys.map(k=>XS[k].l).join(', ')}">
+    ${[0,.25,.5,.75,1].map(f=>{const yy=T+(h-T-B)*(1-f);return `<line class="gl" x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}"/><text class="ax" x="${L-8}" y="${yy+4}" text-anchor="end">${f===1?'max':f===0?'min':''}</text>`}).join('')}
+    ${fr.grid}${fr.fut}
+    ${lines.map(l=>`<path class="ln mix" d="${l.d}" style="stroke:var(${XS[l.k].c})"/>`).join('')}
+    ${lab.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" style="fill:var(${XS[p.k].c})"/><text class="dl" x="${p.x+8}" y="${p.y+4}">${esc(XS[p.k].l.split(' ')[0])}</text>`).join('')}
+    <g class="hov" visibility="hidden"><line class="cross" y1="${T}" y2="${h-B}"/>${keys.map(k=>`<circle class="dt" data-k="${k}" r="5" style="fill:var(${XS[k].c})"/>`).join('')}</g>
+    <rect class="brush" y="${T}" height="${h-T-B}" width="0" visibility="hidden"/>
+    <rect x="${L}" y="${T}" width="${W-L-R}" height="${h-T-B}" fill="transparent"/>
   </svg>`;
 }
+function stats(id,k,a,b){const vs=[];for(let t=Math.ceil(a);t<=b;t++){const v=xval(id,k,t);if(v!=null)vs.push([t,v])}if(!vs.length)return null;const c=XS[k],f=v=>nf(v,c.d)+' '+c.u;let mi=vs[0],ma=vs[0],s=0;vs.forEach(p=>{if(p[1]<mi[1])mi=p;if(p[1]>ma[1])ma=p;s+=p[1]});return {min:f(mi[1]),max:f(ma[1]),avg:f(s/vs.length),tmin:mi[0],tmax:ma[0],vs}}
+function corr(id,k1,k2,a,b){let n=0,s1=0,s2=0,s11=0,s22=0,s12=0;for(let t=Math.ceil(a);t<=b;t++){const u=xval(id,k1,t),v=xval(id,k2,t);if(u==null||v==null)continue;n++;s1+=u;s2+=v;s11+=u*u;s22+=v*v;s12+=u*v}if(n<6)return null;const cv=s12/n-s1*s2/n/n,v1=s11/n-s1*s1/n/n,v2=s22/n-s2*s2/n/n;return v1<=0||v2<=0?null:cv/Math.sqrt(v1*v2)}
+function facts(id,k,a,b){const st=stats(id,k,a,b);if(!st)return null;const c=XS[k];
+  if(c.thr!=null){const above=k==='hum';const hrs=st.vs.filter(p=>above?p[1]>c.thr:p[1]<c.thr).length;
+    if(hrs){const first=st.vs.find(p=>above?p[1]>c.thr:p[1]<c.thr);return `${c.l} : ${above?'au-dessus de':'sous'} ${nf(c.thr,c.d)} ${c.u} pendant ${hrs} h, à partir du ${lblT(first[0])}.`}
+    return `${c.l} : toujours ${above?'sous':'au-dessus de'} ${nf(c.thr,c.d)} ${c.u} sur la période.`}
+  if(k==='pres'){let best=0,bt=null;for(let i=24;i<st.vs.length;i++){const dlt=st.vs[i][1]-st.vs[i-24][1];if(dlt<best){best=dlt;bt=st.vs[i][0]}}return best<-3?`Pression : plus forte baisse en 24 h, ${nf(best,0)} hPa jusqu’au ${lblT(bt)} (vent probable).`:'Pression : stable, pas de baisse rapide.'}
+  return `${c.l} : de ${st.min} (${lblT(st.tmin)}) à ${st.max} (${lblT(st.tmax)}).`}
+function pairText(k1,k2,r){const a=XS[k1].l.toLowerCase(),b=XS[k2].l.toLowerCase(),ar=Math.abs(r);
+  const force=ar>=.7?'lien fort':ar>=.4?'lien moyen':'pas de lien net';
+  if(ar<.4)return {cls:'none',t:`${cap1(a)} et ${b} : ${force}. Elles évoluent chacune de leur côté.`,r};
+  return {cls:r>0?'pos':'neg',t:`${cap1(a)} et ${b} : ${force}. ${r>0?'Quand l’une monte, l’autre monte aussi.':'Quand l’une monte, l’autre baisse.'}`,r};}
+function exMeasure(cards){const el=document.getElementById('explorer');let w=el&&el.clientWidth?el.clientWidth:(innerWidth<760?innerWidth-60:900);if(cards&&w>=760)w=(w-14)/2;w-=36;XW=Math.max(300,Math.min(900,Math.round(w)));XL=XW<480?40:50;}
+function cardHTML(id,k,z0,z1){const c=XS[k],st=stats(id,k,z0,z1),now=HNOW>=z0&&HNOW<=z1?xval(id,k,HNOW):null;
+  return `<section class="card"><div class="card-h"><div><h3>${esc(c.l)}</h3><div class="sub">${esc(c.sub)}, en ${c.u}</div></div><div class="total"><small>${now!=null?'Maintenant':'Moyenne'}</small><b>${now!=null?nf(now,c.d)+' '+c.u:(st?st.avg:'—')}</b></div></div>
+    <div class="card-b">${panelSVG(id,k,z0,z1,230)}${st?`<div class="chart-note">Sur la période : min <b>${st.min}</b> · moyenne <b>${st.avg}</b> · max <b>${st.max}</b></div>`:''}</div></section>`;}
 function explorerHTML(id){
-  for(const k in XEX)delete XEX[k];exMeasure();
+  for(const k in XEX)delete XEX[k];
   if(S.ex.boat!==id){S.ex.boat=id;S.ex.z=null}
-  const keys=exKeys(),[a,b]=exRange(),[z0,z1]=exWin(),zoomed=z0>a||z1<b;
-  const mi=MONTHS.findIndex(([y,m])=>y===S.ex.y&&m===S.ex.m);
+  exDefaults();const cards=S.ex.mode==='cartes';exMeasure(cards);
+  const [a,b]=exRange(),[z0,z1]=exWin(),zoomed=z0>a||z1<b,mi=MONTHS.findIndex(([y,m])=>y===S.ex.y&&m===S.ex.m);
   const dim=new Date(Date.UTC(S.ex.y,S.ex.m+1,0)).getUTCDate();
-  const title=S.ex.per==='7j'?'Du mer. 4 au mar. 10 novembre, une mesure par heure':`Historique du 1 au ${dim} ${MOL[S.ex.m]} ${S.ex.y}${S.ex.m===10?' (données jusqu’au mar. 10)':''}`;
-  const big=S.ex.mode==='individuel';
-  const panels=keys.map((k,i)=>{const st=stats(id,k,z0,z1),c=XS[k];
-    return `<div class="xpanel"><div class="xph"><b>${esc(c.l)}</b>${st?`<span class="xst"><span>Min <b>${st.min}</b></span><span>Moy. <b>${st.avg}</b></span><span>Max <b>${st.max}</b></span></span>`:'<span class="muted">Pas de données</span>'}</div>
-      ${panelSVG(id,k,z0,z1,big?300:(keys.length>2?150:180),big||i===keys.length-1,big,i===0)}</div>`}).join('');
-  return `<div class="xbar">
-      <div class="seg" role="group" aria-label="Période"><button data-ex-per="7j" aria-pressed="${S.ex.per==='7j'}">7 derniers jours</button><button data-ex-per="mois" aria-pressed="${S.ex.per==='mois'}">Mois</button></div>
+  const per=S.ex.per==='7j'?'Du mer. 4 au mar. 10 novembre':S.ex.per==='tout'?`Tout l’historique : du 1 août au 10 novembre 2026`:`Du 1 au ${dim} ${MOL[S.ex.m]} ${S.ex.y}`;
+  const bar=`<div class="xbar">
+      <div class="seg" role="group" aria-label="Période"><button data-ex-per="7j" aria-pressed="${S.ex.per==='7j'}">7 jours</button><button data-ex-per="mois" aria-pressed="${S.ex.per==='mois'}">Mois</button><button data-ex-per="tout" aria-pressed="${S.ex.per==='tout'}">Tout l’historique</button></div>
       ${S.ex.per==='mois'?`<div class="mnav"><button data-ex-m="-1" ${mi<=0?'disabled':''} aria-label="Mois précédent">${ic('back',16)}</button><b>${cap1(MOL[S.ex.m])} ${S.ex.y}</b><button data-ex-m="1" ${mi>=MONTHS.length-1?'disabled':''} aria-label="Mois suivant">${ic('chev',16)}</button></div>`:''}
-      <div class="seg" role="group" aria-label="Vue"><button data-ex-mode="ensemble" aria-pressed="${S.ex.mode==='ensemble'}">${ic('grid',14)} Ensemble</button><button data-ex-mode="individuel" aria-pressed="${S.ex.mode==='individuel'}">${ic('pulse',14)} Individuel</button></div>
-      <div class="fchips">${Object.entries(XS).map(([k,c])=>{const on=S.ex.mode==='ensemble'?S.ex.sel.includes(k):S.ex.one===k;return `<button class="fchip" data-ex-ser="${k}" aria-pressed="${on}">${S.ex.mode==='ensemble'?(on?ic('check',13,2.4):''):''}${esc(c.l)}</button>`}).join('')}</div>
+      <div class="seg" role="group" aria-label="Affichage" style="margin-left:auto"><button data-ex-mode="cartes" aria-pressed="${cards}">${ic('grid',14)} Graphiques</button><button data-ex-mode="ensemble" aria-pressed="${!cards}">${ic('share',14)} Vue d’ensemble</button></div>
     </div>
-    <div class="xsub"><span class="muted">${title}</span>
-      <div class="zbtns"><span class="muted zl">${zoomed?`Zoom : ${lblT(z0)} → ${lblT(z1)}`:'Glissez sur une courbe pour zoomer'}</span>
-        <button data-ex-z="out" aria-label="Dézoomer" ${!zoomed?'disabled':''}>−</button><button data-ex-z="in" aria-label="Zoomer">+</button><button data-ex-z="left" aria-label="Plus tôt" ${z0<=a?'disabled':''}>${ic('back',14)}</button><button data-ex-z="right" aria-label="Plus tard" ${z1>=b?'disabled':''}>${ic('chev',14)}</button><button data-ex-z="reset" class="wide" ${!zoomed?'disabled':''}>Tout voir</button></div></div>
-    <div class="xpanels ${big?'big':''}">${panels}</div>
-    ${overviewSVG(id,keys[0],a,b,z0,z1)}`;
+    <div class="xsub"><span class="muted">${per}${zoomed?` · zoom : ${lblT(z0)} → ${lblT(z1)}`:''}</span>
+      <span class="muted zl">${zoomed?`<button class="btn btn-ghost btn-sm" data-ex-z="reset">Tout voir</button>`:'Glissez sur une courbe pour zoomer · double-clic pour revenir'}</span></div>`;
+  const pick=(sel,attr,label)=>`<div class="xpick"><span class="muted">${label}</span>${Object.entries(XS).map(([k,c])=>{const on=sel.includes(k);return `<button class="fchip xchip" ${attr}="${k}" aria-pressed="${on}"><i style="background:var(${c.c})"></i>${esc(c.l)}</button>`}).join('')}</div>`;
+  if(cards){
+    return bar+pick(S.ex.show,'data-ex-show','Afficher :')+`<div class="grid g2 xcards">${Object.keys(XS).filter(k=>S.ex.show.includes(k)).map(k=>cardHTML(id,k,z0,z1)).join('')}</div>`;
+  }
+  const keys=Object.keys(XS).filter(k=>S.ex.mix.includes(k));
+  const pairs=[];for(let i=0;i<keys.length;i++)for(let j=i+1;j<keys.length;j++){const r=corr(id,keys[i],keys[j],z0,z1);if(r!=null)pairs.push(pairText(keys[i],keys[j],r))}
+  pairs.sort((p,q)=>Math.abs(q.r)-Math.abs(p.r));
+  const fx=keys.map(k=>facts(id,k,z0,z1)).filter(Boolean);
+  const evt=id==='b2'&&H0+CUT>z0&&H0+CUT<z1?`<li><b>Événement :</b> prise de quai débranchée le lun. 9 nov. à 18 h. ${keys.includes('batt')?'La batterie commence à baisser juste après.':''}</li>`:'';
+  return bar+pick(S.ex.mix,'data-ex-mix','Croiser (2 ou plus) :')+`
+    <section class="card"><div class="card-h"><div><h3>Vue d’ensemble</h3><div class="sub">${keys.length} courbes superposées, chacune ramenée entre son minimum et son maximum pour comparer leurs variations</div></div></div>
+      <div class="card-b">${overlaySVG(id,keys,z0,z1,300)}
+        <div class="legend">${keys.map(k=>`<span><i style="background:var(${XS[k].c})"></i>${esc(XS[k].l)}</span>`).join('')}</div></div></section>
+    <section class="card xres"><div class="card-h"><div><h3>Résultat du croisement</h3><div class="sub">Calculé sur la période affichée${zoomed?' (zoom)':''}</div></div></div>
+      <div class="card-b">
+        ${pairs.map(p=>`<div class="xpair ${p.cls}"><span class="xr">${p.r>0?'+':'−'}${nf(Math.abs(p.r),2)}</span><span>${esc(p.t)}</span></div>`).join('')}
+        <ul class="xfacts">${evt}${fx.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+        <div class="chart-note">Le chiffre va de −1 à +1 : proche de +1, les deux courbes montent et descendent ensemble ; proche de −1, l’une monte quand l’autre baisse ; proche de 0, pas de lien.</div>
+      </div></section>`;
 }
 function renderExplorer(){const el=document.getElementById('explorer');if(!el)return;el.innerHTML=explorerHTML(el.dataset.boat);bindExplorer();}
 function setZoom(z0,z1){const [a,b]=exRange();let w=z1-z0;if(w>=b-a-0.5){S.ex.z=null;return}w=Math.max(w,4);if(z0<a){z0=a;z1=a+w}if(z1>b){z1=b;z0=b-w}S.ex.z=[z0,z1]}
-function tipRows(title,rows,cx,cy){const t=TIP();t.replaceChildren();const h=document.createElement('span');h.textContent=title;t.append(h);rows.forEach(([l,v])=>{const r=document.createElement('div');r.className='trow';const b=document.createElement('b');b.textContent=v;const s=document.createElement('span');s.textContent=l;r.append(b,s);t.append(r)});t.hidden=false;
+function tipRows(title,rows,cx,cy){const t=TIP();t.replaceChildren();const h=document.createElement('span');h.textContent=title;t.append(h);rows.forEach(([l,v,c])=>{const r=document.createElement('div');r.className='trow';const k=document.createElement('i');if(c)k.style.background=`var(${c})`;const b=document.createElement('b');b.textContent=v;const s=document.createElement('span');s.textContent=l;r.append(k,b,s);t.append(r)});t.hidden=false;
   const w=t.offsetWidth,hh=t.offsetHeight;let left=cx+16,top=cy-hh-12;if(left+w>innerWidth-8)left=cx-w-16;if(top<8)top=cy+16;t.style.left=Math.max(8,left)+'px';t.style.top=top+'px';}
 function bindExplorer(){
   const root=document.getElementById('explorer');if(!root)return;
   const svgs=[...root.querySelectorAll('svg.xp')];
   const tOf=(svg,cx)=>{const m=XEX[svg.dataset.xp],r=svg.getBoundingClientRect(),vx=(cx-r.left)/r.width*m.W;return m.a+(vx-m.L)/(m.W-m.L-m.R)*(m.b-m.a)};
-  const showAt=(t,cx,cy)=>{const rows=[];svgs.forEach(s=>{const m=XEX[s.dataset.xp],tt=Math.round(Math.min(m.b,Math.max(m.a,t))),v=xval(m.id,m.k,tt),g=s.querySelector('.hov');
-      if(v==null){g.setAttribute('visibility','hidden');rows.push([XS[m.k].l,'—']);return;}
-      g.setAttribute('visibility','visible');g.querySelector('line').setAttribute('x1',m.x(tt));g.querySelector('line').setAttribute('x2',m.x(tt));const c=g.querySelector('circle');c.setAttribute('cx',m.x(tt));c.setAttribute('cy',m.y(v));
-      rows.push([XS[m.k].l,nf(v,XS[m.k].d===1?2:1)+' '+XS[m.k].u]);});
-    tipRows(lblT(Math.round(t)),rows,cx,cy);};
+  const showAt=(t,cx,cy)=>{const rows=[];svgs.forEach(s=>{const m=XEX[s.dataset.xp],tt=Math.round(Math.min(m.b,Math.max(m.a,t))),g=s.querySelector('.hov');let any=false;
+      m.keys.forEach(k=>{const v=xval(m.id,k,tt),c=g.querySelector(`circle[data-k="${k}"]`);if(v==null){c.setAttribute('visibility','hidden');rows.push([XS[k].l,'—',XS[k].c]);return}any=true;c.setAttribute('visibility','visible');c.setAttribute('cx',m.x(tt));
+        let yy;if(m.norm){const y=m.ys[k];yy=y(v)}else yy=m.ys[k](v);c.setAttribute('cy',yy);rows.push([XS[k].l,nf(v,XS[k].d===1?2:1)+' '+XS[k].u,XS[k].c])});
+      g.setAttribute('visibility',any?'visible':'hidden');const ln=g.querySelector('line');ln.setAttribute('x1',m.x(tt));ln.setAttribute('x2',m.x(tt));});
+    const uniq=[];rows.forEach(r=>{if(!uniq.some(u=>u[0]===r[0]))uniq.push(r)});tipRows(lblT(Math.round(t)),uniq,cx,cy);};
   const hideAll=()=>{svgs.forEach(s=>s.querySelector('.hov').setAttribute('visibility','hidden'));hideTip();};
   let drag=null;
   svgs.forEach(svg=>{
-    const m=XEX[svg.dataset.xp],br=svg.querySelector('.brush');
+    const m=XEX[svg.dataset.xp];
     svg.addEventListener('pointerdown',e=>{if(e.button)return;drag={t0:tOf(svg,e.clientX),svg};try{svg.setPointerCapture(e.pointerId)}catch(_){}});
     svg.addEventListener('pointermove',e=>{const t=tOf(svg,e.clientX);showAt(t,e.clientX,e.clientY);
       if(drag&&drag.svg===svg){const t0=Math.max(m.a,Math.min(drag.t0,t)),t1=Math.min(m.b,Math.max(drag.t0,t));svgs.forEach(s=>{const mm=XEX[s.dataset.xp],b2=s.querySelector('.brush');b2.setAttribute('x',mm.x(t0));b2.setAttribute('width',Math.max(0,mm.x(t1)-mm.x(t0)));b2.setAttribute('visibility','visible')});}});
     svg.addEventListener('pointerup',e=>{if(!drag)return;const t=tOf(svg,e.clientX),t0=Math.min(drag.t0,t),t1=Math.max(drag.t0,t);drag=null;
-      if(t1-t0>=2&&Math.abs(XEX[svg.dataset.xp].x(t1)-XEX[svg.dataset.xp].x(t0))>8){setZoom(t0,t1);hideTip();renderExplorer();}else svgs.forEach(s=>s.querySelector('.brush').setAttribute('visibility','hidden'));});
+      if(t1-t0>=2&&Math.abs(m.x(t1)-m.x(t0))>8){setZoom(t0,t1);hideTip();renderExplorer();}else svgs.forEach(s=>s.querySelector('.brush').setAttribute('visibility','hidden'));});
     svg.addEventListener('pointerleave',()=>{if(!drag)hideAll();});
     svg.addEventListener('dblclick',()=>{S.ex.z=null;hideTip();renderExplorer();});
     svg.addEventListener('focus',()=>{const r=svg.getBoundingClientRect();showAt(Math.min(m.b,HNOW),r.right-40,r.top+20)});
     svg.addEventListener('blur',hideAll);
-    svg.addEventListener('keydown',e=>{const map={ArrowLeft:'left',ArrowRight:'right','+':'in','=':'in','-':'out',Escape:'reset'};if(map[e.key]){e.preventDefault();exZoom(map[e.key]);const s=document.querySelector('#explorer svg.xp');if(s)s.focus();}});
+    svg.addEventListener('keydown',e=>{if(e.key==='Escape'){S.ex.z=null;renderExplorer();}});
   });
-  const ov=root.querySelector('svg.xov');
-  if(ov){const move=e=>{const r=ov.getBoundingClientRect(),vx=(e.clientX-r.left)/r.width*XW,[a,b]=exRange(),[z0,z1]=exWin();const t=a+(vx-XL)/(XW-XL-16)*(b-a);const w=(S.ex.z?z1-z0:Math.max(24,(b-a)/4));setZoom(t-w/2,t+w/2);renderExplorer();};
-    ov.addEventListener('pointerdown',e=>{move(e)});}
 }
-function exZoom(kind){const [a,b]=exRange(),[z0,z1]=exWin(),w=z1-z0,c=(z0+z1)/2;
-  if(kind==='reset')S.ex.z=null;else if(kind==='in')setZoom(c-w/4,c+w/4);else if(kind==='out')setZoom(c-w,c+w);else if(kind==='left')setZoom(z0-w/2,z1-w/2);else if(kind==='right')setZoom(z0+w/2,z1+w/2);
-  hideTip();renderExplorer();}
 document.addEventListener('click',e=>{
-  const el=e.target.closest('[data-ex-per],[data-ex-m],[data-ex-mode],[data-ex-ser],[data-ex-z]');if(!el||!el.closest('#explorer'))return;
+  const el=e.target.closest('[data-ex-per],[data-ex-m],[data-ex-mode],[data-ex-show],[data-ex-mix],[data-ex-z]');if(!el||!el.closest('#explorer'))return;
   e.stopPropagation();
-  if(el.dataset.exPer){S.ex.per=el.dataset.exPer;S.ex.z=null;if(S.ex.per==='mois'){S.ex.y=2026;S.ex.m=10}}
-  else if(el.dataset.exM){const i=MONTHS.findIndex(([y,m])=>y===S.ex.y&&m===S.ex.m)+(+el.dataset.exM);if(MONTHS[i]){[S.ex.y,S.ex.m]=MONTHS[i];S.ex.z=null}}
-  else if(el.dataset.exMode){S.ex.mode=el.dataset.exMode}
-  else if(el.dataset.exSer){const k=el.dataset.exSer;if(S.ex.mode==='individuel')S.ex.one=k;else{const s=S.ex.sel;if(s.includes(k)){if(s.length>1)S.ex.sel=s.filter(x=>x!==k)}else S.ex.sel=[...s,k];}}
-  else if(el.dataset.exZ){exZoom(el.dataset.exZ);return}
+  const d=el.dataset;
+  if(d.exPer){S.ex.per=d.exPer;S.ex.z=null;if(d.exPer==='mois'){S.ex.y=2026;S.ex.m=10}}
+  else if(d.exM){const i=MONTHS.findIndex(([y,m])=>y===S.ex.y&&m===S.ex.m)+(+d.exM);if(MONTHS[i]){[S.ex.y,S.ex.m]=MONTHS[i];S.ex.z=null}}
+  else if(d.exMode){S.ex.mode=d.exMode}
+  else if(d.exShow){const k=d.exShow,s=S.ex.show;S.ex.show=s.includes(k)?(s.length>1?s.filter(x=>x!==k):s):[...s,k]}
+  else if(d.exMix){const k=d.exMix,s=S.ex.mix;if(s.includes(k)){if(s.length>2)S.ex.mix=s.filter(x=>x!==k);else toast('Choisissez au moins 2 courbes à croiser')}else S.ex.mix=[...s,k]}
+  else if(d.exZ){S.ex.z=null}
   hideTip();renderExplorer();
 },true);
 
 
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
-const APP_VERSION='v5';
+const APP_VERSION='v6';
 const VERSIONS_FALLBACK=[
+  {v:'v6',date:'2026-11-12',t:'Courbes : cartes comme avant, mois ou tout l’historique, vue d’ensemble qui croise les données'},
   {v:'v5',date:'2026-11-12',t:'Double vue : app + arborescence avant / après, versions'},
   {v:'v4',date:'2026-11-12',t:'Courbes : historique au mois, vues ensemble / individuelle, zoom'},
   {v:'v3',date:'2026-11-10',t:'Commercial : proposition en un clic avec message et lien produit'},
@@ -1211,7 +1243,7 @@ const APRES=[
       {id:'zoomcap',t:'Zoom sur un capteur',e:'tap sur une colonne',st:'new',k:['capteurs:dev'],go:{hash:'capteurs',capBoat:null,dev:'battS'},why:'Savoir combien de bateaux sont concernés par un même problème.',gain:'Équipés, en alerte, sans capteur, et la répartition du parc.',bm:'N° 2 Score avec actions (sans note)'},
       {dec:'Tap sur un bateau'},
       {id:'plan',t:'Le bateau en plan + journal',e:'oui',st:'new',k:['capteurs:boat'],go:{hash:'capteurs',capBoat:'b2'},why:'Les noms techniques du fichier ne parlent qu’aux techniciens.',gain:'Le bateau vu de dessus, zone par zone, avec l’histoire des derniers jours : compréhensible par tous.',bm:'Hors benchmark : lisibilité'},
-      {id:'courbes',t:'Courbes et historique',e:'déplier',st:'new',k:['capteurs:boat:courbes'],go:{hash:'capteurs',capBoat:'b2',acc:{courbes:true}},why:'Sept jours ne suffisent pas pour comprendre une panne ou préparer un hivernage.',gain:'Le mois entier, les courbes ensemble ou une par une, et un zoom à l’heure près.',bm:'Suit la saison nautique'},
+      {id:'courbes',t:'Courbes et historique',e:'déplier',st:'new',k:['capteurs:boat:courbes'],go:{hash:'capteurs',capBoat:'b2',acc:{courbes:true}},why:'Sept jours ne suffisent pas pour comprendre une panne ou préparer un hivernage.',gain:'7 jours, un mois ou tout l’historique. La vue d’ensemble croise 2 courbes ou plus et dit en clair si elles sont liées.',bm:'Suit la saison nautique'},
       {id:'prop',t:'Proposer un produit',e:'commercial',st:'new',k:['*prop'],go:{hash:'capteurs',role:'commercial',capBoat:null,dev:null,prop:'b4|cale'},why:'Le commercial devait rédiger chaque proposition à la main.',gain:'Un message personnalisé avec le lien du produit, prêt à envoyer en un clic.',bm:'Récompenser le travail bien fait'},
       {id:'liste',t:'Les 169 capteurs du fichier',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,acc:{liste:true},scroll:'liste'},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
   {id:'bat',n:4,t:'Bateaux',st:'mod',k:['bateaux'],go:{hash:'bateaux'},why:'La liste ne tenait pas avec une grande flotte et la mise en service était éclatée entre plusieurs écrans.',gain:'Même mise en page qu’aujourd’hui, mais des filtres, des pages et une checklist qui évite les oublis.',bm:'N° 3 Checklist de démarrage',

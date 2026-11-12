@@ -690,5 +690,24 @@ button.tchip:hover{border-color:var(--blue);color:var(--blue-ink)}
 .tdec span{position:relative;font-size:12px;font-weight:600;color:var(--t-dec-ink);text-align:center;padding:0 28px;line-height:1.25}
 .tabk small{padding-right:22px}
 @media (max-width:640px){.vmenu{left:auto;right:auto;left:0}.tb-l .muted{display:none}.topbar{gap:8px}}
+/* ---------- Courbes v6 : cartes, croisement ---------- */
+:root{--s1:#2a78d6;--s2:#1baf7a;--s3:#6250d6;--s4:#e87ba4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--s1:#3987e5;--s2:#199e70;--s3:#9085e9;--s4:#d55181}}
+:root[data-theme="dark"]{--s1:#3987e5;--s2:#199e70;--s3:#9085e9;--s4:#d55181}
+.xpick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.xpick>.muted{margin-right:4px}
+.xchip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.xchip[aria-pressed="true"]{background:var(--blue-softer);border-color:var(--blue);color:var(--ink)}
+.xcards>.card{min-width:0}
+svg.xp .ln.mix{stroke-width:2}
+svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--font)}
+.xres .card-b{display:flex;flex-direction:column;gap:10px}
+.xpair{display:flex;gap:12px;align-items:center;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.xpair .xr{flex:none;min-width:58px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;border-radius:8px;padding:4px 8px;background:var(--line-2);color:var(--ink)}
+.xpair.pos .xr{background:var(--blue-soft);color:var(--blue-ink)}
+.xpair.neg .xr{background:var(--new-bg);color:var(--new-ink)}
+.xfacts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2)}
+.tip .trow i{width:10px;height:3px;border-radius:2px;display:inline-block;background:var(--ink-3);align-self:center}
+@media (max-width:500px){svg.xp .dl{font-size:11px}}
 
 html,body{margin:0}
