@@ -14,7 +14,7 @@ Chaque version importante est conservée dans `versions/vN/` et listée dans `ve
 
 | Version | Date | Contenu |
 |---|---|---|
-| v13 | 12/11/2026 | Page Bateaux allégée : liste repliable, fiche sur une colonne avec « À faire » et sections repliables |
+| v13 | 12/11/2026 | Page Bateaux allégée : la liste ou la fiche, une seule à la fois, avec « À faire » en tête |
 | v12 | 12/11/2026 | Profil fixé à la connexion (choix hors application), le directeur voit toutes les vues |
 | v11 | 12/11/2026 | Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée |
 | v10 | 12/11/2026 | Déclaration de stock : bateaux à régulariser, mise en service en un clic |

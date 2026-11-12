@@ -753,12 +753,15 @@ function boatRowsHTML(){
   if(S.bpage>=pages)S.bpage=pages-1;
   const shown=L.slice(S.bpage*PER,S.bpage*PER+PER);
   if(!L.length)return `<div class="muted" style="padding:16px 6px">Aucun bateau ne correspond. Effacez la recherche ou choisissez « Tous ».</div>`;
-  const rows=shown.map(x=>{const n=boatIssues(x.id);
-    return `<button class="boat ${x.id===S.sel?'on':''}" data-boat="${x.id}">
+  const rows=shown.map(x=>{const n=boatIssues(x.id),st=boatState(x.id);
+    const steps=x.steps,k=steps?steps.filter(Boolean).length:0;
+    const next=steps&&x.status==='Mise en service'?['warn',`Mise en service ${k}/5`]:x.insp?['crit','Inspection en retard']:n?[st==='crit'?'crit':'warn',`${n} alerte${n>1?'s':''} capteur${n>1?'s':''}`]:!V[x.id]&&x.status==='Vendu'?['off','Pas de données']:x.status==='En stock'?['off','En stock']:['ok','Rien à faire'];
+    return `<button class="boat brow2 ${x.id===S.sel?'on':''}" data-boat="${x.id}">
       <span class="av">${esc(x.brand)}</span>
-      <span class="nm"><b>${esc(x.name)}</b><span class="muted">${esc(x.owner)}</span></span>
-      ${n?`<span class="dot">${n}</span>`:''}
+      <span class="nm"><b>${esc(x.name)}</b><span class="muted">${esc(x.owner)}${x.model?` · ${esc(x.model)}`:''}</span></span>
+      <span class="nx st-${next[0]}"><i></i>${next[1]}</span>
       <span class="chip ${x.status==='Vendu'?'c-green':'c-yellow'}">${x.status}</span>
+      <span class="go">${ic('chev',18)}</span>
     </button>`}).join('');
   const win=[];for(let i=Math.max(0,S.bpage-2);i<Math.min(pages,S.bpage+3);i++)win.push(i);
   const pager=`<nav class="pager" aria-label="Pages"><button data-bpage="${S.bpage-1}" ${S.bpage===0?'disabled':''} aria-label="Page précédente">${ic('back',18)}</button>${win.map(i=>`<button data-bpage="${i}" class="${i===S.bpage?'on':''}" aria-current="${i===S.bpage?'page':'false'}">${i+1}</button>`).join('')}<button data-bpage="${S.bpage+1}" ${S.bpage>=pages-1?'disabled':''} aria-label="Page suivante">${ic('chev',18)}</button></nav>
@@ -768,15 +771,16 @@ function boatRowsHTML(){
 S.listOpen=true;S.fsec={};
 function vBateaux(){
   const b=sel(),nf_=BF.find(f=>f.id===S.bf);
-  return `<div class="split ${S.listOpen?'':'nolist'}">
+  if(!S.listOpen&&!b)S.listOpen=true;
+  return `<div class="split one ${S.listOpen?'listonly':'nolist'}">
     ${S.listOpen?`<div class="listcol"><div class="lh">
-        <div style="display:flex;align-items:center;gap:6px;font-size:18px;font-weight:500"><button class="iconbtn" data-blist aria-label="Replier la liste des bateaux" title="Replier la liste">${ic('back',20)}</button>Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:18px;font-weight:500">Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
         <div class="search"><label class="in">${ic('search',20)}<input id="q" value="${esc(S.bq)}" placeholder="Rechercher" aria-label="Rechercher un bateau, un client, un HIN" autocomplete="off"><button class="fbtn ${S.bfOpen||S.bf!=='all'?'on':''}" data-bfopen aria-expanded="${S.bfOpen}" aria-label="Filtrer et trier">${ic('filter',20)}</button></label><button class="sq sq-blue" aria-label="Ajouter un bateau">${ic('boat',22)}</button></div>
         ${S.bfOpen?`<div class="fpanel"><div class="fchips" id="bfil" role="group" aria-label="Filtrer">${bfChips()}</div>
           <label class="muted" style="display:flex;gap:8px;align-items:center;font-size:13px">Trier par <select id="bsort" class="bsel"><option value="grav" ${S.bsort==='grav'?'selected':''}>Les plus urgents</option><option value="nom" ${S.bsort==='nom'?'selected':''}>Nom A → Z</option><option value="rev" ${S.bsort==='rev'?'selected':''}>Révision la plus proche</option></select></label></div>`
           :(S.bf!=='all'?`<div class="muted" style="font-size:12.5px">Filtre : <b>${nf_.l}</b> · <button class="linkbtn" data-bf="all">Effacer</button></div>`:'')}
       </div><div class="boats" id="blist">${boatRowsHTML()}</div></div>`:''}
-    <div class="fiche fiche2">${fiche(b)}</div></div>`;
+    ${S.listOpen?'':`<div class="fiche fiche2">${fiche(b)}</div>`}</div>`;
 }
 function fsec(k,title,summary,body,warn){const open=!!S.fsec[k];
   return `<section class="fsec ${open?'open':''}"><button class="fsec-h" data-fsec="${k}" aria-expanded="${open}"><b>${title}</b><span class="fsum ${warn?'warn':''}">${summary}</span><span class="xch ${open?'open':''}">${ic('chev',18)}</span></button>${open?`<div class="fsec-b">${body}</div>`:''}</section>`;}
@@ -795,7 +799,7 @@ function fiche(b){
   const docs=['Bon de livraison.pdf','Facture.pdf','Manuel du propriétaire.pdf'];
   return `
     <div class="fh2">
-      <div class="fh2-top">${S.listOpen?'':`<button class="btn btn-ghost btn-sm" data-blist>${ic('back',16)} Mes bateaux</button>`}<span class="fh2-ic">${ic('boat',24)}</span><h2>${esc(b.name)}</h2><span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}">${b.status}</span><a href="#bateaux" class="linkbtn" style="margin-left:auto">Transférer</a></div>
+      <div class="fh2-back"><button class="btn btn-ghost btn-sm" data-blist>${ic('back',16)} Mes bateaux</button></div><div class="fh2-top"><span class="fh2-ic">${ic('boat',24)}</span><h2>${esc(b.name)}</h2><span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}">${b.status}</span><a href="#bateaux" class="linkbtn" style="margin-left:auto">Transférer</a></div>
       <div class="meta"><span>HIN : ${b.hin||'—'}</span><span>N° commande : ${b.order||'—'}</span>${b.model?`<span>Modèle : ${esc(b.model)}</span>`:''}</div>
       <div class="fh2-own"><span class="own">${ic('user',18)}<b>${esc(b.owner)}</b></span><span class="ib">${ic('mail',18)}</span><span class="ib">${ic('phone',18)}</span>
         ${cta?`<button class="btn btn-pri" id="mes" ${cur!==4?'disabled title="Terminez les étapes précédentes"':''}>Préparer la mise en service</button>`:`<button class="btn btn-out">Voir la fiche client</button>`}</div>
@@ -1387,7 +1391,7 @@ function tourBoot(){
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
 const APP_VERSION='v13';
 const VERSIONS_FALLBACK=[
-  {v:'v13',date:'2026-11-12',t:'Page Bateaux allégée : liste repliable, fiche sur une colonne avec « À faire » et sections repliables'},
+  {v:'v13',date:'2026-11-12',t:'Page Bateaux allégée : la liste ou la fiche, une seule à la fois, avec « À faire » en tête'},
   {v:'v12',date:'2026-11-12',t:'Profil fixé à la connexion (choix hors application), le directeur voit toutes les vues'},
   {v:'v11',date:'2026-11-12',t:'Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée'},
   {v:'v10',date:'2026-11-12',t:'Déclaration de stock : bateaux à régulariser, mise en service en un clic'},
@@ -1422,7 +1426,7 @@ const APRES=[
       {id:'liste',t:'Guide des 169 capteurs (bouton ⓘ)',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,info:true},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
   {id:'bat',n:4,t:'Bateaux',st:'mod',k:['bateaux'],go:{hash:'bateaux'},why:'La liste ne tenait pas avec une grande flotte et la mise en service était éclatée entre plusieurs écrans.',gain:'Même mise en page qu’aujourd’hui, mais des filtres, des pages et une checklist qui évite les oublis.',bm:'N° 3 Checklist de démarrage',
     kids:[
-      {id:'blist',t:'Liste repliable : filtres, tri, pages',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Liste et fiche en deux colonnes de blocs : trois panneaux côte à côte, trop d’informations d’un coup.',gain:'La liste se replie pour donner toute la place à la fiche. La fiche montre d’abord « À faire », le reste se déplie à la demande.',bm:'Hors benchmark'},
+      {id:'blist',t:'La liste ou la fiche, une à la fois',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Liste et fiche en deux colonnes de blocs : trois panneaux côte à côte, trop d’informations d’un coup.',gain:'À l’ouverture, seulement la liste, avec ce qui est à faire sur chaque bateau. Un bateau ouvert prend tout l’écran : « À faire » d’abord, le reste se déplie à la demande.',bm:'Hors benchmark'},
       {id:'check',t:'Checklist de mise en service',e:'bateau en mise en service',st:'new',k:['bateaux:mes'],go:{hash:'bateaux',sel:'b1'},why:'Réception, stock, client, boîtier, livraison : des étapes oubliées.',gain:'« 3 étapes sur 5 » sur la fiche : chaque bateau livré remonte ses données.',bm:'N° 3 Checklist de démarrage'},
       {id:'bnotif',t:'Notifications → Capteurs',e:'fiche',st:'mod',k:['*bnotif'],go:{hash:'bateaux',sel:'b2'},why:'Les alertes n’étaient pas reliées au détail du bateau.',gain:'Le nombre d’alertes sur la fiche et un lien vers les capteurs, sans doublon.',bm:'N° 11 Santé du compte'}]},
   {id:'msg',n:5,t:'Messages',st:'mod',k:['messages'],go:{hash:'messages'},why:'Une alerte capteur entraîne souvent un message du client, traité sans délai visible.',gain:'Le délai de réponse affiché, et les propositions commerciales arrivent dans la conversation du client.',bm:'N° 10 Délai de réponse'},
@@ -1501,7 +1505,7 @@ function goNode(g){
   if('capBoat' in g)S.capBoat=g.capBoat;
   if('dev' in g)S.dev=g.dev;
   if(g.acc)Object.assign(S.acc,g.acc);
-  if(g.sel)S.sel=g.sel;
+  if(g.sel){S.sel=g.sel;S.listOpen=false;}
   if(g.bfOpen!=null)S.bfOpen=g.bfOpen;
   if(S.layout==='tree')setLayout(innerWidth<900?'app':'both');
   if(g.hash){if(location.hash!=='#'+g.hash)location.hash='#'+g.hash;else render();}
@@ -1685,11 +1689,11 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-bfopen]')){S.bfOpen=!S.bfOpen;render();return;}
   const bp=e.target.closest('[data-bpage]');if(bp){if(bp.disabled)return;S.bpage=+bp.dataset.bpage;updateBoats();const l=document.getElementById('blist');if(l)l.scrollTop=0;return;}
   if(e.target.closest('[data-fold]')){S.ficheOpen=!S.ficheOpen;render();return;}
-  if(e.target.closest('[data-blist]')){S.listOpen=!S.listOpen;render();return;}
+  if(e.target.closest('[data-blist]')){S.listOpen=true;render();document.getElementById('main').scrollTop=0;return;}
   const fs=e.target.closest('[data-fsec]');if(fs){const k=fs.dataset.fsec;S.fsec[k]=!S.fsec[k];render();return;}
   const fx=e.target.closest('[data-fx]');if(fx){S.fx[fx.dataset.fx]=!S.fx[fx.dataset.fx];render();return;}
   const a=e.target.closest('[data-go-boat]');
-  if(a&&a.dataset.goBoat){S.sel=a.dataset.goBoat;S.ftab=a.dataset.ftab||null;if(route()==='bateaux'){render();return;}}
+  if(a&&a.dataset.goBoat){S.sel=a.dataset.goBoat;S.listOpen=false;S.ftab=a.dataset.ftab||null;if(route()==='bateaux'){render();return;}}
   const ft=e.target.closest('[data-ftab]');
   if(ft&&!ft.dataset.goBoat&&ft.dataset.ftab){S.ftab=ft.dataset.ftab;render();return;}
   const bf=e.target.closest('[data-bf]');if(bf){S.bf=bf.dataset.bf;S.bpage=0;render();return;}
@@ -1713,7 +1717,7 @@ document.addEventListener('click',e=>{
   const ac=e.target.closest('[data-acc]');
   if(ac){const k=ac.dataset.acc;const was=S.acc[k]!==undefined?S.acc[k]:ac.dataset.def==='1';S.acc[k]=!was;render();const el=document.querySelector(`[data-acc="${k}"]`);if(el)el.focus({preventScroll:true});return;}
   const bt=e.target.closest('[data-boat]');
-  if(bt){S.sel=bt.dataset.boat;render();if(innerWidth<=980){const f=document.querySelector('.fiche');if(f)f.scrollIntoView({block:'start'});}return;}
+  if(bt){S.sel=bt.dataset.boat;S.listOpen=false;S.fsec={};render();document.getElementById('main').scrollTop=0;return;}
   const st=e.target.closest('[data-step]');
   if(st){const b=sel();if(b.steps){const i=+st.dataset.step;if(i===3&&!b.steps[3]&&b.steps[2]){b.steps[3]=true;if(b.id==='b1')doneTask('t4');toast('Boîtier activé · il remonte bien ses données');render();}else if(i===3&&!b.steps[2]){toast('Rattachez d’abord le propriétaire');}}return;}
   if(e.target.closest('#mes')){const b=sel();b.steps[4]=true;b.status='Livré';toast(`Mise en service terminée · ${b.owner} a reçu son accès`);render();checkAllDone();return;}

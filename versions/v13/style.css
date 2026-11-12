@@ -878,5 +878,21 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .fsum.warn{color:var(--orange-ink);font-weight:500}
 .fsec-b{padding:0 16px 14px}
 @media (max-width:640px){.fsec-h{grid-template-columns:minmax(0,1fr) auto}.fsum{grid-column:1;grid-row:2}.fh2-own .btn{margin-left:0;width:100%;justify-content:center}}
+/* ---------- Bateaux : liste OU fiche ---------- */
+.split.one{grid-template-columns:minmax(0,1fr);height:auto}
+.split.one.listonly .listcol{max-width:980px;width:100%;margin:0 auto}
+.split.one .boats{max-height:none;overflow:visible}
+.split.one .fiche2{max-width:980px;width:100%;margin:0 auto;overflow:visible}
+.brow2{gap:14px}
+.brow2 .nm b{font-size:15.5px}
+.brow2 .nx{display:inline-flex;gap:7px;align-items:center;font-size:13px;color:var(--ink-2);white-space:nowrap;margin-left:auto}
+.brow2 .nx i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.brow2 .nx.st-warn i{background:var(--orange)}.brow2 .nx.st-crit i{background:var(--red)}.brow2 .nx.st-off i{background:var(--ink-3)}
+.brow2 .nx.st-crit{color:var(--red);font-weight:500}
+.brow2 .chip{margin-left:0!important;min-width:112px;justify-content:center}
+.brow2 .go{display:flex;color:var(--ink-3)}
+.boat.on .nx,.boat.on .go{color:#fff}
+.fh2-back{margin:-4px 0 2px}
+@media (max-width:640px){.brow2 .chip{display:none}.brow2 .nx{font-size:12px}}
 
 html,body{margin:0}
