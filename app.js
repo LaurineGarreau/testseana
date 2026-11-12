@@ -765,55 +765,50 @@ function boatRowsHTML(){
     <div class="muted lcnt">${S.bpage*PER+1}–${Math.min(L.length,S.bpage*PER+PER)} sur ${L.length} bateaux</div>`;
   return `<div class="boats-in">${rows}</div>${pager}`;
 }
+S.listOpen=true;S.fsec={};
 function vBateaux(){
   const b=sel(),nf_=BF.find(f=>f.id===S.bf);
-  return `<div class="split">
-    <div class="listcol"><div class="lh">
-        <div style="display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500">${ic('back',20)} Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
+  return `<div class="split ${S.listOpen?'':'nolist'}">
+    ${S.listOpen?`<div class="listcol"><div class="lh">
+        <div style="display:flex;align-items:center;gap:6px;font-size:18px;font-weight:500"><button class="iconbtn" data-blist aria-label="Replier la liste des bateaux" title="Replier la liste">${ic('back',20)}</button>Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
         <div class="search"><label class="in">${ic('search',20)}<input id="q" value="${esc(S.bq)}" placeholder="Rechercher" aria-label="Rechercher un bateau, un client, un HIN" autocomplete="off"><button class="fbtn ${S.bfOpen||S.bf!=='all'?'on':''}" data-bfopen aria-expanded="${S.bfOpen}" aria-label="Filtrer et trier">${ic('filter',20)}</button></label><button class="sq sq-blue" aria-label="Ajouter un bateau">${ic('boat',22)}</button></div>
         ${S.bfOpen?`<div class="fpanel"><div class="fchips" id="bfil" role="group" aria-label="Filtrer">${bfChips()}</div>
           <label class="muted" style="display:flex;gap:8px;align-items:center;font-size:13px">Trier par <select id="bsort" class="bsel"><option value="grav" ${S.bsort==='grav'?'selected':''}>Les plus urgents</option><option value="nom" ${S.bsort==='nom'?'selected':''}>Nom A → Z</option><option value="rev" ${S.bsort==='rev'?'selected':''}>Révision la plus proche</option></select></label></div>`
           :(S.bf!=='all'?`<div class="muted" style="font-size:12.5px">Filtre : <b>${nf_.l}</b> · <button class="linkbtn" data-bf="all">Effacer</button></div>`:'')}
-      </div><div class="boats" id="blist">${boatRowsHTML()}</div></div>
-    <div class="fiche">${fiche(b)}</div></div>`;
+      </div><div class="boats" id="blist">${boatRowsHTML()}</div></div>`:''}
+    <div class="fiche fiche2">${fiche(b)}</div></div>`;
 }
+function fsec(k,title,summary,body,warn){const open=!!S.fsec[k];
+  return `<section class="fsec ${open?'open':''}"><button class="fsec-h" data-fsec="${k}" aria-expanded="${open}"><b>${title}</b><span class="fsum ${warn?'warn':''}">${summary}</span><span class="xch ${open?'open':''}">${ic('chev',18)}</span></button>${open?`<div class="fsec-b">${body}</div>`:''}</section>`;}
 function fiche(b){
   const steps=b.steps,n=steps?steps.filter(Boolean).length:0,cur=steps?steps.findIndex(s=>!s):-1;
-  const al=boatIssues(b.id),has=!!V[b.id];
-  const notifTxt=has?(al?`${al} alerte${al>1?'s':''} capteur${al>1?'s':''}`:'(Aucune)'):'(Aucune)';
+  const al=boatIssues(b.id),has=!!V[b.id],cta=steps&&b.status==='Mise en service';
+  const todo=[];
+  if(steps&&cur>=0){const s=STEPS[cur];todo.push(`<div class="todo-i"><span class="ti">${ic('clip',18)}</span><div class="tb"><b>Mise en service · étape ${cur+1} sur 5 : ${s.t}</b><div class="muted">${s.d}</div>
+      <div class="prog" style="margin-top:8px"><i style="width:${n*20}%"></i></div>
+      ${S.fsec.steps?`<div class="tsteps">${STEPS.map((x,i)=>`<div class="step ${steps[i]?'ok':i===cur?'cur':''}"><span class="n">${steps[i]?ic('check',14,3):i+1}</span><div class="sb"><b>${x.t}</b></div></div>`).join('')}</div>`:''}
+      <button class="linkbtn" data-fsec="steps">${S.fsec.steps?'Masquer les étapes':'Voir les 5 étapes'}</button></div>
+      ${s.btn&&cur!==4?`<button class="btn btn-out btn-sm" data-step="${cur}">${s.btn}</button>`:''}</div>`);}
+  if(b.insp)todo.push(`<div class="todo-i warn"><span class="ti">${ic('alert',18)}</span><div class="tb"><b>Inspection en retard</b><div class="muted">${b.insp} · prévue avant le 27/08/2026</div></div><button class="btn btn-pri btn-sm" data-insp="t1">${S.tasks.find(t=>t.id==='t1').done?'Inspection faite ✓':'Commencer l’inspection'}</button></div>`);
+  if(al)todo.push(`<div class="todo-i ${boatState(b.id)==='crit'?'crit':'warn'}"><span class="ti">${ic('pulse',18)}</span><div class="tb"><b>${al} alerte${al>1?'s':''} capteur${al>1?'s':''}</b><div class="muted">${devicesOf(b.id).filter(d=>d.s[0]!=='ok').map(d=>`${d.n} : ${d.main(V[b.id])}`).join(' · ')}</div></div><a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${b.id}">Voir dans Capteurs</a></div>`);
+  const hist=b.status==='Vendu'?[['12/09/2026','Contrôle après 1ère saison'],['03/05/2026','Livraison au client'],['28/04/2026','Mise en service']]:[['02/11/2026','Réception du bateau']];
+  const docs=['Bon de livraison.pdf','Facture.pdf','Manuel du propriétaire.pdf'];
   return `
-    <div class="fh">${ic('boat',24)}<h2>${esc(b.name)}</h2>
-      <span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}" style="margin-left:auto">${b.status}</span>
-      <button class="fold" data-fold aria-expanded="${S.ficheOpen}" aria-label="${S.ficheOpen?'Replier':'Déplier'} les informations">${ic('chev',18,2)}</button>
-      ${S.ficheOpen?`<div class="meta"><span>HIN : ${b.hin||'—'}</span><span>N° commande : ${b.order||'—'}</span>${b.model?`<span>Modèle : ${esc(b.model)}</span>`:''}<a href="#bateaux" style="margin-left:auto">Transférer</a></div>`:''}</div>
-    ${steps?`<div class="blk">
-      <div class="ck-h"><h4>Mise en service</h4>${NEW}<span class="muted" style="margin-left:auto;font-variant-numeric:tabular-nums">${n===5?'Terminée':`${n} étapes sur 5`}</span></div>
-      <div class="prog" style="margin:12px 0 4px"><i style="width:${n*20}%;${n===5?'background:var(--green)':''}"></i></div>
-      ${STEPS.map((s,i)=>`<div class="step ${steps[i]?'ok':i===cur?'cur':''}"><span class="n">${steps[i]?ic('check',14,3):i+1}</span>
-          <div class="sb"><b>${s.t}</b>${!steps[i]&&i===cur?`<div class="sd">${s.d}</div>`:''}${!steps[i]&&i===cur&&s.warn?`<div class="warn-note">${ic('alert',16)}<span>La mise en service envoie un e-mail au client avec son accès à l’app.</span></div>`:''}</div>
-          ${!steps[i]&&i===cur&&s.btn&&i!==4?`<button class="btn btn-out btn-sm" data-step="${i}">${s.btn}</button>`:''}</div>`).join('')}
-    </div>`:''}
-    ${b.insp?`<div class="blk" style="border-left:4px solid var(--orange)"><div class="row"><div><h4>Inspection en retard</h4><div class="muted" style="font-size:13.5px">${b.insp} · prévu avant le 27/08/2026</div></div><button class="btn btn-pri btn-sm" data-insp="t1">${S.tasks.find(t=>t.id==='t1').done?'Inspection faite ✓':'Commencer l’inspection'}</button></div></div>`:''}
-    <div class="fgrid">
-      <div class="fcol">
-        <div class="blk"><div class="row"><h4>Équipement</h4><button class="btn btn-out btn-sm" data-step="3">Diagnostics</button></div>
-          <div class="field"><span>Unité principale</span><span style="display:flex;gap:8px;align-items:center">${has||b.id==='b1'?'3426100474':'—'} ${ic('edit',16)}</span></div></div>
-        <div class="blk"><div class="row"><h4>Gestion locative</h4><span class="toggle" role="switch" aria-checked="false" aria-label="Gestion locative"></span></div><div class="muted" style="margin-top:6px">Activez la gestion locative pour gérer ce bateau depuis Fleet.</div></div>
-        <div class="blk"><div class="row"><h4>Abonnement propriétaire</h4><span class="chip c-grey">${ic('x',12,2)} Aucun</span></div></div>
-        <div class="blk"><div class="row"><h4>Abonnement Insight</h4><span class="chip c-red">${ic('x',12,2)} indisponible</span></div><div class="muted" style="margin-top:6px">Pas de consentement du propriétaire</div></div>
-      </div>
-      <div class="fcol">
-        <div class="blk"><h4>Notifications</h4><div class="field" style="justify-content:center;${al?'color:var(--orange-ink);border-color:var(--orange);font-weight:500':''}">${notifTxt}</div>
-          ${has?`<a class="btn btn-out" href="#capteurs" data-capboat="${b.id}" style="width:100%;justify-content:center;margin-top:10px">Voir plus${al?' dans Capteurs':''}</a>`:`<button class="btn btn-out" style="width:100%;justify-content:center;margin-top:10px" disabled>Voir plus</button>`}</div>
-        <div class="blk"><button class="row xrow" data-fx="hist" aria-expanded="${S.fx.hist}"><h4>Historique</h4><span class="xch ${S.fx.hist?'open':''}">${ic('chev',18)}</span></button>
-          ${S.fx.hist?`<div class="xbody">${(b.status==='Vendu'?[['12/09/2026','Contrôle après 1ère saison'],['03/05/2026','Livraison au client'],['28/04/2026','Mise en service']]:[['02/11/2026','Réception du bateau']]).map(h=>`<div class="act"><span class="b" style="background:var(--blue)"></span><span style="flex:1">${h[1]}</span><span class="muted" style="font-variant-numeric:tabular-nums">${h[0]}</span></div>`).join('')}</div>`:''}</div>
-        <div class="blk"><button class="row xrow" data-fx="docs" aria-expanded="${S.fx.docs}"><h4>Documents</h4><span class="xch ${S.fx.docs?'open':''}">${ic('chev',18)}</span></button>
-          ${S.fx.docs?`<div class="xbody">${['Bon de livraison.pdf','Facture.pdf','Manuel du propriétaire.pdf'].map(d=>`<div class="act"><span class="b" style="background:var(--ink-3)"></span><span style="flex:1">${d}</span></div>`).join('')}</div>`:''}</div>
-      </div>
+    <div class="fh2">
+      <div class="fh2-top">${S.listOpen?'':`<button class="btn btn-ghost btn-sm" data-blist>${ic('back',16)} Mes bateaux</button>`}<span class="fh2-ic">${ic('boat',24)}</span><h2>${esc(b.name)}</h2><span class="chip ${b.status==='Vendu'?'c-green':'c-yellow'}">${b.status}</span><a href="#bateaux" class="linkbtn" style="margin-left:auto">Transférer</a></div>
+      <div class="meta"><span>HIN : ${b.hin||'—'}</span><span>N° commande : ${b.order||'—'}</span>${b.model?`<span>Modèle : ${esc(b.model)}</span>`:''}</div>
+      <div class="fh2-own"><span class="own">${ic('user',18)}<b>${esc(b.owner)}</b></span><span class="ib">${ic('mail',18)}</span><span class="ib">${ic('phone',18)}</span>
+        ${cta?`<button class="btn btn-pri" id="mes" ${cur!==4?'disabled title="Terminez les étapes précédentes"':''}>Préparer la mise en service</button>`:`<button class="btn btn-out">Voir la fiche client</button>`}</div>
     </div>
-    <div class="foot">
-      <div class="owner">${ic('user',20)}<span style="flex:1;min-width:0">${esc(b.owner)}</span><span class="ib">${ic('mail',20)}</span><span class="ib">${ic('phone',20)}</span><span class="ib x">${ic('x',20)}</span></div>
-      ${steps&&b.status==='Mise en service'?`<button class="big-btn" id="mes" ${cur!==4?'disabled title="Terminez les étapes précédentes"':''}>Préparer la mise en service</button>`:`<button class="big-btn" style="background:var(--panel);color:var(--blue);border:1px solid var(--blue)">Voir la fiche client</button>`}
+    <section class="todo"><div class="todo-h"><b>À faire</b>${todo.length?`<span class="scount">${todo.length}</span>`:''}</div>
+      ${todo.length?todo.join(''):`<div class="todo-ok">${ic('check',18,2.4)} Rien à faire sur ce bateau pour le moment.</div>`}</section>
+    <div class="fsecs">
+      ${fsec('equip','Équipement',has||b.id==='b1'?'Unité principale 3426100474':'Aucune unité principale',`<div class="field"><span>Unité principale</span><span style="display:flex;gap:8px;align-items:center">${has||b.id==='b1'?'3426100474':'—'} ${ic('edit',16)}</span></div><button class="btn btn-out btn-sm" data-step="3" style="margin-top:10px">Diagnostics</button>`)}
+      ${fsec('abo','Abonnements','Propriétaire : aucun · Insight : indisponible',`<div class="act"><span style="flex:1">Abonnement propriétaire</span><span class="chip c-grey">${ic('x',12,2)} Aucun</span></div><div class="act"><span style="flex:1">Abonnement Insight<div class="muted" style="font-size:12.5px">Pas de consentement du propriétaire</div></span><span class="chip c-red">${ic('x',12,2)} indisponible</span></div>`,true)}
+      ${fsec('loc','Gestion locative','Désactivée',`<div class="act"><span style="flex:1">Activez la gestion locative pour gérer ce bateau depuis Fleet.</span><span class="toggle" role="switch" aria-checked="false" aria-label="Gestion locative"></span></div>`)}
+      ${fsec('notif','Notifications',al?`${al} alerte${al>1?'s':''} capteur${al>1?'s':''}`:'Aucune',has?`<a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${b.id}">Voir le détail dans Capteurs</a>`:'<div class="muted">Aucune notification.</div>',al>0)}
+      ${fsec('hist','Historique',`${hist.length} événement${hist.length>1?'s':''} · dernier le ${hist[0][0]}`,hist.map(h=>`<div class="act"><span class="b" style="background:var(--blue)"></span><span style="flex:1">${h[1]}</span><span class="muted" style="font-variant-numeric:tabular-nums">${h[0]}</span></div>`).join(''))}
+      ${fsec('docs','Documents',`${docs.length} documents`,docs.map(d=>`<div class="act"><span class="b" style="background:var(--ink-3)"></span><span style="flex:1">${d}</span></div>`).join(''))}
     </div>`;
 }
 
@@ -1392,7 +1387,7 @@ function tourBoot(){
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
 const APP_VERSION='v13';
 const VERSIONS_FALLBACK=[
-  {v:'v13',date:'2026-11-12',t:'Icône bateau « sailboat » comme dans l’app, recherche sur toute la largeur'},
+  {v:'v13',date:'2026-11-12',t:'Page Bateaux allégée : liste repliable, fiche sur une colonne avec « À faire » et sections repliables'},
   {v:'v12',date:'2026-11-12',t:'Profil fixé à la connexion (choix hors application), le directeur voit toutes les vues'},
   {v:'v11',date:'2026-11-12',t:'Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée'},
   {v:'v10',date:'2026-11-12',t:'Déclaration de stock : bateaux à régulariser, mise en service en un clic'},
@@ -1427,7 +1422,7 @@ const APRES=[
       {id:'liste',t:'Guide des 169 capteurs (bouton ⓘ)',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,info:true},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
   {id:'bat',n:4,t:'Bateaux',st:'mod',k:['bateaux'],go:{hash:'bateaux'},why:'La liste ne tenait pas avec une grande flotte et la mise en service était éclatée entre plusieurs écrans.',gain:'Même mise en page qu’aujourd’hui, mais des filtres, des pages et une checklist qui évite les oublis.',bm:'N° 3 Checklist de démarrage',
     kids:[
-      {id:'blist',t:'Liste : filtres, tri, pages',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Une seule recherche, pas de filtre ni de tri.',gain:'Retrouver les bateaux urgents en un clic, 10 par page.',bm:'Hors benchmark'},
+      {id:'blist',t:'Liste repliable : filtres, tri, pages',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Liste et fiche en deux colonnes de blocs : trois panneaux côte à côte, trop d’informations d’un coup.',gain:'La liste se replie pour donner toute la place à la fiche. La fiche montre d’abord « À faire », le reste se déplie à la demande.',bm:'Hors benchmark'},
       {id:'check',t:'Checklist de mise en service',e:'bateau en mise en service',st:'new',k:['bateaux:mes'],go:{hash:'bateaux',sel:'b1'},why:'Réception, stock, client, boîtier, livraison : des étapes oubliées.',gain:'« 3 étapes sur 5 » sur la fiche : chaque bateau livré remonte ses données.',bm:'N° 3 Checklist de démarrage'},
       {id:'bnotif',t:'Notifications → Capteurs',e:'fiche',st:'mod',k:['*bnotif'],go:{hash:'bateaux',sel:'b2'},why:'Les alertes n’étaient pas reliées au détail du bateau.',gain:'Le nombre d’alertes sur la fiche et un lien vers les capteurs, sans doublon.',bm:'N° 11 Santé du compte'}]},
   {id:'msg',n:5,t:'Messages',st:'mod',k:['messages'],go:{hash:'messages'},why:'Une alerte capteur entraîne souvent un message du client, traité sans délai visible.',gain:'Le délai de réponse affiché, et les propositions commerciales arrivent dans la conversation du client.',bm:'N° 10 Délai de réponse'},
@@ -1690,6 +1685,8 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-bfopen]')){S.bfOpen=!S.bfOpen;render();return;}
   const bp=e.target.closest('[data-bpage]');if(bp){if(bp.disabled)return;S.bpage=+bp.dataset.bpage;updateBoats();const l=document.getElementById('blist');if(l)l.scrollTop=0;return;}
   if(e.target.closest('[data-fold]')){S.ficheOpen=!S.ficheOpen;render();return;}
+  if(e.target.closest('[data-blist]')){S.listOpen=!S.listOpen;render();return;}
+  const fs=e.target.closest('[data-fsec]');if(fs){const k=fs.dataset.fsec;S.fsec[k]=!S.fsec[k];render();return;}
   const fx=e.target.closest('[data-fx]');if(fx){S.fx[fx.dataset.fx]=!S.fx[fx.dataset.fx];render();return;}
   const a=e.target.closest('[data-go-boat]');
   if(a&&a.dataset.goBoat){S.sel=a.dataset.goBoat;S.ftab=a.dataset.ftab||null;if(route()==='bateaux'){render();return;}}

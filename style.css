@@ -841,5 +841,42 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 @media (max-width:640px){.tb-user .muted{display:none}}
 .g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
 .gwrap{max-width:none}
+/* ---------- Page Bateaux allégée (v13) ---------- */
+.split.nolist{grid-template-columns:minmax(0,1fr)}
+.split.nolist .fiche2{max-width:980px;width:100%;margin:0 auto}
+.iconbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--line-2)}
+.fh2{background:var(--panel);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.fh2-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fh2-top h2{margin:0;font-size:21px;font-weight:600}
+.fh2-ic{display:flex;color:var(--ink-2)}
+.fh2 .meta{display:flex;gap:20px;flex-wrap:wrap;color:var(--ink-2);font-size:14px}
+.fh2-own{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line-2);padding-top:12px}
+.fh2-own .own{display:inline-flex;gap:8px;align-items:center;margin-right:4px}
+.fh2-own .own b{font-weight:500}
+.fh2-own .ib{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;background:var(--blue);color:#fff}
+.fh2-own .btn{margin-left:auto}
+.fh2-own .btn[disabled]{opacity:.5;cursor:not-allowed}
+.todo{background:var(--panel);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.todo-h{display:flex;gap:8px;align-items:center;font-size:16px}
+.todo-i{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:12px}
+.todo-i.warn{border-left-color:var(--orange)}
+.todo-i.crit{border-left-color:var(--red)}
+.todo-i .ti{width:34px;height:34px;border-radius:50%;background:var(--line-2);display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.todo-i .tb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.todo-i .tb .muted{font-size:13px}
+.todo-i .linkbtn{align-self:flex-start;margin-top:6px}
+.todo-i>.btn{flex:none}
+.tsteps{margin-top:6px}
+.todo-ok{display:flex;gap:8px;align-items:center;color:var(--green-ink);background:var(--green-bg);border-radius:10px;padding:12px}
+.fsecs{background:var(--panel);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.fsec+.fsec{border-top:1px solid var(--line-2)}
+.fsec-h{width:100%;display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px;text-align:left}
+.fsec-h:hover{background:var(--line-2)}
+.fsec-h b{font-weight:500;font-size:15px}
+.fsum{color:var(--ink-2);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsum.warn{color:var(--orange-ink);font-weight:500}
+.fsec-b{padding:0 16px 14px}
+@media (max-width:640px){.fsec-h{grid-template-columns:minmax(0,1fr) auto}.fsum{grid-column:1;grid-row:2}.fh2-own .btn{margin-left:0;width:100%;justify-content:center}}
 
 html,body{margin:0}
