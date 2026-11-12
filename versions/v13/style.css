@@ -927,5 +927,8 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .fcard-b .act:first-child{border-top:0}
 @media (max-width:900px){.fsecs{grid-template-columns:minmax(0,1fr)}}
 .fcard-b>.btn-sm{align-self:flex-start}
+.fsecs{display:block;columns:2;column-gap:12px}
+.fsecs>.fcard{break-inside:avoid;margin-bottom:12px;display:flex;width:100%}
+@media (max-width:900px){.fsecs{columns:1}}
 
 html,body{margin:0}
