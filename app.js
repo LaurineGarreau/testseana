@@ -1248,7 +1248,7 @@ function regRow(r){
       ${a&&!editing?`<div class="sdone">${ic('check',16,2.4)}<span><b>${ANS[a.a]}</b>${a.a==='livre'?` le ${frD(a.date)}${a.client?` · ${esc(a.client)}`:''}`:''}</span><button class="linkbtn" data-redit="${r.id}">Modifier</button></div>`
       : r.guess&&!editing?`<div class="sguess"><div><b>Mise en service probable le ${frD(r.guess.date)}</b>${r.guess.client?` · client ${esc(r.guess.client)}`:''}<div class="muted" style="font-size:12.5px">Déduit des données : ${esc(r.guess.why)}.</div></div>
           <div class="sgact"><button class="btn btn-pri btn-sm" data-rconf="${r.id}">${ic('check',15,2.4)} Confirmer</button><button class="btn btn-ghost btn-sm" data-redit="${r.id}">Autre réponse</button></div></div>`
-      : `<div class="sq">Que devient ce bateau ?</div><div class="sans">${Object.entries(ANS).map(([k,l])=>`<button class="fchip" data-rans="${r.id}|${k}" aria-pressed="${a&&a.a===k}">${l}</button>`).join('')}</div>
+      : `<div class="squest">Que devient ce bateau ?</div><div class="sans">${Object.entries(ANS).map(([k,l])=>`<button class="fchip" data-rans="${r.id}|${k}" aria-pressed="${a&&a.a===k}">${l}</button>`).join('')}</div>
         ${a&&a.a==='livre'?`<div class="sfields"><label>Date de mise en service<input type="date" id="rd-${r.id}" value="${a.date||''}"></label><label>Client<input type="text" id="rc-${r.id}" value="${esc(a.client||'')}" placeholder="Nom du propriétaire"></label><button class="btn btn-pri btn-sm" data-rsave="${r.id}">Enregistrer</button></div>`:''}`}
     </div></div>`;
 }
@@ -1302,10 +1302,93 @@ document.addEventListener('change',e=>{
   else if('sselall' in t.dataset){STK.filter(s=>!S.stkDone.has(s.id)).forEach(s=>t.checked?S.stkSel.add(s.id):S.stkSel.delete(s.id));render();}
 });
 
+/* ======================= Guides : visite de bienvenue et nouveautés (écran assombri + bulle) ======================= */
+const TOURS={
+  bienvenue:{t:'Visite de l’app',steps:[
+    {title:'Bienvenue dans Seanapps Pro',text:'En une minute, voici où trouver l’essentiel. Vous pouvez passer la visite à tout moment et la revoir avec le bouton « Guide », en haut.',center:true,cta:'Commencer'},
+    {go:{hash:'dashboard'},sel:['.roles'],title:'Choisissez votre métier',text:'Directeur, commercial, technicien ou atelier : le tableau de bord n’affiche que ce qui vous concerne. Tapez sur un métier pour essayer.',click:true},
+    {go:{hash:'dashboard'},sel:['.tabk'],title:'Une case, un sujet',text:'Chaque case donne un chiffre clé. Tapez dessus pour déplier le détail en dessous.',click:true},
+    {sel:['.gbar .gin'],title:'Cherchez tout ici',text:'Un capteur, un bateau, un client ou un écran. Des recherches sont conseillées selon votre métier. Raccourci clavier : la touche « / ».'},
+    {go:{hash:'capteurs',capBoat:null,dev:null},sel:['.nav a[href="#capteurs"]','#menuBtn'],title:'Les capteurs de tout le parc',text:'Une ligne par bateau, une colonne par capteur : seuls les problèmes ressortent en couleur.'},
+    {go:{hash:'capteurs',capBoat:null,dev:null},sel:['.mx tbody tr:first-child .bc'],title:'Tapez sur un bateau',text:'Vous le voyez zone par zone, avec son journal et ses courbes. Tapez sur le nom d’une colonne pour comparer un capteur sur tout le parc.'},
+    {go:{hash:'capteurs',capBoat:null},sel:['[data-info]'],title:'Le guide des 169 capteurs',text:'Ce bouton explique chaque capteur et comment lire ses valeurs.'},
+    {go:{hash:'stock'},sel:['.nav a[href="#stock"]','#menuBtn'],title:'Déclaration de stock',text:'Chaque mois, vous confirmez votre stock. Les bateaux à régulariser arrivent en premier, avec la réponse déjà préparée quand c’est possible.'},
+    {sel:['[data-vers]'],title:'Toutes les versions',text:'Chaque version du prototype reste disponible ici.'},
+    {title:'C’est parti',text:'Vous pouvez revoir cette visite et les nouveautés à tout moment avec le bouton « Guide », en haut de l’écran.',center:true,cta:'Terminer'}
+  ]},
+  nouveautes:{t:'Nouveautés de la version',ver:'v11',intro:'Bateaux à régulariser dans la déclaration de stock, nouvelle vue du bateau, et ce guide.',steps:[
+    {go:{hash:'stock'},sel:['.sacc-h'],title:'Nouveau : À régulariser',text:'Les bateaux en stock depuis plus de 23 mois, ou dont le statut se contredit, arrivent en tête de la déclaration.',badge:true},
+    {go:{hash:'stock'},sel:['.sguess'],title:'La réponse est déjà préparée',text:'Quand le boîtier est activé, la date de mise en service est déduite. Tapez « Confirmer » pour essayer.',badge:true,click:'[data-rconf]'},
+    {go:{hash:'stock'},sel:['.sfoot'],title:'Validez, le pourcentage monte',text:'Les réponses sont envoyées avec « Validez la sélection ». À 100 %, la déclaration est faite.',badge:true},
+    {go:{hash:'bilan'},sel:['.mreg'],title:'Ou répondez depuis le mail du lundi',text:'Deux boutons par bateau : la réponse arrive préparée dans la déclaration.',badge:true},
+    {go:{hash:'capteurs',capBoat:'b2'},sel:['.plan-blk'],title:'Nouveau : le bateau zone par zone',text:'Une pastille par équipement, colorée selon son état, et la liste des zones à droite. Tapez sur une pastille ou une ligne.',badge:true}
+  ]}
+};
+let TOUR=null;
+function tKey(k){try{return localStorage.getItem(k)}catch(_){return null}}
+function tSet(k,v){try{localStorage.setItem(k,v)}catch(_){}}
+function visibleEl(sels){for(const s of sels||[]){const el=[...document.querySelectorAll(s)].find(e=>{const r=e.getBoundingClientRect();return r.width>2&&r.height>2&&r.right>0&&r.left<innerWidth&&getComputedStyle(e).visibility!=='hidden'});if(el)return el}return null}
+function startTour(name){closeNewsCard();TOUR={name,i:0};document.getElementById('tour').hidden=false;stepTour(0);}
+function endTour(done){const n=TOUR&&TOUR.name;TOUR=null;const el=document.getElementById('tour');el.hidden=true;el.innerHTML='';
+  if(n==='bienvenue'){tSet('sp-tour-done','1');}if(n==='nouveautes'||n==='bienvenue')tSet('sp-news-seen',TOURS.nouveautes.ver);
+  if(n==='bienvenue'&&done)toast('Visite terminée');}
+function stepTour(i){
+  const steps=TOURS[TOUR.name].steps;if(i<0)i=0;if(i>=steps.length){endTour(true);return}
+  TOUR.i=i;const s=steps[i];
+  if(s.go)goNode(s.go);
+  setTimeout(()=>{const el=s.center?null:visibleEl(s.sel);if(el)el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});setTimeout(()=>drawTour(el),40)},s.go?140:20);
+}
+function drawTour(el){
+  if(!TOUR)return;const steps=TOURS[TOUR.name].steps,s=steps[TOUR.i],root=document.getElementById('tour');
+  const W=innerWidth,H=innerHeight,pad=8;let hole='',r=null;
+  if(el){const b=el.getBoundingClientRect();r={x:Math.max(4,b.left-pad),y:Math.max(4,b.top-pad),w:Math.min(W-8,b.width+pad*2),h:Math.min(H-8,b.height+pad*2)};
+    const rr=10;hole=`M${r.x+rr},${r.y}H${r.x+r.w-rr}Q${r.x+r.w},${r.y} ${r.x+r.w},${r.y+rr}V${r.y+r.h-rr}Q${r.x+r.w},${r.y+r.h} ${r.x+r.w-rr},${r.y+r.h}H${r.x+rr}Q${r.x},${r.y+r.h} ${r.x},${r.y+r.h-rr}V${r.y+rr}Q${r.x},${r.y} ${r.x+rr},${r.y}Z`;}
+  const n=steps.length,last=TOUR.i===n-1,first=TOUR.i===0;
+  root.innerHTML=`<svg class="tour-mask" width="${W}" height="${H}" aria-hidden="true"><path d="M0,0H${W}V${H}H0Z${hole}" fill-rule="evenodd"/></svg>
+    ${r?`<div class="tour-ring" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"></div>`:''}
+    <div class="tour-pop ${r?'':'center'}" role="dialog" aria-modal="true" aria-labelledby="tourt">
+      <div class="tour-top">${s.badge?`<span class="chip c-new">Nouveau</span>`:`<span class="muted">${TOURS[TOUR.name].t}</span>`}<span class="muted">${TOUR.i+1} / ${n}</span></div>
+      <h3 id="tourt">${esc(s.title)}</h3><p>${esc(s.text)}</p>
+      ${s.click&&r?`<div class="tour-hint">${ic('sparkle',15)} Vous pouvez taper sur la zone éclairée.</div>`:''}
+      <div class="tour-dots">${steps.map((_,k)=>`<i class="${k===TOUR.i?'on':''}"></i>`).join('')}</div>
+      <div class="tour-act">${last?'':`<button class="btn btn-ghost btn-sm" data-tour="skip">Passer</button>`}<span style="flex:1"></span>${first?'':`<button class="btn btn-out btn-sm" data-tour="prev">Précédent</button>`}<button class="btn btn-pri btn-sm" data-tour="next">${s.cta||(last?'Terminer':'Suivant')}</button></div>
+    </div>`;
+  const pop=root.querySelector('.tour-pop');
+  if(r){const pw=pop.offsetWidth,ph=pop.offsetHeight,m=12;let top=r.y+r.h+m,left=r.x;
+    if(top+ph>H-8){top=r.y-ph-m}if(top<8){top=Math.min(H-ph-8,Math.max(8,r.y+r.h/2-ph/2));left=r.x+r.w+m;if(left+pw>W-8)left=r.x-pw-m}
+    left=Math.max(8,Math.min(W-pw-8,left));top=Math.max(8,Math.min(H-ph-8,top));pop.style.left=left+'px';pop.style.top=top+'px';}
+  const nb=pop.querySelector('[data-tour="next"]');if(nb)nb.focus({preventScroll:true});
+  if(el&&s.click){const tgt=typeof s.click==='string'?el.querySelector(s.click)||el:el;const h=()=>{tgt.removeEventListener('click',h,true);if(TOUR)setTimeout(()=>stepTour(TOUR.i+1),300)};tgt.addEventListener('click',h,true);}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tour]');if(!b||!TOUR)return;e.stopPropagation();const a=b.dataset.tour;if(a==='next')stepTour(TOUR.i+1);else if(a==='prev')stepTour(TOUR.i-1);else endTour(false);},true);
+document.addEventListener('keydown',e=>{if(!TOUR)return;if(e.key==='Escape'){e.preventDefault();endTour(false)}else if(e.key==='ArrowRight'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName))stepTour(TOUR.i+1);else if(e.key==='ArrowLeft'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName))stepTour(TOUR.i-1);});
+let tRaf=0;const tRedraw=()=>{if(!TOUR)return;cancelAnimationFrame(tRaf);tRaf=requestAnimationFrame(()=>{const s=TOURS[TOUR.name].steps[TOUR.i];drawTour(s.center?null:visibleEl(s.sel))})};
+addEventListener('resize',tRedraw);document.addEventListener('scroll',tRedraw,true);
+/* Carte « Nouveau dans cette version » */
+function showNewsCard(){const el=document.getElementById('newscard');if(!el)return;const N=TOURS.nouveautes;el.hidden=false;
+  el.innerHTML=`<div class="nc-h"><span class="chip c-new">Nouveau</span><b>Dans la version ${N.ver}</b><button class="btn btn-ghost btn-sm" data-nc="close" aria-label="Fermer">${ic('x',14)}</button></div><p>${esc(N.intro)}</p><div class="nc-act"><button class="btn btn-ghost btn-sm" data-nc="later">Plus tard</button><button class="btn btn-pri btn-sm" data-nc="go">Voir en ${N.steps.length} étapes</button></div>`;}
+function closeNewsCard(){const el=document.getElementById('newscard');if(el){el.hidden=true;el.innerHTML='';}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-nc]');if(!b)return;const a=b.dataset.nc;if(a==='go')startTour('nouveautes');else{closeNewsCard();if(a==='close')tSet('sp-news-seen',TOURS.nouveautes.ver);}});
+/* Bouton « Guide » dans la barre du haut */
+let guideOpen=false;
+function guideBtn(){return `<div class="vwrap"><button class="btn btn-ghost btn-sm" data-guide aria-expanded="${guideOpen}">${ic('book',16)} Guide</button>${guideOpen?`<div class="vmenu gmenu" role="menu">
+  <button class="vitem" data-gstart="bienvenue" role="menuitem"><span class="vv">${ic('sparkle',18)}</span><span class="vt"><b>Visite de l’app</b><span class="muted">${TOURS.bienvenue.steps.length} étapes, environ 1 minute</span></span></button>
+  <button class="vitem" data-gstart="nouveautes" role="menuitem"><span class="vv">${ic('star',18)}</span><span class="vt"><b>Nouveautés ${TOURS.nouveautes.ver}</b><span class="muted">${esc(TOURS.nouveautes.intro)}</span></span></button></div>`:''}</div>`}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-guide]')){guideOpen=!guideOpen;renderTop();return;}
+  const g=e.target.closest('[data-gstart]');if(g){guideOpen=false;renderTop();startTour(g.dataset.gstart);return;}
+  if(guideOpen&&!e.target.closest('.vwrap')){guideOpen=false;renderTop();}
+});
+function tourBoot(){
+  if(new URLSearchParams(location.search).has('noguide'))return;
+  setTimeout(()=>{if(!tKey('sp-tour-done'))startTour('bienvenue');else if(tKey('sp-news-seen')!==TOURS.nouveautes.ver)showNewsCard();},700);
+}
+
 
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
-const APP_VERSION='v10';
+const APP_VERSION='v11';
 const VERSIONS_FALLBACK=[
+  {v:'v11',date:'2026-11-12',t:'Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée'},
   {v:'v10',date:'2026-11-12',t:'Déclaration de stock : bateaux à régulariser, mise en service en un clic'},
   {v:'v9',date:'2026-11-12',t:'Nouvelle vue du bateau : silhouette avec pastilles et liste des zones'},
   {v:'v8',date:'2026-11-12',t:'Toutes les icônes reprises de la bibliothèque Seanapps (bouton ⓘ compris)'},
@@ -1348,7 +1431,11 @@ const APRES=[
       {id:'reg',t:'À régulariser',e:'plus de 23 mois ou statut incohérent',st:'new',k:['*reg'],go:{hash:'stock'},why:'Le concessionnaire ne pense pas à mettre à jour un bateau livré il y a longtemps.',gain:'Une liste courte, 4 réponses possibles, et une réponse groupée pour plusieurs bateaux.',bm:'N° 4 Ma journée · n° 7 Tout est traité'},
       {id:'guess',t:'Mise en service déduite des données',e:'boîtier déjà activé',st:'new',k:['*guess'],go:{hash:'stock'},why:'Un boîtier activé ou une app client connectée prouvent que le bateau navigue.',gain:'La date est préparée : le concessionnaire n’a qu’à confirmer.',bm:'Hors benchmark : donnée existante'},
       {id:'mailreg',t:'Réponse depuis le Bilan du lundi',e:'sans ouvrir l’app',st:'new',k:['*mailreg'],go:{hash:'bilan'},why:'Certaines concessions n’ouvrent pas l’app chaque semaine.',gain:'Deux boutons par bateau dans le mail : la réponse arrive préparée dans la déclaration.',bm:'N° 8 Bilan hebdomadaire'}]},
-  {id:'same',n:8,t:'Écrans inchangés',st:'same',k:['clients','fleet','notifications','historique','partage','services','parametres'],go:{hash:'clients'},why:'Ces écrans fonctionnent : le prototype se concentre sur ce qui manque.',gain:'Aucun changement d’habitude pour les équipes.',bm:'—',
+  {id:'guides',n:8,t:'Guides',st:'new',k:['*guides'],go:{hash:'dashboard',tour:'bienvenue'},why:'Une concession qui découvre l’app ou une nouveauté ne sait pas où taper.',gain:'Une visite de bienvenue à la première ouverture, puis une carte « Nouveau » à chaque version : l’écran s’assombrit sauf ce qu’on montre.',bm:'N° 3 Checklist de démarrage (premiers pas)',
+    kids:[
+      {id:'g-bienv',t:'Visite de bienvenue',e:'première ouverture',st:'new',k:['*g1'],go:{tour:'bienvenue'},why:'Les nouveaux utilisateurs passent à côté des fonctions utiles.',gain:'10 étapes, environ une minute, et on peut taper sur la zone éclairée pour essayer.',bm:'Hors benchmark : prise en main'},
+      {id:'g-news',t:'Nouveautés de la version',e:'à chaque version',st:'new',k:['*g2'],go:{tour:'nouveautes'},why:'Les nouveautés passent inaperçues si personne ne les montre.',gain:'Une carte discrète « Nouveau dans cette version », puis un guide en quelques étapes.',bm:'Hors benchmark : adoption'}]},
+  {id:'same',n:9,t:'Écrans inchangés',st:'same',k:['clients','fleet','notifications','historique','partage','services','parametres'],go:{hash:'clients'},why:'Ces écrans fonctionnent : le prototype se concentre sur ce qui manque.',gain:'Aucun changement d’habitude pour les équipes.',bm:'—',
     chipsH:[['clients','Clients'],['fleet','Fleet'],['notifications','Notifications'],['historique','Historique'],['partage','Stock partagé'],['services','Services'],['parametres','Paramètres']]}
 ];
 const AVANT=[
@@ -1421,6 +1508,7 @@ function goNode(g){
     if(g.focus){const q=document.getElementById('gq');if(q)q.focus();}
     if(g.prop&&typeof openProp==='function')openProp(g.prop);
     if(g.info&&typeof openInfo==='function')openInfo();
+    if(g.tour&&typeof startTour==='function')startTour(g.tour);
     if(g.scroll){const a=document.querySelector(`[data-acc="${g.scroll}"]`);if(a)a.scrollIntoView({block:'start',behavior:'smooth'});}
   },60);
 }
@@ -1432,7 +1520,7 @@ function renderTop(){
   const el=document.getElementById('topbar');if(!el)return;const b=verBase();
   el.innerHTML=`<div class="tb-l"><b>Seanapps Pro</b><span class="muted">prototype · données d’exemple</span></div>
     <div class="seg" role="group" aria-label="Affichage">${[['app','App'],['both','Les deux'],['tree','Arborescence']].map(([k,l])=>`<button data-lay="${k}" aria-pressed="${S.layout===k}">${l}</button>`).join('')}</div>
-    <div class="vwrap"><button class="btn btn-out btn-sm" data-vers aria-expanded="${verOpen}">${ic('hist',16)} Versions · ${APP_VERSION}</button>
+    ${typeof guideBtn==='function'?guideBtn():''}<div class="vwrap"><button class="btn btn-out btn-sm" data-vers aria-expanded="${verOpen}">${ic('hist',16)} Versions · ${APP_VERSION}</button>
       ${verOpen?`<div class="vmenu" role="menu"><div class="muted" style="font-size:12px;padding:4px 8px 8px">Chaque version publiée reste disponible.</div>${VERS.map(v=>{const cur=v.v===APP_VERSION;const href=v.v===VERS[0].v?b+'index.html':b+'versions/'+v.v+'/index.html';
         return `<a class="vitem ${cur?'on':''}" href="${href}" role="menuitem"><span class="vv">${v.v}</span><span class="vt"><b>${esc(v.t)}</b><span class="muted">${v.date.split('-').reverse().join('/')}${v.v===VERS[0].v?' · la plus récente':''}</span></span>${cur?`<span class="chip c-new">Affichée</span>`:''}</a>`}).join('')}</div>`:''}</div>`;
 }
@@ -1651,5 +1739,5 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{if(e.target.id==='sf'){S.fam=e.target.value;updateList();}if(e.target.id==='bsort'){S.bsort=e.target.value;S.bpage=0;updateBoats();}if(e.target.id==='devsel'){S.dev=e.target.value;S.cf='all';S.clim=15;render();}});
 window.addEventListener('hashchange',()=>{closeSearch();render();document.getElementById('main').scrollTop=0;});
-document.body.dataset.layout=S.layout;renderTop();render();
+document.body.dataset.layout=S.layout;renderTop();render();tourBoot();
 

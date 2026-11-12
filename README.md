@@ -14,6 +14,7 @@ Chaque version publiée est conservée dans `versions/vN/` et listée dans `vers
 
 | Version | Date | Contenu |
 |---|---|---|
+| v11 | 12/11/2026 | Guides : visite de bienvenue et nouveautés, écran assombri sauf la fonctionnalité montrée |
 | v10 | 12/11/2026 | Déclaration de stock : bateaux à régulariser, mise en service en un clic |
 | v9 | 12/11/2026 | Nouvelle vue du bateau : silhouette avec pastilles et liste des zones |
 | v8 | 12/11/2026 | Toutes les icônes reprises de la bibliothèque Seanapps (bouton ⓘ compris) |
