@@ -746,7 +746,7 @@ function vCapteursGrid(){
         <div style="min-width:0">${barChart({items:dist,max:top,ticks:[0,top/4,top/2,top*3/4,top],fmt:v=>`${v}`,label:'Répartition des bateaux',h:200})}<div class="legend"><span><i style="background:var(--bar-2)"></i>Normal</span><span><i style="background:var(--orange)"></i>Hors seuil</span></div></div>
       </div></section>`;
   }
-  return `<div class="top"><div class="h1">Capteurs</div>${roleTabs()}</div>
+  return `<div class="top"><div class="h1">Capteurs</div>${infoBtn()}${roleTabs()}</div>
   <div class="wrap">
     <p class="role-intro"><b>La grille du parc.</b> Une ligne par bateau, une colonne par capteur. Seuls les problèmes ressortent en couleur. Tapez sur un nom de colonne pour comparer ce capteur sur tout le parc, ou sur un bateau pour ouvrir sa fiche.</p>
     ${zoom}
@@ -758,14 +758,7 @@ function vCapteursGrid(){
       ${mx}
       <div class="muted" style="font-size:12.5px">${S.boats.length-B.length} bateaux n’envoient pas de données (stock, mise en service) et ne sont pas dans la grille. Colonnes choisies pour le ${ro.l.toLowerCase()}.</div>
     </div></section>
-    <div class="accs">
-    ${acc('lire','Comment lire les valeurs','<span>Oui / Non, pourcentage, mesure</span>',()=>`<div class="types3">
-      <div class="vt"><span class="gz">OUI/NON</span><p><b>Oui / Non</b> : la porte est ouverte ou fermée, il y a de l’eau ou pas. Dans le fichier : 0 = non, 1 = oui.</p></div>
-      <div class="vt"><span class="gz">68 %</span><p><b>Pourcentage</b> : une jauge, comme la batterie d’un téléphone ou le niveau d’un réservoir.</p></div>
-      <div class="vt"><span class="gz">12,6 V</span><p><b>Mesure</b> : un chiffre avec une unité (volts, °C, heures, hPa…).</p></div></div>`,false)}
-    ${acc('liste',`Les ${SENSORS.length} capteurs du fichier`,'<span>Recherche par nom, famille et métier</span>',()=>listSection(),false)}
-    </div>
-    <div class="proto-note">Prototype · ${S.boats.length} bateaux d’exemple. La liste des 169 capteurs vient du fichier Capteurs.xlsx.</div>
+    <div class="proto-note">Prototype · ${S.boats.length} bateaux d’exemple. Le guide des 169 capteurs est dans le bouton ⓘ, en haut de la page.</div>
   </div>`;
 }
 
@@ -848,7 +841,7 @@ function vCapteurs(){
 }
 function capBoatPage(b){
   const v=V[b.id];
-  return `<div class="top"><div class="h1">Capteurs</div>${roleTabs()}</div>
+  return `<div class="top"><div class="h1">Capteurs</div>${infoBtn()}${roleTabs()}</div>
   <div class="wrap">
     <div><button class="btn btn-ghost btn-sm" data-capback>${ic('back',16)} Retour à la grille du parc</button></div>
     <section class="card"><div class="card-b" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
@@ -889,7 +882,7 @@ function hl(text,q){
   const t=String(text),n=norm(t),i=q?n.indexOf(q):-1;
   return i<0?esc(t):esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length));
 }
-function openSensor(raw){S.q=raw;S.fam='';S.acc.liste=true;goList()}
+function openSensor(raw){S.q=raw;S.fam='';openInfo()}
 function goList(){const done=()=>{const el=document.querySelector('[data-acc="liste"]');if(el)el.scrollIntoView({block:'start',behavior:'smooth'})};if(route()==='capteurs'){render();done()}else{location.hash='#capteurs';setTimeout(done,30)}}
 function searchAll(qRaw){
   const q=norm(qRaw.trim());const G=[];if(!q)return G;
@@ -902,7 +895,7 @@ function searchAll(qRaw){
   const dv=DEV.map(d=>({d,s:score(q,d.n,d.raw.join(' '),d.what)})).filter(x=>x.s).sort((a,b)=>b.s-a.s).slice(0,3);
   if(dv.length)G.push({t:'Comparer sur tout le parc',items:dv.map(({d})=>{const R=capRows(d),bad=R.filter(r=>r.s[0]!=='ok').length;return {i:'pulse',h:hl(d.n,q),sub:`${R.length} bateaux équipés${bad?` · ${bad} hors seuil`:''}`,go:()=>{S.dev=d.k;S.cf='all';S.clim=15;location.hash==='#capteurs'?render():location.hash='#capteurs'}}})});
   const sn=SENSORS.map(s=>({s,sc:score(q,s[3],s[0],s[4]+' '+FAM[s[2]].t+' '+mt(s[1])+' '+s[1])})).filter(x=>x.sc).sort((a,b)=>b.sc-a.sc);
-  if(sn.length)G.push({t:`Capteurs de la liste · ${sn.length} sur ${SENSORS.length}`,items:sn.slice(0,6).map(({s})=>({i:'pulse',h:`${hl(s[3],q)} <span class="code">${hl(s[0],q)}</span>`,sub:`${esc(FAM[s[2]].t)} · ${esc(mt(s[1]))}`,go:()=>openSensor(s[0])})).concat(sn.length>6?[{i:'search',h:`<b>Voir les ${sn.length} capteurs pour « ${esc(qRaw.trim())} »</b>`,sub:'Ouvre la liste filtrée',go:()=>{S.q=qRaw.trim();S.fam='';S.acc.liste=true;goList()}}]:[])});
+  if(sn.length)G.push({t:`Capteurs de la liste · ${sn.length} sur ${SENSORS.length}`,items:sn.slice(0,6).map(({s})=>({i:'pulse',h:`${hl(s[3],q)} <span class="code">${hl(s[0],q)}</span>`,sub:`${esc(FAM[s[2]].t)} · ${esc(mt(s[1]))}`,go:()=>openSensor(s[0])})).concat(sn.length>6?[{i:'search',h:`<b>Voir les ${sn.length} capteurs pour « ${esc(qRaw.trim())} »</b>`,sub:'Ouvre le guide des capteurs, filtré',go:()=>{S.q=qRaw.trim();S.fam='';openInfo()}}]:[])});
   const sh=shop().map(x=>({x,s:score(q,x[0],x[3])})).filter(y=>y.s).slice(0,3);
   if(sh.length)G.push({t:'Catalogue Seanapps',items:sh.map(({x})=>({i:'euro',h:hl(x[0],q),sub:`${x[1]} · à proposer à ${withData().length-x[2]} bateaux`,go:()=>{S.role='commercial';S.dtab.commercial='cat';location.hash==='#dashboard'?render():location.hash='#dashboard'}}))});
   return G;
@@ -1216,10 +1209,39 @@ document.addEventListener('click',e=>{
   hideTip();renderExplorer();
 },true);
 
+/* ======================= Guide des capteurs : bouton ⓘ en haut de la page Capteurs ======================= */
+S.info=false;
+const infoBtn=()=>`<button class="ibtn" data-info aria-label="Guide des capteurs : les 169 capteurs et comment lire les valeurs" title="Guide des capteurs">i</button>`;
+function openInfo(){S.info=true;renderInfo();setTimeout(()=>{const q=document.getElementById('sq');if(q)q.focus({preventScroll:true})},40);}
+function closeInfo(){S.info=false;renderInfo();const b=document.querySelector('[data-info]');if(b)b.focus({preventScroll:true});}
+function renderInfo(){
+  const el=document.getElementById('infod');if(!el)return;
+  if(!S.info){el.hidden=true;el.innerHTML='';return;}
+  el.hidden=false;
+  el.innerHTML=`<div class="id-scrim" data-iclose></div>
+  <aside class="id" role="dialog" aria-modal="true" aria-labelledby="idt">
+    <div class="id-h"><div><h3 id="idt">Guide des capteurs</h3><div class="muted" style="font-size:13px">Les ${SENSORS.length} capteurs du fichier, expliqués simplement</div></div><button class="btn btn-ghost btn-sm" data-iclose aria-label="Fermer">${ic('x',16)}</button></div>
+    <div class="id-b">
+      <div class="id-sec"><div class="tdl">Comment lire les valeurs</div>
+        <div class="types3 id-types">
+        <div class="vt"><span class="gz">OUI/NON</span><p><b>Oui / Non</b> : la porte est ouverte ou fermée, il y a de l’eau ou pas. Dans le fichier : 0 = non, 1 = oui.</p></div>
+        <div class="vt"><span class="gz">68 %</span><p><b>Pourcentage</b> : une jauge, comme la batterie d’un téléphone ou le niveau d’un réservoir.</p></div>
+        <div class="vt"><span class="gz">12,6 V</span><p><b>Mesure</b> : un chiffre avec une unité (volts, °C, heures, hPa…).</p></div></div></div>
+      <div class="id-sec"><div class="tdl">Les ${SENSORS.length} capteurs</div>${listSection()}</div>
+    </div>
+  </aside>`;
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-info]')){e.preventDefault();openInfo();return;}
+  if(S.info&&e.target.closest('[data-iclose]')){closeInfo();}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.info)closeInfo();});
+
 
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
-const APP_VERSION='v6';
+const APP_VERSION='v7';
 const VERSIONS_FALLBACK=[
+  {v:'v7',date:'2026-11-12',t:'Guide des capteurs dans un bouton ⓘ, en haut de la page Capteurs'},
   {v:'v6',date:'2026-11-12',t:'Courbes : cartes comme avant, mois ou tout l’historique, vue d’ensemble qui croise les données'},
   {v:'v5',date:'2026-11-12',t:'Double vue : app + arborescence avant / après, versions'},
   {v:'v4',date:'2026-11-12',t:'Courbes : historique au mois, vues ensemble / individuelle, zoom'},
@@ -1245,7 +1267,7 @@ const APRES=[
       {id:'plan',t:'Le bateau en plan + journal',e:'oui',st:'new',k:['capteurs:boat'],go:{hash:'capteurs',capBoat:'b2'},why:'Les noms techniques du fichier ne parlent qu’aux techniciens.',gain:'Le bateau vu de dessus, zone par zone, avec l’histoire des derniers jours : compréhensible par tous.',bm:'Hors benchmark : lisibilité'},
       {id:'courbes',t:'Courbes et historique',e:'déplier',st:'new',k:['capteurs:boat:courbes'],go:{hash:'capteurs',capBoat:'b2',acc:{courbes:true}},why:'Sept jours ne suffisent pas pour comprendre une panne ou préparer un hivernage.',gain:'7 jours, un mois ou tout l’historique. La vue d’ensemble croise 2 courbes ou plus et dit en clair si elles sont liées.',bm:'Suit la saison nautique'},
       {id:'prop',t:'Proposer un produit',e:'commercial',st:'new',k:['*prop'],go:{hash:'capteurs',role:'commercial',capBoat:null,dev:null,prop:'b4|cale'},why:'Le commercial devait rédiger chaque proposition à la main.',gain:'Un message personnalisé avec le lien du produit, prêt à envoyer en un clic.',bm:'Récompenser le travail bien fait'},
-      {id:'liste',t:'Les 169 capteurs du fichier',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,acc:{liste:true},scroll:'liste'},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
+      {id:'liste',t:'Guide des 169 capteurs (bouton ⓘ)',e:'référence',st:'new',k:['*liste'],go:{hash:'capteurs',capBoat:null,dev:null,info:true},why:'Le fichier mélange langues, unités et doublons.',gain:'Chaque capteur traduit en clair, avec sa famille et les métiers qui s’en servent.',bm:'Hors benchmark'}]},
   {id:'bat',n:4,t:'Bateaux',st:'mod',k:['bateaux'],go:{hash:'bateaux'},why:'La liste ne tenait pas avec une grande flotte et la mise en service était éclatée entre plusieurs écrans.',gain:'Même mise en page qu’aujourd’hui, mais des filtres, des pages et une checklist qui évite les oublis.',bm:'N° 3 Checklist de démarrage',
     kids:[
       {id:'blist',t:'Liste : filtres, tri, pages',e:'optimisé',st:'mod',k:['bateaux:fiche'],go:{hash:'bateaux',sel:'b2',bfOpen:true},why:'Une seule recherche, pas de filtre ni de tri.',gain:'Retrouver les bateaux urgents en un clic, 10 par page.',bm:'Hors benchmark'},
@@ -1325,6 +1347,7 @@ function goNode(g){
   setTimeout(()=>{
     if(g.focus){const q=document.getElementById('gq');if(q)q.focus();}
     if(g.prop&&typeof openProp==='function')openProp(g.prop);
+    if(g.info&&typeof openInfo==='function')openInfo();
     if(g.scroll){const a=document.querySelector(`[data-acc="${g.scroll}"]`);if(a)a.scrollIntoView({block:'start',behavior:'smooth'});}
   },60);
 }

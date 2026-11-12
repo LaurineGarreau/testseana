@@ -14,6 +14,7 @@ Chaque version publiée est conservée dans `versions/vN/` et listée dans `vers
 
 | Version | Date | Contenu |
 |---|---|---|
+| v7 | 12/11/2026 | Guide des capteurs dans un bouton ⓘ, en haut de la page Capteurs |
 | v6 | 12/11/2026 | Courbes : cartes comme avant, mois ou tout l’historique, vue d’ensemble qui croise les données |
 | v5 | 12/11/2026 | Double vue app + arborescence avant / après, versions |
 | v4 | 12/11/2026 | Courbes : historique au mois, vues ensemble / individuelle, zoom |
