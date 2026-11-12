@@ -723,5 +723,7 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .id-types{grid-template-columns:minmax(0,1fr)}
 .id .tw{max-height:none}
 .id .vt{display:flex;flex-direction:row;align-items:center;gap:12px}.id .vt p{margin:0}
+.ibtn{width:36px;height:36px;border:0;border-radius:10px;color:var(--blue);background:transparent;font:inherit}
+.ibtn:hover{background:var(--blue-soft);color:var(--blue-ink)}
 
 html,body{margin:0}
