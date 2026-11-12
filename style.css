@@ -840,5 +840,6 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .gitem2 .vv{color:var(--blue)}
 @media (max-width:640px){.tb-user .muted{display:none}}
 .g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.gwrap{max-width:none}
 
 html,body{margin:0}
