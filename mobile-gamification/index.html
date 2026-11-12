@@ -567,8 +567,10 @@ function collectif(){const pct=ST.coll?63:62;return `<div class="card cp gx" dat
   <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ink)">Objectif de la flotte Lagoon</b>${NEW('collectif')}</div>
   <div style="font-size:22px;font-weight:800;color:var(--teal-dk)">${ST.coll?'634 120':'633 708'} <span style="font-size:14.5px;font-weight:600;color:var(--ink-3)">/ 1 000 000 nm cette saison</span></div>
   <span class="prog" style="height:8px"><i style="width:${pct}%"></i></span>
-  <span class="small" style="color:var(--ink-2)">À 1 million de milles, Lagoon reverse un don à une cause liée à la mer (exemple, à définir). Votre part : 412 nm.</span>
-  ${ST.coll?`<span class="tag ok" style="align-self:flex-start">${ic('check',12,2.4)} Vous participez</span>`:'<button class="btn" data-coll style="align-self:flex-start">Participer avec mes milles</button>'}</div>`;}
+  <span class="small" style="color:var(--ink-2)">Tous les milles parcourus cette saison par les bateaux Lagoon équipés du boîtier s’additionnent automatiquement. Rien à saisir : ce sont les milles de vos voyages.</span>
+  <div style="display:flex;gap:10px;align-items:center;background:#fff;border-radius:10px;padding:8px 10px"><span style="color:var(--teal)">${ic('myboat',18)}</span><span class="small" style="color:var(--ink-2);flex:1">Votre part : <b style="color:var(--ink)">412 nm</b> (vos 24 voyages de 2026)</span></div>
+  <span class="small muted">À 1 million de milles, Lagoon reverse un don à une cause liée à la mer (exemple, à définir).</span>
+  ${ST.coll?`<span class="tag ok" style="align-self:flex-start">${ic('check',12,2.4)} Vous participez</span>`:'<button class="btn" data-coll style="align-self:flex-start">Ajouter mes milles au compteur</button>'}</div>`;}
 function contribHTML(){const Q=[['prof','Profondeur à l’entrée',['Facile','Attention à marée basse']],['place','Places visiteurs',['Faciles','Réserver avant']],['serv','Services',['Bons','Limités']]];const done=Object.keys(ST.ans).length===3;
   return `<div class="scrim" data-close-contrib></div><div class="sheet" style="z-index:46"><div class="grab"></div><b style="color:var(--ink)">Saint-Martin-de-Ré</b><div class="small muted" style="margin:2px 0 12px">Vos réponses aident les autres propriétaires</div>
   ${Q.map(q=>`<div style="margin-bottom:12px"><div class="small" style="color:var(--ink-2);margin-bottom:6px">${q[1]}</div><div style="display:flex;gap:8px">${q[2].map(o=>`<button class="tag" data-ans="${q[0]}" data-v="${o}" style="padding:7px 12px;${ST.ans[q[0]]===o?'background:var(--teal);color:#fff;border-color:var(--teal)':''}">${o}</button>`).join('')}</div></div>`).join('')}
@@ -606,7 +608,7 @@ const MECH=[
   avoid:'Pas de contenu « pour occuper » : seulement ce qui sert à cette période.'},
  {id:'collectif',n:8,name:'Objectif collectif de la flotte',insp:'Ecosia, Pikmin Bloom',go:()=>{go('challenges');ST.chSeg='challenges';},where:'Challenges',
   exist:'Les challenges globaux existent, mais avec un classement. Le trophée « Collectif » existe aussi, mais il récompense l’invitation de proches, pas un objectif commun.',
-  adapt:'Un compteur commun de milles pour tous les propriétaires Lagoon, qui débloque un don à une cause liée à la mer.',
+  adapt:'Un compteur commun qui additionne automatiquement les milles des voyages enregistrés par le boîtier (la même donnée que « Mes statistiques » et le trophée « Explorateur »). Le propriétaire n’a rien à saisir : il accepte seulement que ses milles comptent. L’objectif se fixe à partir de la flotte réelle (ex. 2 500 bateaux connectés × 400 nm en moyenne ≈ 1 million).',
   why:['C’est la seule façon de faire participer tout le monde sans classement : chaque sortie compte, même courte.','Il réutilise le format des challenges globaux.','Bon pour l’image de Bénéteau avec une action concrète.'],
   avoid:'Pas de classement individuel. Nom à choisir pour ne pas confondre avec le trophée « Collectif ».'},
  {id:'journal',n:7,name:'Registre pré-rempli',insp:'Pikmin Bloom',go:()=>{go('boat');ST.sub='voyage';},where:'Détail voyage › Registre',
