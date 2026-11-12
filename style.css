@@ -763,5 +763,49 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .zrow .zst i{width:8px;height:8px;border-radius:50%;display:inline-block}
 @media (max-width:1100px){.bplan{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.hull-svg .pin .halo{animation:none}}
+/* ---------- Déclaration de stock (v10) ---------- */
+.stockwrap{padding-bottom:110px}
+.sbar{background:var(--panel);border-radius:12px;padding:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.sacc{background:var(--panel);border-radius:12px;box-shadow:var(--shadow)}
+.sacc-h{width:100%;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:16px 18px;font-size:17px;font-weight:500;text-align:left}
+.sacc-h>span:first-child{display:inline-flex;gap:8px;align-items:center}
+.scount{min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:12px;font-weight:600;display:inline-grid;place-items:center;padding:0 7px}
+.sacc-b{padding:0 18px 16px;display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:12px}
+.srow.simple{align-items:center;cursor:pointer}
+.srow.answered{background:var(--green-bg);border-color:transparent}
+.scb{width:18px;height:18px;margin-top:2px;accent-color:var(--blue);flex:none}
+.sbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.shead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.shead b{font-weight:600}
+.shead .muted{font-size:12.5px}
+.sreasons{display:flex;gap:6px;flex-wrap:wrap}
+.sreason{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2);background:var(--line-2);border-radius:999px;padding:3px 10px}
+.sguess{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--blue-softer);border:1px solid var(--blue-soft);border-radius:10px;padding:10px 12px;font-size:14px}
+.sgact{display:flex;gap:6px;flex-wrap:wrap}
+.sq{font-size:13px;font-weight:500;color:var(--ink-2)}
+.sans{display:flex;gap:6px;flex-wrap:wrap}
+.sfields{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.sfields label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-2)}
+.sfields input{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.sdone{display:flex;gap:8px;align-items:center;color:var(--green-ink);font-size:14px;flex-wrap:wrap}
+.sdone .linkbtn{margin-left:auto}
+.sbulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--blue-softer);border-radius:10px;padding:8px 12px;font-size:13.5px}
+.sall{font-size:13px;color:var(--ink-2)}
+.sall label{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+.sfoot{position:sticky;bottom:0;z-index:5;margin:0 max(28px,env(safe-area-inset-left,0px)) 12px;background:var(--panel);border-radius:12px;box-shadow:0 -4px 20px rgba(20,30,60,.08);padding:14px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sfoot>b{font-size:19px;font-weight:600;color:var(--ink-2)}
+.sfoot>b.okc{color:var(--green-ink)}
+.sfi{display:inline-flex;color:var(--ink-2);cursor:help}
+.sprog{flex:1;min-width:120px;height:14px;border-radius:7px;background:var(--line-2);overflow:hidden}
+.sprog i{display:block;height:100%;border-radius:7px;transition:width .3s}
+.sfoot .btn[disabled]{background:var(--line);color:var(--ink-3);cursor:not-allowed}
+.mreg{display:flex;flex-direction:column;gap:8px}
+.mregrow{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mregbtn{display:flex;gap:6px;flex-wrap:wrap}
+.mregbtn a{font-size:13px;text-decoration:none;border:1px solid var(--blue);border-radius:8px;padding:6px 10px;color:var(--blue);font-weight:500}
+.mregbtn a:first-child{background:var(--blue);color:#fff}
+@media (max-width:820px){.sfoot{margin:0 16px 10px}}
+@media (max-width:600px){.sfoot{gap:8px;padding:10px 12px}.sfoot>b{font-size:15px}.sfoot>.muted,.sfoot .sfi{display:none}.sfoot .sprog{order:3;flex-basis:100%}.sfoot .btn{margin-left:auto}}
 
 html,body{margin:0}

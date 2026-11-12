@@ -22,7 +22,7 @@ const S = {
   cb:'b2', capOnlyMine:false, q:'', fam:'',
   tasks:[
     {id:'t1',kind:'insp',title:'Faire le « Contrôle à 1 an » de Test Boat',ctx:'Prévu avant le 27/08/2026',late:true,go:'#bateaux',boat:'b3',done:false},
-    {id:'t2',kind:'stock',title:'Déclarer 2 bateaux en stock',ctx:'Déclaration de novembre',go:'#stock',done:false},
+    {id:'t2',kind:'stock',title:'Déclarer le stock et régulariser 8 bateaux',ctx:'Déclaration de novembre · 3 réponses déjà préparées',go:'#stock',done:false},
     {id:'t3',kind:'msg',title:'Répondre à Jean Teste',ctx:'Reçu il y a 3 h. Répondre ?',nudge:true,go:'#messages',done:false},
     {id:'t4',kind:'box',title:'Activer le boîtier de Princess 3',ctx:'Étape 4 sur 5 de la mise en service',go:'#bateaux',boat:'b1',done:false},
     {id:'t5',kind:'client',title:'Relancer Edouard Gatouillat',ctx:'Consentement Insight manquant · Princess 1',go:'#clients',done:true}
@@ -286,7 +286,7 @@ function health(){
   const crit=alerts().filter(a=>a.sev==='crit');
   crit.forEach(a=>acts.push({t:`Alerte capteur : ${a.d.n.toLowerCase()}`,d:`${a.b.name} · ${a.val}`,go:'#capteurs',cap:a.b.id}));
   if(late) acts.push({t:'1 inspection en retard',d:'Contrôle à 1 an · Test Boat',go:'#bateaux',boat:'b3'});
-  if(stock) acts.push({t:'2 bateaux non déclarés',d:'Déclaration de novembre',go:'#stock'});
+  if(stock) acts.push({t:'8 bateaux à régulariser',d:'Déclaration de stock de novembre',go:'#stock'});
   if(box) acts.push({t:'1 boîtier à activer',d:'Princess 3 · mise en service',go:'#bateaux',boat:'b1'});
   const m={insp:late?92:97,stock:stock?96:100,box:box?80:90};
   return {ok:acts.length===0,acts,m};
@@ -313,7 +313,7 @@ const NAV=[
   {h:'fleet',l:'Fleet',i:'key',cnt:()=>1},
   {h:'notifications',l:'Notifications',i:'bell',cnt:()=>2},
   {sec:'Stock'},
-  {h:'stock',l:'Déclaration…',i:'clip',cnt:()=>S.tasks.find(t=>t.id==='t2').done?0:2},
+  {h:'stock',l:'Déclaration…',i:'clip',cnt:()=>typeof regLeft==='function'?regLeft().length:0},
   {h:'historique',l:'Historique',i:'hist'},
   {h:'partage',l:'Stock partagé',i:'share'},
   {sec:'Compte'},
@@ -1216,10 +1216,97 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.info)closeInfo();});
 
+/* ======================= Déclaration de stock : écran Seanapps Pro + « À régulariser » ======================= */
+const REG=[
+  {id:'s1',name:'Oceanis 30.1',hin:'FR-BEN30E112',months:42,prio:'crit',reasons:['Boîtier activé le 14/06/2024','En stock depuis 42 mois'],guess:{date:'2024-06-14',client:'P. Garnier',why:'boîtier activé et app client connectée'}},
+  {id:'s4',name:'Gran Turismo 36',hin:'FR-BEN36G771',months:33,prio:'crit',reasons:['Boîtier activé le 02/09/2025','64 h moteur depuis'],guess:{date:'2025-09-02',client:'',why:'boîtier activé, 64 h moteur enregistrées'}},
+  {id:'s7',name:'Merry Fisher 795',hin:'FR-JEA79M305',months:29,prio:'crit',reasons:['Boîtier activé le 21/03/2026','App client connectée'],guess:{date:'2026-03-21',client:'L. Martin',why:'le client a appairé son bateau dans l’app'}},
+  {id:'s2',name:'Antares 9',hin:'FR-BEN9A2208',months:20,prio:'crit',reasons:['« En livraison », date prévue dépassée (03/2025)']},
+  {id:'s3',name:'Flyer 8 SUNdeck',hin:'FR-BEN8F0937',months:38,prio:'crit',reasons:['En stock depuis 38 mois']},
+  {id:'s5',name:'First 27',hin:'FR-BEN27F114',months:14,prio:'warn',reasons:['« En commande », production terminée']},
+  {id:'s6',name:'Cap Camarat 7.5',hin:'FR-JEA75C442',months:27,prio:'warn',reasons:['En stock depuis 27 mois']},
+  {id:'s8',name:'Sun Odyssey 410',hin:'FR-JEA41S208',months:25,prio:'warn',reasons:['En stock depuis 25 mois']}
+];
+const STK=[
+  {id:'k1',name:'Oceanis 34.1',hin:'FR-BEN34O551',months:3},
+  {id:'k2',name:'Antares 7',hin:'FR-BEN7A1093',months:5},
+  {id:'k3',name:'Leader 33',hin:'FR-JEA33L770',months:1},
+  {id:'k4',name:'Noroît · Flyer 8',hin:'FR-BEN31000',months:2}
+];
+const ANS={livre:'Livré au client',stock:'Toujours en stock',ailleurs:'Vendu ou transféré ailleurs',verif:'À vérifier'};
+Object.assign(S,{reg:{},regSel:new Set(),stkSel:new Set(),stkDone:new Set(),regDone:new Set(),stkF:'all',stkFOpen:false,stkOpen:{reg:true,todo:true,done:false},regEdit:null});
+const frD=d=>d?d.split('-').reverse().join('/'):'';
+function stockPct(){const tot=REG.length+STK.length;const done=S.regDone.size+S.stkDone.size;return Math.round(done/tot*100)}
+function regLeft(){return REG.filter(r=>!S.regDone.has(r.id))}
+function regRow(r){
+  const a=S.reg[r.id],sel=S.regSel.has(r.id),editing=S.regEdit===r.id||(a&&a.a==='livre'&&a.editing);
+  return `<div class="srow ${a?'answered':''}">
+    <input type="checkbox" class="scb" data-rsel="${r.id}" ${sel?'checked':''} aria-label="Sélectionner ${esc(r.name)}">
+    <div class="sbody">
+      <div class="shead"><b>${esc(r.name)}</b><span class="muted">HIN : ${r.hin}</span><span class="chip ${r.prio==='crit'?'c-red':'c-orange'}">${r.prio==='crit'?'Priorité forte':'À vérifier'}</span></div>
+      <div class="sreasons">${r.reasons.map(x=>`<span class="sreason">${ic(/Boîtier|App|moteur/.test(x)?'wifi':/livraison|commande/.test(x)?'alert':'clock',14)}${esc(x)}</span>`).join('')}</div>
+      ${a&&!editing?`<div class="sdone">${ic('check',16,2.4)}<span><b>${ANS[a.a]}</b>${a.a==='livre'?` le ${frD(a.date)}${a.client?` · ${esc(a.client)}`:''}`:''}</span><button class="linkbtn" data-redit="${r.id}">Modifier</button></div>`
+      : r.guess&&!editing?`<div class="sguess"><div><b>Mise en service probable le ${frD(r.guess.date)}</b>${r.guess.client?` · client ${esc(r.guess.client)}`:''}<div class="muted" style="font-size:12.5px">Déduit des données : ${esc(r.guess.why)}.</div></div>
+          <div class="sgact"><button class="btn btn-pri btn-sm" data-rconf="${r.id}">${ic('check',15,2.4)} Confirmer</button><button class="btn btn-ghost btn-sm" data-redit="${r.id}">Autre réponse</button></div></div>`
+      : `<div class="sq">Que devient ce bateau ?</div><div class="sans">${Object.entries(ANS).map(([k,l])=>`<button class="fchip" data-rans="${r.id}|${k}" aria-pressed="${a&&a.a===k}">${l}</button>`).join('')}</div>
+        ${a&&a.a==='livre'?`<div class="sfields"><label>Date de mise en service<input type="date" id="rd-${r.id}" value="${a.date||''}"></label><label>Client<input type="text" id="rc-${r.id}" value="${esc(a.client||'')}" placeholder="Nom du propriétaire"></label><button class="btn btn-pri btn-sm" data-rsave="${r.id}">Enregistrer</button></div>`:''}`}
+    </div></div>`;
+}
+function stkRow(s){const sel=S.stkSel.has(s.id);return `<label class="srow simple"><input type="checkbox" class="scb" data-ssel="${s.id}" ${sel?'checked':''}><div class="sbody"><div class="shead"><b>${esc(s.name)}</b><span class="muted">HIN : ${s.hin}</span><span class="muted">En stock depuis ${s.months} mois</span></div></div></label>`}
+function vStock(){
+  const left=regLeft(),f=S.stkF;
+  const regList=left.filter(r=>f==='all'||(f==='boitier'&&r.guess)||(f==='crit'&&r.prio==='crit')||(f==='warn'&&r.prio==='warn'));
+  const todo=STK.filter(s=>!S.stkDone.has(s.id)),done=[...REG.filter(r=>S.regDone.has(r.id)).map(r=>({n:r.name,t:ANS[S.reg[r.id].a]+(S.reg[r.id].a==='livre'?` le ${frD(S.reg[r.id].date)}`:'')})),...STK.filter(s=>S.stkDone.has(s.id)).map(s=>({n:s.name,t:'Confirmé en stock'}))];
+  const pct=stockPct(),ok=pct===100,ready=REG.filter(r=>S.reg[r.id]&&!S.reg[r.id].editing&&!S.regDone.has(r.id)).length+S.stkSel.size;
+  const nsel=S.regSel.size;
+  const sec=(k,title,count,body,extra='')=>`<section class="sacc"><button class="sacc-h" data-sacc="${k}" aria-expanded="${S.stkOpen[k]}"><span>${title}${count!=null?` <span class="scount">${count}</span>`:''}</span>${extra}<span class="xch ${S.stkOpen[k]?'open':''}">${ic('chev',18)}</span></button>${S.stkOpen[k]?`<div class="sacc-b">${body}</div>`:''}</section>`;
+  return `<div class="top"><div class="h1">Déclaration de stock</div><span class="muted">Novembre 2026</span></div>
+  <div class="wrap stockwrap">
+    <div class="sbar"><button class="btn btn-out" data-sfopen aria-expanded="${S.stkFOpen}">Filtres ${ic('filter',18)}</button>
+      ${S.stkFOpen?`<div class="fchips">${[['all','Tous'],['boitier','Boîtier déjà activé'],['crit','Priorité forte'],['warn','À vérifier']].map(([k,l])=>`<button class="fchip" data-sf="${k}" aria-pressed="${f===k}">${l}</button>`).join('')}</div>`:''}</div>
+    ${left.length?sec('reg',`À régulariser ${NEW}`,left.length,`
+      <p class="muted" style="margin:0 0 10px">Ces bateaux sont en stock depuis plus de 23 mois ou ont un statut qui se contredit. Dites-nous ce qu’ils sont devenus : quand les données le permettent, la réponse est déjà préparée.</p>
+      ${nsel?`<div class="sbulk"><b>${nsel} sélectionné${nsel>1?'s':''}</b><span class="muted">Appliquer :</span>${['stock','ailleurs','verif'].map(k=>`<button class="btn btn-out btn-sm" data-rbulk="${k}">${ANS[k]}</button>`).join('')}<button class="linkbtn" data-rbulk="none">Désélectionner</button></div>`:''}
+      ${regList.map(regRow).join('')||'<div class="muted">Aucun bateau pour ce filtre.</div>'}`):''}
+    ${sec('todo','État de stock à confirmer',null,todo.length?`<div class="sall"><label><input type="checkbox" data-sselall ${todo.every(s=>S.stkSel.has(s.id))?'checked':''}> Tout sélectionner</label></div>${todo.map(stkRow).join('')}`:'<div class="muted">Aucun bateau</div>')}
+    ${sec('done','État de stock confirmé',done.length||null,done.length?done.map(d=>`<div class="act"><span class="b" style="background:var(--green)"></span><span style="flex:1"><b style="font-weight:500">${esc(d.n)}</b></span><span class="muted">${esc(d.t)}</span></div>`).join(''):'<div class="muted">Aucun bateau</div>')}
+  </div>
+  <div class="sfoot"><b class="${ok?'okc':''}">${ok?'Déclaration effectuée':'Déclaration non effectuée'}</b><span class="sfi" data-tip="Part des bateaux confirmés ou régularisés ce mois-ci|Les bateaux à régulariser comptent dans ce pourcentage">${ic('info',16)}</span>
+    <span class="muted">Pourcentage de déclaration : ${pct} %</span><span class="sprog"><i style="width:${pct}%;background:${ok?'var(--green)':'var(--red)'}"></i></span>
+    <button class="btn btn-pri" data-svalid ${ready?'':'disabled'}>Validez la sélection${ready?` (${ready})`:''}</button></div>`;
+}
+function stockValidate(){
+  let n=0;REG.forEach(r=>{const a=S.reg[r.id];if(a&&!a.editing&&!S.regDone.has(r.id)){S.regDone.add(r.id);n++}});
+  S.stkSel.forEach(id=>{S.stkDone.add(id);n++});S.stkSel.clear();S.regSel.clear();
+  if(stockPct()===100){doneTask('t2');S.stkOpen.done=true;}
+  render();toast(`Déclaration envoyée : ${n} bateau${n>1?'x':''}`);checkAllDone();
+}
+document.addEventListener('click',e=>{
+  if(route()!=='stock'&&!e.target.closest('[data-rmail]'))return;
+  const t=e.target,c=s=>t.closest(s);let el;
+  if(el=c('[data-rmail]')){e.preventDefault();const [id,k]=el.dataset.rmail.split('|');const r=REG.find(x=>x.id===id);S.reg[id]=k==='livre'&&r.guess?{a:'livre',date:r.guess.date,client:r.guess.client}:{a:k};S.stkOpen.reg=true;location.hash='#stock';setTimeout(()=>toast('Réponse préparée : il reste à valider'),80);return;}
+  if(c('[data-sfopen]')){S.stkFOpen=!S.stkFOpen;render();return;}
+  if(el=c('[data-sf]')){S.stkF=el.dataset.sf;render();return;}
+  if(el=c('[data-sacc]')){const k=el.dataset.sacc;S.stkOpen[k]=!S.stkOpen[k];render();return;}
+  if(el=c('[data-rconf]')){const r=REG.find(x=>x.id===el.dataset.rconf);S.reg[r.id]={a:'livre',date:r.guess.date,client:r.guess.client};render();toast(`${r.name} : mise en service confirmée`);return;}
+  if(el=c('[data-redit]')){const id=el.dataset.redit;S.regEdit=id;if(S.reg[id])S.reg[id].editing=S.reg[id].a==='livre';else S.reg[id]=undefined;render();return;}
+  if(el=c('[data-rans]')){const [id,k]=el.dataset.rans.split('|');const r=REG.find(x=>x.id===id);S.reg[id]={a:k,editing:k==='livre',date:k==='livre'&&r.guess?r.guess.date:'',client:k==='livre'&&r.guess?r.guess.client:''};if(k!=='livre')S.regEdit=null;else S.regEdit=id;render();return;}
+  if(el=c('[data-rsave]')){const id=el.dataset.rsave,d=document.getElementById('rd-'+id).value,cl=document.getElementById('rc-'+id).value.trim();if(!d){toast('Indiquez la date de mise en service');return;}S.reg[id]={a:'livre',date:d,client:cl};S.regEdit=null;render();return;}
+  if(el=c('[data-rbulk]')){const k=el.dataset.rbulk;if(k!=='none')S.regSel.forEach(id=>{S.reg[id]={a:k}});S.regSel.clear();render();if(k!=='none')toast(`Réponse appliquée : ${ANS[k]}`);return;}
+  if(c('[data-svalid]')){stockValidate();return;}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.rsel){t.checked?S.regSel.add(t.dataset.rsel):S.regSel.delete(t.dataset.rsel);render();}
+  else if(t.dataset.ssel){t.checked?S.stkSel.add(t.dataset.ssel):S.stkSel.delete(t.dataset.ssel);render();}
+  else if('sselall' in t.dataset){STK.filter(s=>!S.stkDone.has(s.id)).forEach(s=>t.checked?S.stkSel.add(s.id):S.stkSel.delete(s.id));render();}
+});
+
 
 /* ======================= Double vue : arborescence Seanapps Pro avant / après, reliée à l'app ======================= */
-const APP_VERSION='v9';
+const APP_VERSION='v10';
 const VERSIONS_FALLBACK=[
+  {v:'v10',date:'2026-11-12',t:'Déclaration de stock : bateaux à régulariser, mise en service en un clic'},
   {v:'v9',date:'2026-11-12',t:'Nouvelle vue du bateau : silhouette avec pastilles et liste des zones'},
   {v:'v8',date:'2026-11-12',t:'Toutes les icônes reprises de la bibliothèque Seanapps (bouton ⓘ compris)'},
   {v:'v7',date:'2026-11-12',t:'Guide des capteurs dans un bouton ⓘ, en haut de la page Capteurs'},
@@ -1256,8 +1343,13 @@ const APRES=[
       {id:'bnotif',t:'Notifications → Capteurs',e:'fiche',st:'mod',k:['*bnotif'],go:{hash:'bateaux',sel:'b2'},why:'Les alertes n’étaient pas reliées au détail du bateau.',gain:'Le nombre d’alertes sur la fiche et un lien vers les capteurs, sans doublon.',bm:'N° 11 Santé du compte'}]},
   {id:'msg',n:5,t:'Messages',st:'mod',k:['messages'],go:{hash:'messages'},why:'Une alerte capteur entraîne souvent un message du client, traité sans délai visible.',gain:'Le délai de réponse affiché, et les propositions commerciales arrivent dans la conversation du client.',bm:'N° 10 Délai de réponse'},
   {id:'conc',n:6,t:'Ma concession',st:'new',k:['concession'],go:{hash:'concession'},why:'Rien ne valorisait la concession qui fait tout à temps.',gain:'Un statut trimestriel sur 3 critères, sans classement entre concessions.',bm:'N° 1 Statut à critères'},
-  {id:'same',n:7,t:'Écrans inchangés',st:'same',k:['clients','fleet','notifications','stock','historique','partage','services','parametres'],go:{hash:'clients'},why:'Ces écrans fonctionnent : le prototype se concentre sur ce qui manque.',gain:'Aucun changement d’habitude pour les équipes.',bm:'—',
-    chipsH:[['clients','Clients'],['fleet','Fleet'],['notifications','Notifications'],['stock','Déclaration de stock'],['historique','Historique'],['partage','Stock partagé'],['services','Services'],['parametres','Paramètres']]}
+  {id:'stockd',n:7,t:'Déclaration de stock',st:'mod',k:['stock'],go:{hash:'stock'},why:'Des bateaux restent « en stock » ou « en commande » des années après leur livraison : l’indicateur de mise en service est faussé.',gain:'Le stock reflète la réalité, et chaque mise en service oubliée est rattrapée en un clic.',bm:'N° 1 Statut à critères (stock déclaré) · n° 3 Checklist',
+    kids:[
+      {id:'reg',t:'À régulariser',e:'plus de 23 mois ou statut incohérent',st:'new',k:['*reg'],go:{hash:'stock'},why:'Le concessionnaire ne pense pas à mettre à jour un bateau livré il y a longtemps.',gain:'Une liste courte, 4 réponses possibles, et une réponse groupée pour plusieurs bateaux.',bm:'N° 4 Ma journée · n° 7 Tout est traité'},
+      {id:'guess',t:'Mise en service déduite des données',e:'boîtier déjà activé',st:'new',k:['*guess'],go:{hash:'stock'},why:'Un boîtier activé ou une app client connectée prouvent que le bateau navigue.',gain:'La date est préparée : le concessionnaire n’a qu’à confirmer.',bm:'Hors benchmark : donnée existante'},
+      {id:'mailreg',t:'Réponse depuis le Bilan du lundi',e:'sans ouvrir l’app',st:'new',k:['*mailreg'],go:{hash:'bilan'},why:'Certaines concessions n’ouvrent pas l’app chaque semaine.',gain:'Deux boutons par bateau dans le mail : la réponse arrive préparée dans la déclaration.',bm:'N° 8 Bilan hebdomadaire'}]},
+  {id:'same',n:8,t:'Écrans inchangés',st:'same',k:['clients','fleet','notifications','historique','partage','services','parametres'],go:{hash:'clients'},why:'Ces écrans fonctionnent : le prototype se concentre sur ce qui manque.',gain:'Aucun changement d’habitude pour les équipes.',bm:'—',
+    chipsH:[['clients','Clients'],['fleet','Fleet'],['notifications','Notifications'],['historique','Historique'],['partage','Stock partagé'],['services','Services'],['parametres','Paramètres']]}
 ];
 const AVANT=[
   {id:'a-dash',n:1,t:'Tableau de bord',st:'chg',k:['dashboard'],go:{hash:'dashboard',role:'directeur'},why:'Un seul tableau pour tous les métiers : ventes, stock, inspections, clientèle, connectivité.',gain:'Devient 4 vues par métier, avec des cases qui se déplient.',chipsS:['Mes ventes','État des stocks','Inspections à effectuer','Clientèle','Connectivité']},
@@ -1265,7 +1357,7 @@ const AVANT=[
   {id:'a-cli',n:3,t:'Clients',st:'same',k:['clients'],go:{hash:'clients'},why:'Liste des propriétaires rattachés.',gain:'Inchangé.'},
   {id:'a-msg',n:4,t:'Messages',st:'chg',k:['messages'],go:{hash:'messages'},why:'Conversations avec les propriétaires.',gain:'Ajoute le délai de réponse et les propositions avec lien produit.'},
   {id:'a-fleet',n:5,t:'Fleet · Notifications',st:'same',k:['fleet','notifications'],go:{hash:'notifications'},why:'Gestion locative et alertes reçues.',gain:'Inchangé. Les alertes capteurs ont en plus leur propre écran.'},
-  {id:'a-stock',n:6,t:'Stock',st:'same',k:['stock','historique','partage'],go:{hash:'stock'},why:'Déclaration, historique, stock partagé.',gain:'Inchangé.',chipsS:['Déclaration','Historique','Stock partagé']},
+  {id:'a-stock',n:6,t:'Stock',st:'chg',k:['stock','historique','partage'],go:{hash:'stock'},why:'Déclaration mensuelle : bateaux à confirmer et confirmés. Les bateaux livrés depuis longtemps restent « en stock ».',gain:'La déclaration gagne « À régulariser », avec la mise en service déduite des données.',chipsS:['Déclaration','Historique','Stock partagé']},
   {id:'a-cpt',n:7,t:'Compte',st:'chg',k:['services','parametres','concession'],go:{hash:'services'},why:'Services et paramètres.',gain:'Ajoute « Ma concession » et son statut.',chipsS:['Services','Paramètres']},
   {id:'a-none',t:'Ce qui n’existait pas',st:'gone',ghost:true,k:['capteurs','*search'],go:{hash:'capteurs',capBoat:null,dev:null},why:'Pas d’écran capteurs, pas de recherche globale, pas de statut concession ni de bilan.',gain:'Tout cela arrive dans la version « Après ».',chipsS:['Écran Capteurs','Recherche universelle','Statut concession','Bilan du lundi']}
 ];
@@ -1455,10 +1547,13 @@ function vBilan(){
           <b>Cette semaine</b>
           <div class="mlist">
             <a href="#bateaux" data-go-boat="b3"><span>Contrôle à 1 an · Test Boat (en retard)</span><span>Faire →</span></a>
-            <a href="#stock"><span>Déclarer 2 bateaux en stock</span><span>Déclarer →</span></a>
+            <a href="#stock"><span>Déclarer le stock de novembre</span><span>Déclarer →</span></a>
             <a href="#bateaux" data-go-boat="b1"><span>Activer le boîtier · Princess 3</span><span>Activer →</span></a>
           </div>
         </div>
+        ${regLeft().length?`<div><b>À régulariser : répondez directement depuis ce mail</b><div class="muted" style="font-size:13px;margin:2px 0 8px">Ces bateaux sont en stock depuis longtemps ou ont un statut qui se contredit.</div>
+          <div class="mreg">${regLeft().slice(0,3).map(r=>`<div class="mregrow"><div><b>${esc(r.name)}</b><div class="muted" style="font-size:12.5px">${esc(r.reasons[0])}</div></div><div class="mregbtn"><a href="#stock" data-rmail="${r.id}|livre">${r.guess?'Confirmer la mise en service':'Livré au client'}</a><a href="#stock" data-rmail="${r.id}|stock">Toujours en stock</a></div></div>`).join('')}</div>
+          ${regLeft().length>3?`<a href="#stock" class="linkbtn">Voir les ${regLeft().length} bateaux à régulariser →</a>`:''}</div>`:''}
         <div class="health ${h.ok?'ok':'warn'}"><div class="ico">${ic(h.ok?'check':'pulse',20,2.2)}</div><div><b>${h.ok?'Parc en bonne santé':'Parc à surveiller'}</b><span style="font-size:13px">Statut « Concession Seanapps » : ${statusCrit().filter(c=>c.v>=c.seuil).length} critères sur 3 atteints ce trimestre.</span></div></div>
         <a class="btn btn-pri" href="#dashboard" style="justify-content:center;padding:13px">Ouvrir Seanapps Pro</a>
         <div class="muted" style="font-size:12px">Vous recevez ce bilan car vous êtes administrateur de la concession. Vous pouvez le désactiver dans Paramètres › Notifications.</div>
@@ -1468,14 +1563,7 @@ function vBilan(){
 }
 
 /* ======================= Écrans inchangés ======================= */
-function vStock(){
-  const d=S.tasks.find(t=>t.id==='t2').done;
-  return `<div class="top"><div class="h1">Déclaration de stock</div></div>
-  <div class="wrap"><section class="card"><div class="card-h"><h3>Novembre 2026</h3><span class="chip ${d?'c-green':'c-yellow'}" style="margin-left:auto">${d?'Déclaration validée':'2 bateaux à déclarer'}</span></div>
-  <div class="card-b">${['Oceanis 30.1 · FR-BEN30E112','Antares 9 · FR-BEN9A2208'].map(x=>`<div class="act"><span class="b" style="background:${d?'var(--green)':'var(--orange)'}"></span><span style="flex:1">${x}</span><span class="chip ${d?'c-green':'c-grey'}">${d?'Déclaré':'Non déclaré'}</span></div>`).join('')}
-  <div style="margin-top:14px">${d?'':'<button class="btn btn-pri" id="declare">Confirmer le stock</button>'}</div></div></section>
-  <div class="proto-note">Écran simplifié pour le prototype</div></div>`;
-}
+
 function vEmpty(title){
   return `<div class="top"><div class="h1">${title}</div></div><div class="wrap"><div class="empty"><b>Écran inchangé</b><div style="margin-top:6px">Cet écran reste comme dans Seanapps Pro aujourd’hui. Le prototype se concentre sur le tableau de bord par métier et les capteurs.</div><div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn btn-out" href="#dashboard">Tableau de bord</a><a class="btn btn-pri" href="#capteurs">Voir les capteurs</a></div></div></div>`;
 }
