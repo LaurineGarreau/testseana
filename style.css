@@ -902,5 +902,19 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .blhead .chip .linkbtn{display:inline-flex;margin-left:2px;color:var(--ink-2)}
 .blhead .sq{width:38px;height:38px}
 .blhead .btn.on{background:var(--blue-soft)}
+/* ---------- Cases du tableau de bord au style Seanapps Pro ---------- */
+.tile{text-align:left;width:100%;display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s,box-shadow .15s;font:inherit;color:inherit}
+.tile:hover{border-color:var(--blue)}
+.tile.on{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.tile .card-h{border-bottom:0;padding-bottom:8px;align-items:flex-start}
+.tile .tl{min-width:0}
+.tile .tl h3{font-size:16px}
+.tile .tl .sub{font-size:13px;margin-top:2px}
+.tile .total{padding-left:14px;min-width:0}
+.tile .total b{font-size:26px;white-space:nowrap}
+.tile-f{display:flex;gap:8px;align-items:center;padding:0 18px 14px;margin-top:auto}
+.tile-o{margin-left:auto;display:inline-flex;gap:4px;align-items:center;font-size:13px;color:var(--blue);font-weight:500}
+.tile-o .xch{color:var(--blue)}
+.kpi,.kpi.is-warn,.kpi.is-crit,.kpi.is-ok{border-left:1px solid var(--line)}
 
 html,body{margin:0}
