@@ -774,8 +774,8 @@ function vBateaux(){
   if(!S.listOpen&&!b)S.listOpen=true;
   return `<div class="split one ${S.listOpen?'listonly':'nolist'}">
     ${S.listOpen?`<div class="listcol"><div class="lh">
-        <div style="display:flex;align-items:center;gap:6px;font-size:18px;font-weight:500">Mes bateaux <span class="muted" style="font-size:14px;font-weight:400">${S.boats.length}</span></div>
-        <div class="search"><label class="in">${ic('search',20)}<input id="q" value="${esc(S.bq)}" placeholder="Rechercher" aria-label="Rechercher un bateau, un client, un HIN" autocomplete="off"><button class="fbtn ${S.bfOpen||S.bf!=='all'?'on':''}" data-bfopen aria-expanded="${S.bfOpen}" aria-label="Filtrer et trier">${ic('filter',20)}</button></label><button class="sq sq-blue" aria-label="Ajouter un bateau">${ic('boat',22)}</button></div>
+        <div class="blhead"><span class="blt">Mes bateaux <span class="muted">${S.boats.length}</span></span>${S.bq?`<span class="chip c-grey">« ${esc(S.bq)} » <button class="linkbtn" data-bclear aria-label="Effacer la recherche">${ic('x',12,2)}</button></span>`:''}<button class="btn btn-out btn-sm ${S.bfOpen||S.bf!=='all'?'on':''}" data-bfopen aria-expanded="${S.bfOpen}">${ic('filter',16)} Filtres</button><button class="sq sq-blue" aria-label="Ajouter un bateau">${ic('boat',20)}</button></div>
+        
         ${S.bfOpen?`<div class="fpanel"><div class="fchips" id="bfil" role="group" aria-label="Filtrer">${bfChips()}</div>
           <label class="muted" style="display:flex;gap:8px;align-items:center;font-size:13px">Trier par <select id="bsort" class="bsel"><option value="grav" ${S.bsort==='grav'?'selected':''}>Les plus urgents</option><option value="nom" ${S.bsort==='nom'?'selected':''}>Nom A → Z</option><option value="rev" ${S.bsort==='rev'?'selected':''}>Révision la plus proche</option></select></label></div>`
           :(S.bf!=='all'?`<div class="muted" style="font-size:12.5px">Filtre : <b>${nf_.l}</b> · <button class="linkbtn" data-bf="all">Effacer</button></div>`:'')}
@@ -888,6 +888,13 @@ function renderResults(){
   if(!GS.open){box.hidden=true;return}
   const ro=roleOf(S.role),q=GS.q.trim();
   let html='';GS.items=[];
+  if(route()==='bateaux'&&!GS.global){
+    if(!q){box.hidden=true;return}
+    const n=boatList().length;
+    GS.items=[{go:()=>{GS.global=true;GS.open=true;renderResults();document.getElementById('gq').focus()}}];
+    box.innerHTML=`<div class="gsec"><div class="gt">${n} bateau${n>1?'x':''} dans la liste pour « ${esc(q)} »</div><button class="gitem on" data-gi="0"><span class="gi">${ic('search',18)}</span><span class="gx"><span class="gh">Chercher « ${esc(q)} » partout</span><span class="gs">Capteurs, alertes, clients, écrans…</span></span></button></div>`;
+    box.hidden=false;return;
+  }
   if(!q){
     const rc=recent();
     html=`<div class="gsec"><div class="gt">Recherches conseillées pour le ${ro.l.toLowerCase()}</div><div class="gchips">${chips(SUGG[S.role])}</div></div>
@@ -905,14 +912,15 @@ function renderResults(){
   box.innerHTML=html;box.hidden=false;
   const on=box.querySelector('.gitem.on');if(on)on.scrollIntoView({block:'nearest'});
 }
-function choose(k){const it=GS.items[k];if(!it)return;pushRecent(GS.q);closeSearch();it.go();}
+function choose(k){const it=GS.items[k];if(!it)return;if(route()==='bateaux'&&!GS.global){it.go();return;}pushRecent(GS.q);closeSearch();it.go();}
 function closeSearch(){GS.open=false;renderResults();}
 function gbar(){
   return `<div class="gbar"><div class="gwrap"><label class="gin" for="gq">${ic('search',20)}<input id="gq" type="search" placeholder="Rechercher un capteur, un bateau, un client, un écran…" autocomplete="off" aria-label="Rechercher partout" role="combobox" aria-expanded="false" aria-controls="gres"><kbd>/</kbd></label>
     <div class="gres" id="gres" role="listbox" hidden></div></div></div>`;
 }
 document.addEventListener('focusin',e=>{if(e.target.id==='gq'){GS.open=true;GS.sel=0;renderResults();e.target.setAttribute('aria-expanded','true')}});
-document.addEventListener('input',e=>{if(e.target.id==='gq'){GS.q=e.target.value;GS.sel=0;GS.open=true;renderResults()}});
+document.addEventListener('input',e=>{if(e.target.id==='gq'){GS.q=e.target.value;GS.sel=0;GS.open=true;if(route()==='bateaux'&&!GS.global){S.bq=GS.q;S.bpage=0;updateBoats();}renderResults()}});
+function syncSearchBar(){const q=document.getElementById('gq');if(!q)return;const onB=route()==='bateaux';GS.global=false;q.placeholder=onB?'Rechercher un bateau, un client, un HIN…':'Rechercher un capteur, un bateau, un client, un écran…';if(document.activeElement!==q)q.value=onB?S.bq:'';GS.q=q.value;}
 document.addEventListener('keydown',e=>{
   const gq=document.getElementById('gq');
   if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();gq.focus();return}
@@ -1673,7 +1681,7 @@ function render(){
   for(const k in CH)delete CH[k];
   hideTip();
   document.getElementById('view').innerHTML=(views[r]||vDashboard)();
-  renderNav();bindCharts();if(typeof renderTree==='function')renderTree();if(document.getElementById('explorer')&&typeof renderExplorer==='function')renderExplorer();
+  renderNav();bindCharts();if(typeof syncSearchBar==='function')syncSearchBar();if(typeof renderTree==='function')renderTree();if(document.getElementById('explorer')&&typeof renderExplorer==='function')renderExplorer();
   const nb=document.getElementById('blist');if(nb&&bs)nb.scrollTop=bs;
   document.getElementById('side').classList.remove('open');
 }
@@ -1689,6 +1697,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-bfopen]')){S.bfOpen=!S.bfOpen;render();return;}
   const bp=e.target.closest('[data-bpage]');if(bp){if(bp.disabled)return;S.bpage=+bp.dataset.bpage;updateBoats();const l=document.getElementById('blist');if(l)l.scrollTop=0;return;}
   if(e.target.closest('[data-fold]')){S.ficheOpen=!S.ficheOpen;render();return;}
+  if(e.target.closest('[data-bclear]')){S.bq='';S.bpage=0;render();return;}
   if(e.target.closest('[data-blist]')){S.listOpen=true;render();document.getElementById('main').scrollTop=0;return;}
   const fs=e.target.closest('[data-fsec]');if(fs){const k=fs.dataset.fsec;S.fsec[k]=!S.fsec[k];render();return;}
   const fx=e.target.closest('[data-fx]');if(fx){S.fx[fx.dataset.fx]=!S.fx[fx.dataset.fx];render();return;}

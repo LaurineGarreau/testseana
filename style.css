@@ -894,5 +894,13 @@ svg.xp .dl{fill:var(--ink-2);font-size:12px;font-weight:600;font-family:var(--fo
 .boat.on .nx,.boat.on .go{color:#fff}
 .fh2-back{margin:-4px 0 2px}
 @media (max-width:640px){.brow2 .chip{display:none}.brow2 .nx{font-size:12px}}
+/* ---------- Bateaux pleine largeur, une seule recherche ---------- */
+.split.one.listonly .listcol,.split.one .fiche2{max-width:none}
+.blhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.blhead .blt{font-size:18px;font-weight:500;margin-right:auto}
+.blhead .blt .muted{font-size:14px;font-weight:400}
+.blhead .chip .linkbtn{display:inline-flex;margin-left:2px;color:var(--ink-2)}
+.blhead .sq{width:38px;height:38px}
+.blhead .btn.on{background:var(--blue-soft)}
 
 html,body{margin:0}
