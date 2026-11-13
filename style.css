@@ -954,5 +954,20 @@ svg.xp .dlt{fill:var(--ink-2);font:500 11.5px var(--font)}
 .zmini .sdot .ring{stroke-width:2}
 .zmini .sdot .ring-p{stroke-width:2.5}
 .dv-row{display:flex;align-items:center;gap:12px}
+.ctophd{padding-top:12px;gap:10px}
+.ctophd .h1{font-size:22px}
+.ctophd .chd{font-size:13px}
+.cwrap{padding-top:6px}
+.ctop{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:1100px){.ctop{grid-template-columns:minmax(0,1fr)}}
+.kfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}
+.kfacts>div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.kfacts span{font-size:12px}.kfacts b{font-size:14.5px;font-weight:600}
+.cok{display:flex;gap:8px;align-items:center;color:var(--green);font-weight:500;padding:6px 2px}
+.cfam .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px;margin-top:12px}
+.cbad{display:flex;flex-direction:column;gap:8px}
+.chint{font-size:12.5px;margin-top:10px}
+.cexp{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.xhint{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;margin-left:auto}
 
 html,body{margin:0}

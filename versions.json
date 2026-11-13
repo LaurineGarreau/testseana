@@ -1,5 +1,10 @@
 [
   {
+    "v": "v14",
+    "date": "2026-11-13",
+    "t": "Capteurs d’un bateau : résumé et journal de bord en tête, puis 5 familles (Système, Énergie, Sécurité, Environnement, Usage) ; toucher un capteur affiche sa courbe, plusieurs de la même famille se croisent"
+  },
+  {
     "v": "v13",
     "date": "2026-11-12",
     "t": "Page Bateaux allégée : la liste ou la fiche, une seule à la fois, avec « À faire » en tête"
