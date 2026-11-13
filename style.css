@@ -1119,5 +1119,8 @@ button.fold-h{background:none;border:0;padding:0;font:inherit;color:inherit;curs
 .mlist{padding:4px}
 .mconv.on .mc-w{color:#fff;border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.12)}
 .tnode.ro{cursor:default}.tnode.ro:hover{border-color:var(--t-kid-br)}
+@keyframes flashT{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 0%,transparent)}25%{box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 45%,transparent)}100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 0%,transparent)}}
+.flash{animation:flashT 1.6s ease-out 1}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;outline:2px solid var(--blue)}}
 
 html,body{margin:0}

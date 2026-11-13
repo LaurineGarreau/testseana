@@ -1,5 +1,10 @@
 [
   {
+    "v": "v22",
+    "date": "2026-11-13",
+    "t": "Recherche universelle qui emmène à l’endroit demandé : « batterie Princess 2 » ouvre la courbe, « inspections Test Boat » la section de la fiche, « écrire à Jane Doe » la conversation ; Entrée va au meilleur résultat"
+  },
+  {
     "v": "v21",
     "date": "2026-11-13",
     "t": "Messages comme dans l’app (recherche, nouvelle conversation, bateau et propriétaire en tête, pièce jointe) avec le délai de réponse : moyenne, conversations en attente, « répondu en » sous chaque réponse"
