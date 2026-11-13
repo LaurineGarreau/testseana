@@ -1,5 +1,15 @@
 [
   {
+    "v": "v16",
+    "date": "2026-11-13",
+    "t": "Le parc en cartes (une par bateau) ; la page détail d’un bateau revient aux lignes avec pastilles"
+  },
+  {
+    "v": "v15",
+    "date": "2026-11-13",
+    "t": "Capteurs en cartes : le parc (une carte par bateau) et la page détail d’un bateau (une carte par capteur, Voir la courbe / Croiser)"
+  },
+  {
     "v": "v14",
     "date": "2026-11-13",
     "t": "Capteurs d’un bateau : résumé et journal de bord en tête, puis 5 familles (Système, Énergie, Sécurité, Environnement, Usage) ; toucher un capteur affiche sa courbe, plusieurs de la même famille se croisent"
