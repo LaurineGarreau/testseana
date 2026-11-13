@@ -1,5 +1,10 @@
 [
   {
+    "v": "v21",
+    "date": "2026-11-13",
+    "t": "Messages comme dans l’app (recherche, nouvelle conversation, bateau et propriétaire en tête, pièce jointe) avec le délai de réponse : moyenne, conversations en attente, « répondu en » sous chaque réponse"
+  },
+  {
     "v": "v20",
     "date": "2026-11-13",
     "t": "Bouton ⓘ à côté de chaque famille (Système, Énergie, Sécurité, Environnement, Usage) : guide de la famille avec une recherche dans les 169 capteurs"
