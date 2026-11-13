@@ -942,9 +942,17 @@ svg.xp .dlt{fill:var(--ink-2);font:500 11.5px var(--font)}
 .tile-o{white-space:nowrap}
 .tile-f{gap:6px}
 .tile-f .chip{white-space:nowrap}
-.zrow .zi{border:0;background:radial-gradient(closest-side,var(--panel) calc(100% - 2.5px),transparent calc(100% - 2px)),conic-gradient(var(--zc) calc(var(--p,100)*1%),var(--line) 0)}
-.zrow.on .zi{background:radial-gradient(closest-side,var(--blue-softer) calc(100% - 2.5px),transparent calc(100% - 2px)),conic-gradient(var(--zc) calc(var(--p,100)*1%),var(--line) 0)}
-.zrow .zi.st-none{border:2.5px dashed var(--zc);background:none}
-.hull-svg .ring-p{fill:none;stroke-width:3.5;stroke-linecap:round}
+.hull-svg .ring-p,.sdot .ring-p{fill:none;stroke-width:3.5;stroke-linecap:round}
+.hull-svg .liq,.sdot .liq{opacity:.32}
+.hull-svg .pin.on .liq{opacity:.55}
+.sdot{flex:none;overflow:visible;color:var(--ink)}
+.sdot .ring{fill:var(--panel);stroke-width:2.5}
+.sdot .mark{stroke:var(--panel);stroke-width:1.5}
+.hull-svg .mark{stroke:var(--panel);stroke-width:1.5}
+.zrow.on .sdot .ring{fill:var(--blue-softer)}
+.zmini{display:inline-flex;gap:4px;margin-left:8px;vertical-align:-5px}
+.zmini .sdot .ring{stroke-width:2}
+.zmini .sdot .ring-p{stroke-width:2.5}
+.dv-row{display:flex;align-items:center;gap:12px}
 
 html,body{margin:0}
