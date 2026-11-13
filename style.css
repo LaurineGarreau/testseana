@@ -1039,5 +1039,38 @@ a.sc-btn{text-decoration:none}
 .sc-b .btn{width:100%}
 .fh2-own .btn.btn-icon{margin-left:0;width:40px}
 .tb>.btn{align-self:flex-start}
+/* ---------- Fiche bateau alignée sur l'app Seanapps Pro ---------- */
+.fh2 .meta2{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;color:var(--ink-2);font-size:14px}
+.fh2 .meta2>div{display:flex;flex-direction:column;gap:6px}
+.tlink{color:var(--blue);text-decoration:underline;font-weight:500;white-space:nowrap}
+.fcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.fcol{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (max-width:900px){.fcols{grid-template-columns:minmax(0,1fr)}}
+.fcol .fcard{gap:12px}
+.fcard-hd{display:flex;align-items:center;gap:10px;justify-content:space-between;min-height:34px}
+.fcard-hd>b{font-size:16px;font-weight:600;display:inline-flex;gap:8px;align-items:center}
+button.fold-h{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;width:100%;text-align:left}
+.fold-h .xch svg{transform:rotate(90deg);transition:transform .2s}.fold-h .xch.open svg{transform:rotate(-90deg)}
+.fwide{width:100%}
+.fempty{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;color:var(--ink-2);font-size:13.5px}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fmap{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);height:220px}
+.fmap svg{width:100%;height:100%;display:block}
+.fmap svg g{transition:transform .25s}
+.fmap-z{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
+.fmap-z button{width:30px;height:30px;border:0;background:var(--panel);font-size:18px;cursor:pointer;color:var(--ink)}
+.fmap-z button+button{border-top:1px solid var(--line)}
+.fcaps{display:flex;flex-direction:column;gap:8px}
+.fcap{display:flex;align-items:center;gap:10px;font-size:14px}.fcap span{flex:1;min-width:0}.fcap b{font-weight:600;font-variant-numeric:tabular-nums}
+.fnotifs{display:flex;flex-direction:column;gap:10px;max-height:330px;overflow:auto;padding-right:4px}
+.fnotif{border:1px solid var(--blue);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.fnotif.read{border-color:var(--line)}
+.fn-h{grid-column:1/-1;display:flex;align-items:center;gap:10px}.fn-h b{flex:1;color:var(--blue);font-weight:600}.fnotif.read .fn-h b{color:var(--ink)}
+.fn-lvl{display:inline-flex;gap:4px;align-items:center;font-size:12.5px;font-weight:500;padding:3px 8px;border-radius:8px;background:var(--blue-softer);color:var(--blue)}
+.fn-lvl.l-crit{background:color-mix(in srgb,var(--red) 10%,transparent);color:var(--red)}
+.fn-b{color:var(--ink-2);font-size:14px}.fn-t{color:var(--ink-3);font-size:13px;grid-column:1}
+.fn-a{grid-column:2;grid-row:2/4;display:flex;gap:6px;align-self:end}
+.fown{position:sticky;bottom:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 -6px 16px rgba(0,0,0,.05)}
+.fown .own{display:inline-flex;gap:8px;align-items:center;margin-right:6px}.fown .own b{font-weight:500}
 
 html,body{margin:0}

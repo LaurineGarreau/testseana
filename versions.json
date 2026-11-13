@@ -1,5 +1,10 @@
 [
   {
+    "v": "v18",
+    "date": "2026-11-13",
+    "t": "Fiche bateau alignée sur l’app : Localisation, Équipement, Capteurs, Notifications (marquer comme lu), Inspections, Historique et Documents repliables, Activités, barre propriétaire en bas ; fiche pour les bateaux aux données réelles"
+  },
+  {
     "v": "v17",
     "date": "2026-11-13",
     "t": "Boutons cohérents avec le Design System : 5 types (un seul bouton plein par zone), 4 tailles selon le contexte, libellés en verbe à l’infinitif, icônes seules avec infobulle"
