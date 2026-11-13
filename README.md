@@ -33,4 +33,4 @@ Chaque version importante est conservée dans `versions/vN/` et listée dans `ve
 Deux prototypes cliquables issus des benchmarks gamification (données d'exemple) :
 
 - [`pro-gamification/`](pro-gamification/) : Seanapps Pro avec Ma journée, État du parc, checklist de mise en service, bilan du lundi, statut concession et délai de réponse.
-- [`mobile-gamification/`](mobile-gamification/) : app propriétaire avec bilan de saison, missions, avantages réseau, carte qui se dévoile et app qui suit la saison.
+- [`mobile-gamification/`](mobile-gamification/) : prototype de l'app propriétaire de Killian Hocquet (React, version compilée), avec les ajouts gamification : bilan de saison, missions, codes boutique, avantages du réseau, carte qui se dévoile, saisons, objectif de la flotte, registre pré-rempli, délai de réponse.
