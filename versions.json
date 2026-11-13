@@ -1,5 +1,10 @@
 [
   {
+    "v": "v19",
+    "date": "2026-11-13",
+    "t": "Éléments « À faire » et alertes au style du Design System : cartes bordées sans bande de couleur, badge d’état unique, boutons en bas à droite"
+  },
+  {
     "v": "v18",
     "date": "2026-11-13",
     "t": "Fiche bateau alignée sur l’app : Localisation, Équipement, Capteurs, Notifications (marquer comme lu), Inspections, Historique et Documents repliables, Activités, barre propriétaire en bas ; fiche pour les bateaux aux données réelles"

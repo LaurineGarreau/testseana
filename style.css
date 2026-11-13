@@ -1072,5 +1072,15 @@ button.fold-h{background:none;border:0;padding:0;font:inherit;color:inherit;curs
 .fn-a{grid-column:2;grid-row:2/4;display:flex;gap:6px;align-self:end}
 .fown{position:sticky;bottom:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 -6px 16px rgba(0,0,0,.05)}
 .fown .own{display:inline-flex;gap:8px;align-items:center;margin-right:6px}.fown .own b{font-weight:500}
+/* À faire : cartes du Design System (pas de bande de couleur sur le côté) */
+.titem{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;background:var(--panel)}
+.ti-h{display:flex;align-items:flex-start;gap:10px;justify-content:space-between}
+.ti-h b{font-size:15px;font-weight:600}
+.ti-d{color:var(--ink-2);font-size:13.5px}
+.ti-prog{display:flex;align-items:center;gap:10px;margin-top:4px}.ti-prog .prog{flex:1;margin:0}.ti-prog span{font-size:12.5px;font-variant-numeric:tabular-nums}
+.ti-a{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+.sc-badge.b-info{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:var(--blue-softer)}
+.alrow{grid-template-columns:minmax(0,1fr) auto}
+@media (max-width:720px){.alrow{grid-template-columns:minmax(0,1fr)}.alrow .acts{grid-column:1}}
 
 html,body{margin:0}
