@@ -1010,5 +1010,34 @@ a.sc-btn{text-decoration:none}
 .bgrid{margin-top:0}
 .cmpchips{align-items:center}
 .sc-btn{white-space:nowrap;padding:10px 8px;font-size:13px}
+/* ===== Boutons : système unique (Seanapps Design System · Buttons)
+   Types : .btn-pri Primary (un seul plein par zone) · .btn-suc Success · .btn-des Destructive · .btn-out Secondary · .btn-ghost Tertiary
+   Tailles : .btn-xs XS (ligne de liste) · .btn-sm S (en-têtes de bloc, zones denses, mobile) · M par défaut (en-tête d'écran, pied de dialog) · .btn-lg L (pleine largeur)
+   .btn-icon : bouton icône seule, toujours avec title (infobulle) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid transparent;font:inherit;font-size:14px;font-weight:500;line-height:1.2;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color .12s,border-color .12s,filter .12s}
+.btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.btn-sm{min-height:34px;padding:0 12px;font-size:13px}
+.btn-xs{min-height:28px;padding:0 10px;font-size:12.5px;border-radius:6px;gap:4px}
+.btn-lg{min-height:48px;padding:0 20px;font-size:15px;width:100%}
+.btn-pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-pri:hover{filter:brightness(.93)}.btn-pri:active{filter:brightness(.85)}
+.btn-suc{background:var(--green);border-color:var(--green);color:#fff}
+.btn-suc:hover{filter:brightness(.93)}
+.btn-des{background:var(--panel);border-color:var(--red);color:var(--red)}
+.btn-des:hover{background:color-mix(in srgb,var(--red) 8%,var(--panel))}
+.btn-out{background:var(--panel);border-color:var(--blue);color:var(--blue)}
+.btn-out:hover{background:var(--blue-softer)}.btn-out:active{background:var(--blue-soft)}
+.btn-ghost{background:var(--panel);border-color:var(--line);color:var(--ink-2)}
+.btn-ghost:hover{background:var(--line-2)}.btn-ghost:active{background:var(--line)}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;filter:none}
+.btn-icon{padding:0;width:40px;min-width:40px}
+.btn-sm.btn-icon{width:34px;min-width:34px}
+.btn-xs.btn-icon{width:28px;min-width:28px}
+.fs-act{margin-top:12px;align-self:flex-start}
+.fh2-own .btn-icon{flex:none}
+.more{justify-content:center;width:100%;margin-top:8px}
+.sc-b .btn{width:100%}
+.fh2-own .btn.btn-icon{margin-left:0;width:40px}
+.tb>.btn{align-self:flex-start}
 
 html,body{margin:0}

@@ -1,5 +1,10 @@
 [
   {
+    "v": "v17",
+    "date": "2026-11-13",
+    "t": "Boutons cohérents avec le Design System : 5 types (un seul bouton plein par zone), 4 tailles selon le contexte, libellés en verbe à l’infinitif, icônes seules avec infobulle"
+  },
+  {
     "v": "v16",
     "date": "2026-11-13",
     "t": "Le parc en cartes (une par bateau) ; la page détail d’un bateau revient aux lignes avec pastilles"
