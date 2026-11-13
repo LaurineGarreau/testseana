@@ -997,5 +997,18 @@ svg.xp .dlt{fill:var(--ink-2);font:500 11.5px var(--font)}
 .sc-btn:hover{border-color:var(--ink-3)}
 .sc-btn.dark{background:var(--ink);color:var(--panel);border-color:var(--ink)}
 .sc-btn.dark[aria-pressed="true"]{background:var(--blue);border-color:var(--blue)}
+.sc-boat{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;border:2.5px solid var(--green);color:var(--ink)}
+.sc-boat.st-warn{border-color:var(--orange)}.sc-boat.st-crit{border-color:var(--red)}
+.sc-vt{font-size:17px}
+.sc-badge.b-new{color:var(--violet,#6d4bd8);border-color:color-mix(in srgb,var(--violet,#6d4bd8) 40%,transparent);background:color-mix(in srgb,var(--violet,#6d4bd8) 8%,transparent)}
+.bdots{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bdot{display:inline-flex;border-radius:50%}.bdot.on{box-shadow:0 0 0 2px var(--blue)}
+.bmiss{width:24px;height:24px;border-radius:50%;border:1.5px dashed var(--ink-3);display:grid;place-items:center;font-size:11px;color:var(--ink-3)}
+.bmiss.sell{border-color:var(--blue);color:var(--blue)}
+.sc-b.one{grid-template-columns:1fr}
+a.sc-btn{text-decoration:none}
+.bgrid{margin-top:0}
+.cmpchips{align-items:center}
+.sc-btn{white-space:nowrap;padding:10px 8px;font-size:13px}
 
 html,body{margin:0}
