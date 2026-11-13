@@ -1082,5 +1082,8 @@ button.fold-h{background:none;border:0;padding:0;font:inherit;color:inherit;curs
 .sc-badge.b-info{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:var(--blue-softer)}
 .alrow{grid-template-columns:minmax(0,1fr) auto}
 @media (max-width:720px){.alrow{grid-template-columns:minmax(0,1fr)}.alrow .acts{grid-column:1}}
+.fh4{display:inline-flex;align-items:center;gap:6px}
+.ibtn.ibtn-s{width:28px;height:28px}
+.st tr.grp td{background:var(--line-2);font-size:12.5px;font-weight:600;color:var(--ink-2);padding:6px 10px}
 
 html,body{margin:0}

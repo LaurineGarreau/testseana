@@ -1,5 +1,10 @@
 [
   {
+    "v": "v20",
+    "date": "2026-11-13",
+    "t": "Bouton ⓘ à côté de chaque famille (Système, Énergie, Sécurité, Environnement, Usage) : guide de la famille avec une recherche dans les 169 capteurs"
+  },
+  {
     "v": "v19",
     "date": "2026-11-13",
     "t": "Éléments « À faire » et alertes au style du Design System : cartes bordées sans bande de couleur, badge d’état unique, boutons en bas à droite"
