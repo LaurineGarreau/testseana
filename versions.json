@@ -1,5 +1,10 @@
 [
   {
+    "v": "v24",
+    "date": "2026-11-16",
+    "t": "Bouton « Donner un avis » en bas à droite : capture de l’écran, zone à entourer, commentaire, page / profil / version joints ; liste « Avis » hors application avec export"
+  },
+  {
     "v": "v23",
     "date": "2026-11-16",
     "t": "Bateaux comme les maquettes : tableau Nom / Client / Statut avec notifications, aperçu latéral (notifications, dernière mise à jour, dernier document, action selon le statut), fiche à onglets Information / Activités / Insight"
