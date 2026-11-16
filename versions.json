@@ -1,5 +1,10 @@
 [
   {
+    "v": "v23",
+    "date": "2026-11-16",
+    "t": "Bateaux comme les maquettes : tableau Nom / Client / Statut avec notifications, aperçu latéral (notifications, dernière mise à jour, dernier document, action selon le statut), fiche à onglets Information / Activités / Insight"
+  },
+  {
     "v": "v22",
     "date": "2026-11-13",
     "t": "Recherche universelle qui emmène à l’endroit demandé : « batterie Princess 2 » ouvre la courbe, « inspections Test Boat » la section de la fiche, « écrire à Jane Doe » la conversation ; Entrée va au meilleur résultat"
