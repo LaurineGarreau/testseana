@@ -773,18 +773,19 @@ function vCapteursGrid(){
   const bcard=({b})=>{const v=V[b.id],ds=cols.filter(c=>v[c]!==undefined).map(c=>{const d=DEV.find(x=>x.k===c);return {c,d,s:d.st(v)}});
     const all=devicesOf(b.id),bad=all.filter(d=>d.s[0]!=='ok').sort((p,q)=>RANK[p.s[0]]-RANK[q.s[0]]),w=worst(b),top=bad[0];
     const miss=isCom?cols.filter(c=>v[c]===undefined&&PROD[c]&&!S.sent[sentKey(b.id,c)]):[];
-    const dots=cols.map(c=>{if(v[c]===undefined)return `<span class="bmiss ${isCom&&PROD[c]?'sell':''}" data-tip="${isCom&&PROD[c]?'À proposer':'Pas de capteur'}|${esc(b.name)} · ${esc(DEV.find(d=>d.k===c).n)}">—</span>`;const d=DEV.find(x=>x.k===c),st=d.st(v);return `<span class="bdot ${c===k?'on':''}" data-tip="${esc(d.main(v))} · ${esc(st[1])}|${esc(b.name)} · ${esc(d.n)}">${sDot(c,v,st[0],24)}</span>`}).join('');
+    const bc=ds.filter(x=>x.s[0]!=='ok').sort((p,q)=>RANK[p.s[0]]-RANK[q.s[0]])[0];
+    const dots=cols.filter(c=>v[c]===undefined||DEV.find(x=>x.k===c).st(v)[0]!=='ok').map(c=>{if(v[c]===undefined)return `<span class="bmiss ${isCom&&PROD[c]?'sell':''}" data-tip="${isCom&&PROD[c]?'À proposer':'Pas de capteur'}|${esc(b.name)} · ${esc(DEV.find(d=>d.k===c).n)}">—</span>`;const d=DEV.find(x=>x.k===c),st=d.st(v);return `<span class="bdot ${c===k?'on':''}" data-tip="${esc(d.main(v))} · ${esc(st[1])}|${esc(b.name)} · ${esc(d.n)}">${sDot(c,v,st[0],34)}</span>`}).join('');
     return `<article class="scard st-${w}">
-      <div class="sc-h"><span class="sc-boat st-${w}">${ic('boat',16)}</span><b>${esc(b.name)}</b><span class="sc-badge b-${w}">${ic(STI[w],14)} ${STL[w]}</span></div>
+      <div class="sc-h"><span class="sc-boat st-${w}">${ic('boat',20)}</span><b>${esc(b.name)}</b><span class="sc-badge b-${bc?bc.s[0]:'ok'}">${ic(STI[bc?bc.s[0]:'ok'],16)} ${bc?esc((SHORT[bc.c]||[bc.d.n])[0]):STL.ok}</span></div>
       <div class="sc-boxes"><div>${ic('user',16)}<span class="muted">Propriétaire</span><b>${esc(b.owner)}</b></div><div>${ic('clock',16)}<span class="muted">Dernier envoi</span><b>${esc(v.lastSeen)}</b></div></div>
       <div class="sc-v sc-vt">${top?`${esc(top.n)} : ${esc(top.main(v))}`:'Tout est normal'}</div>
       <p class="sc-d">${top?esc(top.s[1])+(bad.length>1?` · et ${bad.length-1} autre${bad.length>2?'s':''} point${bad.length>2?'s':''} à regarder`:''):`${all.length} capteurs, aucun problème.`}</p>
-      <div class="bdots">${dots}</div>
+      ${dots?`<div class="bdots">${dots}</div>`:''}
       <div class="sc-b">${miss.length?`<button class="btn btn-ghost btn-sm" data-propose="${b.id}|${miss[0]}">Proposer un capteur</button>`:`<a class="btn btn-ghost btn-sm" href="#bateaux" data-go-boat="${b.id}">Voir la fiche</a>`}<a class="btn btn-out btn-sm" href="#capteurs" data-capboat="${b.id}">Voir les capteurs</a></div>
     </article>`};
   const rcard=R=>{const rows=realRows(R.id);rows.forEach(r=>rRow(r,false));const bad=rows.filter(r=>r.st==='crit'||r.st==='warn').sort((p,q)=>RANK[p.st]-RANK[q.st]),w=bad.some(r=>r.st==='crit')?'crit':bad.length?'warn':'ok',nv=R.raw.filter(x=>x[3]!=null).length,top=bad[0];
     return `<article class="scard st-${w} real">
-      <div class="sc-h"><span class="sc-boat st-${w}">${ic('boat',16)}</span><b>${esc(R.name)}</b><span class="sc-badge b-new">${ic('sparkle',14)} Données réelles</span></div>
+      <div class="sc-h"><span class="sc-boat st-${w}">${ic('boat',20)}</span><b>${esc(R.name)}</b><span class="sc-badge b-new">${ic('sparkle',16)} Données réelles</span></div>
       <div class="sc-boxes"><div>${ic('pulse',16)}<span class="muted">Capteurs</span><b>${R.raw.length}</b></div><div>${ic('clock',16)}<span class="muted">Avec une valeur</span><b>${nv} sur ${R.raw.length}</b></div></div>
       <div class="sc-v sc-vt">${top?`${esc(top.n)} : ${esc(top.val)}`:nv?'Tout est normal':'Liste des capteurs'}</div>
       <p class="sc-d">${top?esc(top.why):nv?'Aucune valeur hors seuil.':'Export de la base Seanapps, sans dernière valeur pour la plupart des capteurs.'}</p>
@@ -807,7 +808,7 @@ function vCapteursGrid(){
   }
   return `<div class="top"><div class="h1">Capteurs</div>${infoBtn()}${roleTabs()}</div>
   <div class="wrap">
-    <p class="role-intro"><b>Le parc en cartes.</b> Une carte par bateau, les problèmes en premier. Les pastilles en bas de chaque carte sont les capteurs suivis pour votre métier. « Comparer » montre un capteur sur tout le parc.</p>
+    <p class="role-intro"><b>Le parc en cartes.</b> Une carte par bateau, les problèmes en premier. En haut de chaque carte, le capteur qui ne va pas. Les pastilles en bas ne montrent que les capteurs à regarder pour votre métier : ceux qui vont bien sont masqués. « Comparer » montre un capteur sur tout le parc.</p>
     ${zoom}
     <section class="card"><div class="card-b" style="display:flex;flex-direction:column;gap:12px">
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">

@@ -1215,3 +1215,12 @@ button.fold-h{background:none;border:0;padding:0;font:inherit;color:inherit;curs
 .fbz{position:fixed;inset:0;background:rgba(15,23,42,.8);display:grid;place-items:center;padding:24px;cursor:zoom-out;z-index:2}.fbz img{max-width:100%;max-height:100%;border-radius:8px}
 
 html,body{margin:0}
+
+/* Page Capteurs : une seule couleur par carte (le badge), icônes plus grandes */
+.scgrid .sc-boat,.scgrid .sc-boat.st-warn,.scgrid .sc-boat.st-crit{width:38px;height:38px;border:1.5px solid var(--line);color:var(--ink-2)}
+.scgrid .sc-badge{font-size:13px;padding:5px 12px}
+.scgrid .sc-badge.b-new{color:var(--ink-2);border-color:var(--line);background:var(--bg,#f3f4f6)}
+.scgrid .sc-boxes svg{width:18px;height:18px}
+.scgrid .bdots{gap:8px}
+.scgrid .bmiss{width:34px;height:34px;font-size:13px}
+.scgrid .bmiss.sell{border-color:var(--ink-3);color:var(--ink-2)}
