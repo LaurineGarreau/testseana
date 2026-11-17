@@ -1,5 +1,10 @@
 [
   {
+    "v": "v25",
+    "date": "2026-11-16",
+    "t": "Données réelles sur 4 bateaux : r2 mis à jour et 3 nouveaux boîtiers (3323302856, 3323303145, 3323305673), courbes tirées de 6 mois d’historique (un relevé par jour, puis par heure sur la dernière semaine), date des valeurs anciennes"
+  },
+  {
     "v": "v24",
     "date": "2026-11-16",
     "t": "Bouton « Donner un avis » en bas à droite : capture de l’écran, zone à entourer, commentaire, page / profil / version joints ; liste « Avis » hors application avec export"
