@@ -8,7 +8,7 @@ La page Capteurs et le détail capteurs d'un bateau sont devenus trop chargés :
 - **de gros espaces vides** : dans la grille, une carte haute (avec le bloc IA) étire toute la ligne, et les cartes OK ont un grand vide au milieu ;
 - **trop de couleurs** : rouge, orange, bleu, vert, fond bleu IA, texte rouge, texte orange… on ne sait plus ce qui est important ;
 - **trop d'infos par carte** : problème, compte à rebours, prévision IA, ponton, GPS, prise en charge, pastilles et deux boutons, tout en même temps ;
-- **le clic sur un capteur n'affiche plus sa courbe**, alors que le texte dit « Touchez un capteur pour voir sa courbe ».
+- **le clic sur un capteur n'affiche plus sa courbe** comme en v41, alors que le texte dit « Touchez un capteur pour voir sa courbe ».
 
 Objectif : **des pages plus simples, plus calmes, où l'essentiel se voit en 3 secondes**, sans perdre les fonctionnalités. Elles restent accessibles en un clic.
 
@@ -17,7 +17,7 @@ Les modes Grille, Liste, Tableau et Carte sont **des propositions à comparer** 
 ## Avant de coder
 
 1. Lis `versions.json` (la dernière version est en tête), le CSS et le code de la page Capteurs et du détail capteurs d'un bateau dans `app.js`.
-2. Ouvre aussi **`versions/v25/app.js`** pour voir comment les courbes s'affichaient avant : `explorerHTML`, `renderExplorer`, les attributs `data-cview` (voir la courbe) et `data-csen` (croiser plusieurs capteurs), l'objet `S.ex`.
+2. Ouvre aussi **`versions/v41/`** (`app.js` et `style.css`) : c'est la référence pour les courbes (voir la section 5).
 3. Fais-moi un plan court : ce que tu enlèves, ce que tu caches derrière un clic, ce que tu gardes. Attends mon accord.
 
 ## 1. Espacements
@@ -57,21 +57,29 @@ Ce qui passe dans le détail, au survol ou dans un menu « ⋯ » : la prévisio
 L'ordre de la page devient :
 
 1. **En-tête** : nom, badge d'état, propriétaire, modèle, et les boutons « Appeler » et « Envoyer un message » à droite.
-2. **Ce qui ne va pas** : seulement les capteurs en problème, chacun sur une ligne avec sa valeur, et sa courbe ouverte par défaut.
+2. **Ce qui ne va pas** : seulement les capteurs en problème, chacun sur une ligne avec sa valeur. Un clic ouvre sa courbe comme en v41.
 3. **Tous les capteurs**, par famille (Système, Énergie, Sécurité, Environnement, Usage). Les familles sans problème sont repliées sur une ligne : « Sécurité · 1 capteur · tout est normal ».
 4. **Repliés par défaut** : « Où trouver le bateau » (plan du port), « Journal de bord », « Capteurs du bateau » (de série et ajoutés), « Capteurs à proposer » (visible pour le commercial seulement).
 
 Supprime les répétitions : la prise de quai ne doit apparaître qu'une fois en haut, puis dans sa famille.
 
-## 5. Retrouver les courbes au clic (comme avant)
+## 5. Retrouver les courbes au clic, exactement comme la v41
 
-- **Clic sur un capteur → sa courbe s'ouvre juste en dessous de la ligne**, dans la même famille, sans changer de page ni défiler ailleurs. Reprends le fonctionnement et le style de la v25 (`explorerHTML`, `data-cview`).
-- Elle affiche la valeur actuelle, la moyenne, le minimum et le maximum, le seuil en pointillé, et les onglets 24 h, 7 jours, Mois et Tout l'historique.
-- Un deuxième clic sur le même capteur referme la courbe.
-- **Croiser** : un bouton « Croiser » (ou Ctrl/Cmd + clic) ajoute un autre capteur de la même famille sur le même graphique, avec une légende. Reprends `data-csen` de la v25.
-- La ligne cliquée est mise en évidence (contour), avec `aria-expanded` sur le bouton.
-- Le texte d'aide « Touchez un capteur pour voir sa courbe » n'apparaît qu'une fois en haut de la page, pas sous chaque famille.
-- Ça marche aussi dans le panneau latéral du mode Carte (onglet Capteurs).
+Les courbes de la **v41** sont la référence : reprends leur code et leur style **à l'identique** depuis `versions/v41/` (`app.js` et `style.css`), sans les redessiner. Repère dans la v41 la fonction qui affiche l'explorateur de courbes sous une famille de capteurs et réutilise-la telle quelle.
+
+Comportement attendu (celui de la v41) :
+- **Clic sur un capteur** : la ligne passe en contour bleu et **le bloc de courbe s'ouvre sous la famille** (Système, Énergie…), sans changer de page.
+- En haut du bloc : les onglets **« 7 jours » et « Mois »**, la période (« Du mer. 4 au mar. 10 novembre ») et l'aide « Molette ou clic sur une courbe : zoom à cet endroit · glisser : choisir une période ».
+- La carte de courbe : le titre du capteur, une ligne d'explication (« en % », « en dBm »), la valeur **« Maintenant »** en grand à droite, la courbe avec la zone remplie, l'axe des jours, et en bas « Sur la période : min · moyenne · max ».
+- **Zoom** : molette ou clic sur la courbe pour zoomer à cet endroit, glisser pour choisir une période. La valeur en haut à droite devient « Moyenne » pendant le zoom, avec le bouton « Voir toute la période » pour revenir.
+- **Survol** : une ligne verticale, le point et une bulle avec la valeur et la date (« mer. 4 nov. · 10 h », « 90 % »).
+- **Deux capteurs de la même famille** (« Touchez un 2ᵉ capteur de la même famille pour croiser les courbes ») : les deux lignes sont sélectionnées, et un sélecteur **« Séparés / Croiser »** apparaît. « Séparés » met les deux courbes côte à côte, « Croiser » les superpose sur un seul graphique avec une légende.
+- Un nouveau clic sur un capteur sélectionné le retire. Quand plus rien n'est sélectionné, le bloc se ferme.
+- Le texte d'aide « Touchez un capteur pour voir sa courbe, plusieurs pour les croiser » apparaît une seule fois en haut de la page, pas sous chaque famille.
+- Ça fonctionne de la même façon dans le panneau latéral du mode Carte (onglet Capteurs) et dans le détail d'un bateau aux données réelles.
+- Garde l'accessibilité : `aria-pressed` sur les lignes de capteurs, onglets et sélecteur utilisables au clavier.
+
+**Ne change pas** les couleurs, les tailles ni le style de ces courbes. Les règles de couleur de la section 2 ne s'appliquent pas à l'intérieur des graphiques.
 
 ## 6. Vérification
 
@@ -82,7 +90,7 @@ Supprime les répétitions : la prise de quai ne doit apparaître qu'une fois en
 
 Fais **deux versions**, pour pouvoir revenir en arrière séparément :
 - **vNN** : espacements, couleurs, cartes simplifiées (sections 1 à 3) ;
-- **vNN+1** : détail du bateau simplifié et courbes au clic (sections 4 et 5).
+- **vNN+1** : détail du bateau simplifié et courbes au clic reprises de la v41 (sections 4 et 5).
 
 Pour chaque version :
 1. copie l'état complet dans `versions/vNN/` ;
